@@ -783,9 +783,6 @@ void CHalfLifeMultiplay::DeathNotice( CBaseMonster *pVictim, entvars_t *pKiller,
 				killerName = "Mortar";
 			}
 			else if (pVictim->m_lastDamageType & DMG_BLAST) {
-				if (Killer->IsBreakable()) {
-					killerName = "Explosives";
-				}
 				//killerName = "Explosion";
 				// entity name should be better
 			}
@@ -839,12 +836,25 @@ void CHalfLifeMultiplay::DeathNotice( CBaseMonster *pVictim, entvars_t *pKiller,
 				if (attackerCount > 1 && Killer->IsPlayer() && otherAttacker) {
 					CBasePlayer* plr = (CBasePlayer*)Killer;
 					originalKillerName = plr->DisplayName();
-					
+
+					static char killerName[40]; // max name length is 32 chars
+					snprintf(killerName, 40, "%s", Killer->DisplayName());
+					killerName[39] = 0;
+
 					if (attackerCount == 2) {
-						plr->Rename(UTIL_VarArgs("%s + %s", Killer->DisplayName(), otherAttacker), true);
+						int killerNameLen = strlen(killerName);
+						int assistNameLen = strlen(otherAttacker);
+						if (killerNameLen > 14 && (killerNameLen + assistNameLen + 3) > 31) {
+							int cutoff = V_max(14, 31 - (assistNameLen + 3));
+							killerName[cutoff] = '\0';
+						}
+
+						plr->Rename(UTIL_VarArgs("%s + %s", killerName, otherAttacker), true);
 					}
 					else {
-						plr->Rename(UTIL_VarArgs("%s + %d players", Killer->DisplayName(), attackerCount-1), true);
+						killerName[19] = '\0'; // leave room for the player count
+
+						plr->Rename(UTIL_VarArgs("%s + %d players", killerName, attackerCount-1), true);
 					}
 				}
 
@@ -910,7 +920,7 @@ void CHalfLifeMultiplay::DeathNotice( CBaseMonster *pVictim, entvars_t *pKiller,
 		CBasePlayer* plr = (CBasePlayer*)pVictim;
 		if (plr->tempNameActive && plr != hackedPlayer1 && plr != hackedPlayer2) {
 			plr->Rename(STRING(plr->pev->netname), true, MSG_ONE, plr->edict());
-			plr->UpdateTeamInfo(-1, MSG_ONE, plr->edict());
+			plr->UpdateTeamInfo(plr->GetNameColor(), MSG_ONE, plr->edict());
 		}
 	}
 	if (Killer->IsPlayer()) {
@@ -918,7 +928,7 @@ void CHalfLifeMultiplay::DeathNotice( CBaseMonster *pVictim, entvars_t *pKiller,
 		if (plr->tempNameActive && plr != hackedPlayer1 && plr != hackedPlayer2) {
 			if (!originalKillerName)
 				plr->Rename(STRING(plr->pev->netname), true, MSG_ONE, plr->edict());
-			plr->UpdateTeamInfo(-1, MSG_ONE, plr->edict());
+			plr->UpdateTeamInfo(plr->GetNameColor(), MSG_ONE, plr->edict());
 		}
 	}
 
@@ -931,7 +941,7 @@ void CHalfLifeMultiplay::DeathNotice( CBaseMonster *pVictim, entvars_t *pKiller,
 	// restore player name and team info
 	if (hackedPlayer1) {
 		hackedPlayer1->Rename(hackedKillerOriginalName, false);
-		hackedPlayer1->UpdateTeamInfo();
+		hackedPlayer1->UpdateTeamInfo(hackedPlayer1->GetNameColor());
 		
 		// TODO: this is sending the hacked player double the network packets, and these are already heavy
 		if (hackedPlayer1->tempNameActive) {
@@ -942,11 +952,11 @@ void CHalfLifeMultiplay::DeathNotice( CBaseMonster *pVictim, entvars_t *pKiller,
 	if (originalKillerName) {
 		CBasePlayer* plr = (CBasePlayer*)Killer;
 		plr->Rename(originalKillerName, false);
-		plr->UpdateTeamInfo(); // forces name on client to update NOW
+		plr->UpdateTeamInfo(plr->GetNameColor()); // forces name on client to update NOW
 	}
 	if (hackedPlayer2) {
 		hackedPlayer2->Rename(hackedVictimOriginalName, false);
-		hackedPlayer2->UpdateTeamInfo();
+		hackedPlayer2->UpdateTeamInfo(hackedPlayer2->GetNameColor());
 
 		if (hackedPlayer2->tempNameActive) {
 			hackedPlayer2->Rename(hackedPlayer2->m_tempName, false, MSG_ONE, hackedPlayer2->edict());
@@ -964,7 +974,7 @@ void CHalfLifeMultiplay::DeathNotice( CBaseMonster *pVictim, entvars_t *pKiller,
 	}
 	if (Killer->IsPlayer()) {
 		CBasePlayer* plr = (CBasePlayer*)Killer;
-		if (plr->tempNameActive && plr != hackedPlayer1 && plr != hackedPlayer2 && !originalKillerName) {
+		if (plr->tempNameActive && plr != hackedPlayer1 && plr != hackedPlayer2) {
 			plr->Rename(plr->m_tempName, false, MSG_ONE, plr->edict());
 			plr->UpdateTeamInfo(plr->m_tempTeam, MSG_ONE, plr->edict());
 		}
@@ -1291,6 +1301,16 @@ void CHalfLifeMultiplay :: GoToIntermission( void )
 {
 	if ( g_fGameOver )
 		return;  // intermission has already been triggered, so ignore.
+
+	// undo status bar name changes so scoreboard looks correct
+	for (int i = 1; i <= gpGlobals->maxClients; i++) {
+		CBasePlayer* pEnt = UTIL_PlayerByIndex(i);
+
+		if (pEnt && pEnt->tempNameActive) {
+			pEnt->Rename(pEnt->DisplayName(), false, MSG_ONE, pEnt->edict());
+			pEnt->UpdateTeamInfo(-1, MSG_ONE, pEnt->edict());
+		}
+	}
 
 	MESSAGE_BEGIN(MSG_ALL, SVC_INTERMISSION);
 	MESSAGE_END();
