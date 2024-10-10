@@ -653,7 +653,7 @@ void CBaseGrunt::ShootMp5(Vector& vecShootOrigin, Vector& vecShootDir)
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40, 90) + gpGlobals->v_up * RANDOM_FLOAT(75, 200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass(vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 2048, BULLET_MONSTER_MP5); // shoot +-5 degrees;
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_05DEGREES, 2048, BULLET_MONSTER_MP5); // shoot +-5 degrees;
 	PLAY_DISTANT_SOUND(edict(), DISTANT_9MM);
 }
 
@@ -740,7 +740,7 @@ void CBaseGrunt::ShootSaw(Vector& vecShootOrigin, Vector& vecShootDir)
 
 void CBaseGrunt::ShootGlock(Vector& vecShootOrigin, Vector& vecShootDir) {
 	UTIL_MakeVectors(pev->angles);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 1024, BULLET_MONSTER_9MM); // shoot +-5 degrees
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 1024, BULLET_MONSTER_9MM); // shoot +-5 degrees
 
 	const auto random = RANDOM_LONG(0, 20);
 	EMIT_SOUND_DYN(edict(), CHAN_WEAPON, "weapons/pl_gun3.wav", VOL_NORM, ATTN_NORM, 0, (random <= 10 ? random - 5 : 0) + 100);
