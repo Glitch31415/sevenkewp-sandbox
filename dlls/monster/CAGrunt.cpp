@@ -413,7 +413,7 @@ void CAGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				
 				UTIL_MakeVectors(pev->angles);
 
-				Vector vecSpread = VECTOR_CONE_4DEGREES;
+				Vector vecSpread = VECTOR_CONE_2DEGREES;
 				float x, y;
 				GetCircularGaussianSpread(x, y);
 				direction = direction + x * vecSpread.x * gpGlobals->v_right +

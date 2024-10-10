@@ -653,7 +653,7 @@ void CBaseGrunt::ShootMp5(Vector& vecShootOrigin, Vector& vecShootDir)
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40, 90) + gpGlobals->v_up * RANDOM_FLOAT(75, 200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass(vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 2048, BULLET_MONSTER_MP5); // shoot +-5 degrees;
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 2048, BULLET_MONSTER_MP5); // shoot +-5 degrees;
 	PLAY_DISTANT_SOUND(edict(), DISTANT_9MM);
 }
 
@@ -664,7 +664,7 @@ void CBaseGrunt::ShootUzis(Vector& vecShootOrigin, Vector& vecShootDir) {
 	Vector	rightShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40, 90)*-1 + gpGlobals->v_up * RANDOM_FLOAT(75, 200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass(vecShootOrigin - vecShootDir * 24, leftShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
 	EjectBrass(vecShootOrigin - vecShootDir * 24, rightShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
-	FireBullets(2, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 2048, BULLET_MONSTER_MP5); // shoot +-5 degrees;
+	FireBullets(2, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 2048, BULLET_MONSTER_MP5); // shoot +-5 degrees;
 	
 	const char* sound = RANDOM_LONG(0, 1) ? "weapons/uzi/fire_both1.wav" : "weapons/uzi/fire_both2.wav";
 	EMIT_SOUND(ENT(pev), CHAN_STATIC, sound, 1, ATTN_NORM);
@@ -688,14 +688,14 @@ void CBaseGrunt::ShootMinigun(Vector& vecShootOrigin, Vector& vecShootDir) {
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40, 90) + gpGlobals->v_up * RANDOM_FLOAT(75, 200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass(vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 2048, BULLET_PLAYER_556, 2);
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 2048, BULLET_PLAYER_556, 2);
 	EMIT_SOUND(ENT(pev), channel, sound, 1, ATTN_NORM);
 	PLAY_DISTANT_SOUND(edict(), DISTANT_9MM);
 }
 
 void CBaseGrunt::ShootSniper(Vector& vecShootOrigin, Vector& vecShootDir) {
 	//TODO: why is this 556? is 762 too damaging?
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 8192, BULLET_MONSTER_762);
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_025DEGREES, 8192, BULLET_MONSTER_762);
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/sniper_fire.wav", 1, 0.3);
 }
 
@@ -705,7 +705,7 @@ void CBaseGrunt ::ShootShotgun(Vector& vecShootOrigin, Vector& vecShootDir)
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass ( vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iShotgunShell, TE_BOUNCE_SHOTSHELL); 
-	FireBullets(gSkillData.sk_hgrunt_pellets, vecShootOrigin, vecShootDir, VECTOR_CONE_15DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0 ); // shoot +-7.5 degrees
+	FireBullets(gSkillData.sk_hgrunt_pellets, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0 ); // shoot +-7.5 degrees
 
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/sbarrel1.wav", 1, ATTN_NORM);
 	PLAY_DISTANT_SOUND(edict(), DISTANT_556);
@@ -732,7 +732,7 @@ void CBaseGrunt::ShootSaw(Vector& vecShootOrigin, Vector& vecShootDir)
 	}
 	}
 
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 8192, BULLET_PLAYER_556, 2); // shoot +-5 degrees
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 8192, BULLET_PLAYER_556, 2); // shoot +-5 degrees
 
 	EMIT_SOUND_DYN(edict(), CHAN_WEAPON, "weapons/saw_fire1.wav", VOL_NORM, ATTN_NORM, 0, RANDOM_LONG(0, 15) + 94);
 	PLAY_DISTANT_SOUND(edict(), DISTANT_556);
@@ -740,7 +740,7 @@ void CBaseGrunt::ShootSaw(Vector& vecShootOrigin, Vector& vecShootDir)
 
 void CBaseGrunt::ShootGlock(Vector& vecShootOrigin, Vector& vecShootDir) {
 	UTIL_MakeVectors(pev->angles);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 1024, BULLET_MONSTER_9MM); // shoot +-5 degrees
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 1024, BULLET_MONSTER_9MM); // shoot +-5 degrees
 
 	const auto random = RANDOM_LONG(0, 20);
 	EMIT_SOUND_DYN(edict(), CHAN_WEAPON, "weapons/pl_gun3.wav", VOL_NORM, ATTN_NORM, 0, (random <= 10 ? random - 5 : 0) + 100);
@@ -749,7 +749,7 @@ void CBaseGrunt::ShootGlock(Vector& vecShootOrigin, Vector& vecShootDir) {
 
 void CBaseGrunt::ShootDeagle(Vector& vecShootOrigin, Vector& vecShootDir) {
 	UTIL_MakeVectors(pev->angles);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 1024, BULLET_PLAYER_357); // shoot +-5 degrees
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_05DEGREES, 1024, BULLET_PLAYER_357); // shoot +-5 degrees
 
 	const auto random = RANDOM_LONG(0, 20);
 	EMIT_SOUND_DYN(edict(), CHAN_WEAPON, "weapons/desert_eagle_fire.wav", VOL_NORM, ATTN_NORM, 0, (random <= 10 ? random - 5 : 0) + 100);
@@ -758,7 +758,7 @@ void CBaseGrunt::ShootDeagle(Vector& vecShootOrigin, Vector& vecShootDir) {
 
 void CBaseGrunt::Shoot357(Vector& vecShootOrigin, Vector& vecShootDir) {
 	UTIL_MakeVectors(pev->angles);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 1024, BULLET_PLAYER_357); // shoot +-5 degrees
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_05DEGREES, 1024, BULLET_PLAYER_357); // shoot +-5 degrees
 
 	const char* sound = RANDOM_LONG(0, 1) == 0 ? "weapons/357_shot1.wav" : "weapons/357_shot2.wav";
 	const auto random = RANDOM_LONG(0, 20);
