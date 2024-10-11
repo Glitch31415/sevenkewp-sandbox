@@ -383,7 +383,7 @@ void CBarney :: BarneyFirePistol ( void )
 	SetBlending( 0, angDir.x );
 	pev->effects = EF_MUZZLEFLASH;
 
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 8192, BULLET_MONSTER_9MM );
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 8192, BULLET_MONSTER_9MM );
 	
 	int pitchShift = RANDOM_LONG( 0, 20 );
 	
