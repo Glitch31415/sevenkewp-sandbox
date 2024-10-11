@@ -498,6 +498,7 @@ UTIL_PrecacheOther("monster_miniturret");
 UTIL_PrecacheOther("monster_turret");
 UTIL_PrecacheOther("monster_sentry");
 UTIL_PrecacheOther("monster_babygarg");
+UTIL_PrecacheOther("monster_gman");
 	if (g_mapWeapons.find("weapon_shotgun") != g_mapWeapons.end()) {
 		UTIL_PrecacheOther("weapon_shotgun");
 		UTIL_PrecacheOther("ammo_buckshot");
