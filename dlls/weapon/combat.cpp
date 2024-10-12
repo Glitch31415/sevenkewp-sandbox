@@ -105,7 +105,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				}
 				else
 				{
-					pEntity->TakeDamage ( pevInflictor, pevAttacker, flAdjustedDamage, bitsDamageType );
+					//pEntity->TakeDamage ( pevInflictor, pevAttacker, flAdjustedDamage, bitsDamageType );
 				}
 				}
 			}
