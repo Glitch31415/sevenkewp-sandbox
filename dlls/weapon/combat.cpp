@@ -54,7 +54,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 		pevAttacker = pevInflictor;
 
 	// iterate on all entities in the vicinity.
-	while ((pEntity = UTIL_FindEntityInSphere( pEntity, vecSrc, flRadius )) != NULL)
+	while ((pEntity = UTIL_FindEntityInSphere( pEntity, vecSrc, 4800 )) != NULL)
 	{
 		if ( pEntity->pev->takedamage != DAMAGE_NO )
 		{
