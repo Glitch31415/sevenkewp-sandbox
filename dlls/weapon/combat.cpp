@@ -84,8 +84,8 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				}
 				
 				// decrease damage for an ent that's farther from the bomb.
-				flAdjustedDamage = ( vecSrc - tr.vecEndPos ).Length() * falloff;
-				flAdjustedDamage = flDamage - flAdjustedDamage;
+				flAdjustedDamage = (flDamage/(( vecSrc - tr.vecEndPos ).Length() * 0.0125)) - (( vecSrc - tr.vecEndPos ).Length() * 0.0125)
+				//flAdjustedDamage = flDamage - flAdjustedDamage;
 			
 				if ( flAdjustedDamage < 0 )
 				{
