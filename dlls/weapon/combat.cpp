@@ -87,9 +87,12 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				flAdjustedDamage = (flDamage/(( vecSrc - tr.vecEndPos ).Length() * (0.0125/3))) - (( vecSrc - tr.vecEndPos ).Length() * (0.0125/3));
 				//flAdjustedDamage = flDamage - flAdjustedDamage;
 			
-				if ( flAdjustedDamage < 0 )
+				if ( flAdjustedDamage < 10 )
 				{
 					flAdjustedDamage = 0;
+				}
+				if (flAdjustedDamage > 2*flDamage) {
+					flAdjustedDamage = 2*flDamage;
 				}
 			
 				// ALERT( at_console, "hit %s\n", STRING( pEntity->pev->classname ) );
