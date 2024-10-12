@@ -96,6 +96,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				}
 			
 				// ALERT( at_console, "hit %s\n", STRING( pEntity->pev->classname ) );
+				if (flAdjustedDamage != 0) {
 				if (tr.flFraction != 1.0)
 				{
 					ClearMultiDamage( );
@@ -105,6 +106,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				else
 				{
 					pEntity->TakeDamage ( pevInflictor, pevAttacker, flAdjustedDamage, bitsDamageType );
+				}
 				}
 			}
 		}
