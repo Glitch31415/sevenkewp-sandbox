@@ -54,7 +54,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 		pevAttacker = pevInflictor;
 
 	// iterate on all entities in the vicinity.
-	while ((pEntity = UTIL_FindEntityInSphere( pEntity, vecSrc, 4800 )) != NULL)
+	while ((pEntity = UTIL_FindEntityInSphere( pEntity, vecSrc, 3850 )) != NULL)
 	{
 		if ( pEntity->pev->takedamage != DAMAGE_NO )
 		{
@@ -79,8 +79,8 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				if (tr.fStartSolid)
 				{
 					// if we're stuck inside them, fixup the position and distance
-					tr.vecEndPos = vecSrc;
-					tr.flFraction = 0.0;
+					//tr.vecEndPos = vecSrc;
+					//tr.flFraction = 0.0;
 				}
 				
 				// decrease damage for an ent that's farther from the bomb.
