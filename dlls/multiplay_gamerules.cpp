@@ -849,13 +849,15 @@ void CHalfLifeMultiplay::DeathNotice( CBaseMonster *pVictim, entvars_t *pKiller,
 							killerName[cutoff] = '\0';
 						}
 
-						plr->Rename(UTIL_VarArgs("%s + %s", killerName, otherAttacker), true);
+						//plr->Rename(UTIL_VarArgs("%s + %s", killerName, otherAttacker), true);
+						plr->Rename(UTIL_VarArgs("%s", killerName), true);
 					}
 					else {
 						killerName[19] = '\0'; // leave room for the player count
 
-						plr->Rename(UTIL_VarArgs("%s + %d players", killerName, attackerCount-1), true);
-					}
+						//plr->Rename(UTIL_VarArgs("%s + %d players", killerName, attackerCount-1), true);
+						plr->Rename(UTIL_VarArgs("%s", killerName), true);
+					} // removed assists completely until i find how to make them work for all types of kills
 				}
 
 				hackedPlayer1->Rename(pVictim->DisplayName(), true);
