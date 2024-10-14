@@ -490,7 +490,7 @@ void EV_FireGlock1( event_args_t *args )
 	
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_9MM, 0, 0, args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_9MM, 0, 0, 0.00873, 0.00873 );
 }
 
 void EV_FireGlock2( event_args_t *args )
@@ -535,7 +535,7 @@ void EV_FireGlock2( event_args_t *args )
 	
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_9MM, 0, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_9MM, 0, &tracerCount[idx-1], 0.02618, 0.02618 );
 	
 }
 //======================
@@ -592,11 +592,11 @@ void EV_FireShotGunDouble( event_args_t *args )
 
 	if ( gEngfuncs.GetMaxClients() > 1 )
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 8, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.17365, 0.04362 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 18, vecSrc, vecAiming, 131072, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.01745, 0.01745 );
 	}
 	else
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.08716, 0.08716 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 18, vecSrc, vecAiming, 131072, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.01745, 0.01745 );
 	}
 }
 
@@ -644,11 +644,11 @@ void EV_FireShotGunSingle( event_args_t *args )
 
 	if ( gEngfuncs.GetMaxClients() > 1 )
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 4, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.08716, 0.04362 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 9, vecSrc, vecAiming, 131072, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.01745, 0.01745 );
 	}
 	else
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 6, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.08716, 0.08716 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 9, vecSrc, vecAiming, 131072, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.01745, 0.01745 );
 	}
 }
 //======================
@@ -709,11 +709,11 @@ void EV_FireMP5( event_args_t *args )
 
 	if ( gEngfuncs.GetMaxClients() > 1 )
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_MP5, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_MP5, 2, &tracerCount[idx-1], 0.00109, 0.00109 );
 	}
 	else
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_MP5, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_MP5, 2, &tracerCount[idx-1], 0.00109, 0.00109 );
 	}
 }
 
@@ -795,7 +795,7 @@ void EV_FirePython( event_args_t *args )
 	
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_357, 0, 0, args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_357, 0, 0, 0.00218, 0.00218 );
 }
 //======================
 //	    PHYTON END 
