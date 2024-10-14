@@ -567,7 +567,7 @@ void COtis :: OtisFirePistol ( void )
 	SetBlending( 0, angDir.x );
 	pev->effects = EF_MUZZLEFLASH;
 
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_05DEGREES, 8192, gSkillData.sk_otis_bullet );
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_05DEGREES, 131072, gSkillData.sk_otis_bullet );
 	
 	int pitchShift = RANDOM_LONG( 0, 20 );
 	

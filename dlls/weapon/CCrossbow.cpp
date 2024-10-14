@@ -374,7 +374,7 @@ void CCrossbow::FireSniperBolt()
 	Vector vecDir = gpGlobals->v_forward;
 
 	lagcomp_begin(m_pPlayer);
-	UTIL_TraceLine(vecSrc, vecSrc + vecDir * 8192, dont_ignore_monsters, m_pPlayer->edict(), &tr);
+	UTIL_TraceLine(vecSrc, vecSrc + vecDir * 131072, dont_ignore_monsters, m_pPlayer->edict(), &tr);
 	lagcomp_end();
 
 #ifndef CLIENT_DLL

@@ -3673,7 +3673,7 @@ CBaseEntity *FindEntityForward( CBaseEntity *pMe )
 	TraceResult tr;
 
 	UTIL_MakeVectors(pMe->pev->v_angle);
-	UTIL_TraceLine(pMe->pev->origin + pMe->pev->view_ofs,pMe->pev->origin + pMe->pev->view_ofs + gpGlobals->v_forward * 8192,dont_ignore_monsters, pMe->edict(), &tr );
+	UTIL_TraceLine(pMe->pev->origin + pMe->pev->view_ofs,pMe->pev->origin + pMe->pev->view_ofs + gpGlobals->v_forward * 131072,dont_ignore_monsters, pMe->edict(), &tr );
 	if ( tr.flFraction != 1.0 && !FNullEnt( tr.pHit) )
 	{
 		CBaseEntity *pHit = CBaseEntity::Instance( tr.pHit );
