@@ -247,7 +247,6 @@ char *EV_HLDM_DamageDecal( physent_t *pe )
 
 void EV_HLDM_GunshotDecalTrace( pmtrace_t *pTrace, char *decalName )
 {
-	gEngfuncs.Con_DPrintf("FireShotGunDouble");
 	int iRand;
 	physent_t *pe;
 
