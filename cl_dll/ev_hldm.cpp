@@ -547,7 +547,6 @@ void EV_FireGlock2( event_args_t *args )
 //======================
 void EV_FireShotGunDouble( event_args_t *args )
 {
-
 	int idx;
 	vec3_t origin;
 	vec3_t angles;
