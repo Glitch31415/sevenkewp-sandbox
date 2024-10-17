@@ -107,7 +107,7 @@ void CCheckButton2::SetText(char const *pText, ...)
 	
 	va_list marker;
 	va_start(marker, pText);
-	vsnprintf(str, sizeof(str), pText, marker);
+	_vsnprintf(str, sizeof(str), pText, marker);
 	va_end(marker);
 
 	m_Label.setText(str);
