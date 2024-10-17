@@ -88,8 +88,8 @@ int CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 
 		float flForce = flDamage * ((32 * 32 * 72.0) / (pev->size.x * pev->size.y * pev->size.z)) * 5;
 
-		if (flForce > 0)
-			flForce = 0;
+		if (flForce > 1000.0)
+			flForce = 1000.0;
 		pev->velocity = pev->velocity + vecDir * flForce;
 	}
 
