@@ -86,10 +86,10 @@ int CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 		Vector vecDir = pev->origin - (pevInflictor->absmin + pevInflictor->absmax) * 0.5;
 		vecDir = vecDir.Normalize();
 
-		float flForce = flDamage * ((32 * 32 * 72.0) / (pev->size.x * pev->size.y * pev->size.z)) * 0.05;
+		float flForce = flDamage * ((32 * 32 * 72.0) / (pev->size.x * pev->size.y * pev->size.z)) * 5;
 
-		if (flForce > 10.0)
-			flForce = 10.0;
+		if (flForce > 0)
+			flForce = 0;
 		pev->velocity = pev->velocity + vecDir * flForce;
 	}
 
