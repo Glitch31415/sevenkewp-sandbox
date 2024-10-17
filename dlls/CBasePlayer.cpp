@@ -206,7 +206,7 @@ Vector VecVelocityForDamage(float flDamage)
 		vec = vec * 2;
 	else
 		vec = vec * 10;
-	vec = vec(0,0,0);
+	vec = vec * 0;
 	return vec;
 }
 
