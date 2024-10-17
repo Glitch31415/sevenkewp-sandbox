@@ -134,6 +134,65 @@ NerfStats g_nerfStats;
 TextureTypeStats g_textureStats;
 bool g_cfgsExecuted;
 
+#include <algorithm>
+#include <fstream>
+
+void dump_missing_files() {
+	bool dumpMissing = !strcmp(CMD_ARGV(0), "dmiss");
+
+	std::vector<std::string> resList;
+
+	std::set<std::string> allPrecacheFiles;
+	allPrecacheFiles.insert(g_tryPrecacheModels.begin(), g_tryPrecacheModels.end());
+	allPrecacheFiles.insert(g_missingModels.begin(), g_missingModels.end());
+	allPrecacheFiles.insert(g_tryPrecacheGeneric.begin(), g_tryPrecacheGeneric.end());
+	allPrecacheFiles.insert(g_tryPrecacheEvents.begin(), g_tryPrecacheEvents.end());
+
+	for (std::string item : g_tryPrecacheSounds) {
+		if (item.size() > 1) {
+			if (item[0] == '*' || item[0] == '!') {
+				item = item.substr(1); // client will ignore this character and load the path after this
+			}
+		}
+
+		allPrecacheFiles.insert("sound/" + item);
+	}
+
+	for (std::string item : allPrecacheFiles) {
+		std::string lowerItem = normalize_path(toLowerCase(item));
+
+		if (getGameFilePath(lowerItem.c_str()).empty() == dumpMissing) {
+			resList.push_back(lowerItem);
+		}
+	}
+
+	if (resList.empty()) {
+		g_engfuncs.pfnServerPrint(dumpMissing ? "No missing files\n" : "No precached files\n");
+		return;
+	}
+
+	sort(resList.begin(), resList.end());
+
+	std::ofstream resfile;
+	const char* suffix = dumpMissing ? ".miss" : ".res";
+	std::string fname = std::string("res/") + STRING(gpGlobals->mapname) + suffix;
+	resfile.open(fname, std::ios_base::app);
+
+	if (!resfile.is_open()) {
+		g_engfuncs.pfnServerPrint("Failed to open file in res/ folder (does it exist?)\n");
+		return;
+	}
+
+	for (std::string item : resList) {
+		resfile << item + "\n";
+	}
+
+	resfile.close();
+
+	g_engfuncs.pfnServerPrint(UTIL_VarArgs("Wrote %d %s files to %s\n",
+		(int)resList.size(), dumpMissing ? "missing" : "precached", fname.c_str()));
+}
+
 void test_command() {
 }
 
@@ -146,6 +205,8 @@ void cfg_exec_finished() {
 void GameDLLInit( void )
 {
 	g_engfuncs.pfnAddServerCommand("test", test_command);
+	g_engfuncs.pfnAddServerCommand("dcache", dump_missing_files);
+	g_engfuncs.pfnAddServerCommand("dmiss", dump_missing_files);
 	g_engfuncs.pfnAddServerCommand("cfg_exec_finished", cfg_exec_finished);
 	g_engfuncs.pfnAddServerCommand("edicts", PrintEntindexStats);
 	// Register cvars here:
