@@ -59,7 +59,7 @@ class CItemBattery : public CItem
 
 		float healthcap = m_healthcap > 0 ? m_healthcap : maxArmor;
 
-		if ((pPlayer->pev->armorvalue < healthcap) &&
+		if ((pPlayer->pev->armorvalue < 500) &&
 			(pPlayer->pev->weapons & (1 << WEAPON_SUIT)))
 		{
 			int pct;
