@@ -6,7 +6,7 @@
 #include "CItem.h"
 #include "gamerules.h"
 
-#define MAX_NORMAL_BATTERY	200
+#define MAX_NORMAL_BATTERY	500
 
 class CItemBattery : public CItem
 {

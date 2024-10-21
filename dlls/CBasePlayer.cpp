@@ -102,7 +102,7 @@ extern CGraph	WorldGraph;
 #define DOT_25DEGREE  0.9063077870367
 
 #define ARMOR_RATIO	 0.2	// Armor Takes 80% of the damage
-#define ARMOR_BONUS  0.5	// Each Point of Armor is work 1/x points of health
+#define ARMOR_BONUS  0.2	// Each Point of Armor is work 1/x points of health
 
 #define GEIGERDELAY 0.25
 #define SUITUPDATETIME	3.5
