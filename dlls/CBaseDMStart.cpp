@@ -109,7 +109,7 @@ edict_t* EntSelectSpawnPoint(CBaseEntity* pPlayer, bool includeDisabledSpawns)
 		"info_player_start",
 		//"info_player_deathmatch",
 		//"info_player_dm2",
-		"info_player_coop"
+		//"info_player_coop"
 	};
 
 	bool shouldDisableLegacySpawns = false;
