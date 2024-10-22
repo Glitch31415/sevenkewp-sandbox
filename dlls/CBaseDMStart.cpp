@@ -107,8 +107,8 @@ edict_t* EntSelectSpawnPoint(CBaseEntity* pPlayer, bool includeDisabledSpawns)
 	const int SPAWN_ENT_TYPES = 4;
 	const char* spawn_ent_names[SPAWN_ENT_TYPES] = {
 		"info_player_start",
-		"info_player_deathmatch",
-		"info_player_dm2",
+		//"info_player_deathmatch",
+		//"info_player_dm2",
 		"info_player_coop"
 	};
 
