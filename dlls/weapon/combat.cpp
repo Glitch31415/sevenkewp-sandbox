@@ -79,8 +79,8 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				if (tr.fStartSolid)
 				{
 					// if we're stuck inside them, fixup the position and distance
-					//tr.vecEndPos = vecSrc;
-					//tr.flFraction = 0.0;
+					tr.vecEndPos = vecSrc;
+					tr.flFraction = 0.0;
 				}
 				
 				// decrease damage for an ent that's farther from the bomb.
