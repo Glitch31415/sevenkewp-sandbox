@@ -4545,8 +4545,14 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	if (pevAttacker != pev) {
 		GiveScorePoints(pevAttacker, flTake);
 	}
-
 	pev->frags -= flTake/100;
+	if (V_min(pev->max_health, pev->health - flTake) <= 0) {
+		// double score changes if kill
+		if (pevAttacker != pev) {
+			GiveScorePoints(pevAttacker, flTake);
+		}
+		pev->frags -= flTake/100;
+	}
 
 	// do the damage
 	pev->health = V_min(pev->max_health, pev->health - flTake);
@@ -4560,12 +4566,9 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 
 	if (pev->health <= 0)
 	{
-		// double score changes if kill
-		if (pevAttacker != pev) {
-			GiveScorePoints(pevAttacker, flTake);
-		}
 
-		pev->frags -= flTake/100;
+
+
 
 		g_pevLastInflictor = pevInflictor;
 
