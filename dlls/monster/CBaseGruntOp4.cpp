@@ -307,7 +307,7 @@ void CBaseGruntOp4::InitAiFlags(void) {
 	waitForEnemyFire = true;
 	runFromHeavyDamage = true;
 	canCallMedic = true;
-	maxShootDist = 2048;
+	maxShootDist = 131072.0;
 }
 
 void CBaseGruntOp4::PlaySentenceSound(int sentenceType) {

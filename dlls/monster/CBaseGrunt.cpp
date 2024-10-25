@@ -1004,7 +1004,7 @@ void CBaseGrunt::InitAiFlags() {
 	canCallMedic = false;
 	suppressOccludedTarget = false;
 	maxSuppressTime = 3.0f;
-	maxShootDist = 2048;
+	maxShootDist = 131072.0;
 }
 
 void CBaseGrunt::BasePrecache() {
