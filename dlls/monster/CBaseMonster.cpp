@@ -311,7 +311,7 @@ void CBaseMonster::Look(int iDistance)
 	{
 		CBaseEntity* pList[100];
 
-		Vector delta = Vector(2048, 2048, 2048);
+		Vector delta = Vector(4096, 4096, 4096);
 
 		// Find only monsters/clients in box, NOT limited to PVS
 		int count = UTIL_EntitiesInBox(pList, 100, pev->origin - delta, pev->origin + delta, FL_CLIENT | FL_MONSTER | FL_POSSIBLE_TARGET, false);
