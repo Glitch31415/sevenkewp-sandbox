@@ -328,7 +328,7 @@ BOOL CBaseGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 	// are any of my squad members near the intended grenade impact area?
 	if ( InSquad() )
 	{
-		if (SquadMemberInRange( vecTarget, 256 ))
+		if (SquadMemberInRange( vecTarget, 2048 ))
 		{
 			// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
@@ -336,7 +336,7 @@ BOOL CBaseGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 		}
 	}
 	
-	if ( ( vecTarget - pev->origin ).Length2D() <= 256 )
+	if ( ( vecTarget - pev->origin ).Length2D() <= 2048 )
 	{
 		// crap, I don't want to blow myself up
 		m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
