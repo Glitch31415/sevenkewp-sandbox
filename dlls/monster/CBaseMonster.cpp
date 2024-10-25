@@ -397,9 +397,10 @@ void CBaseMonster::Look(int iDistance)
 //=========================================================
 int CBaseMonster::ISoundMask(void)
 {
-	return	bits_SOUND_WORLD |
-		bits_SOUND_COMBAT |
-		bits_SOUND_PLAYER;
+	//return	bits_SOUND_WORLD |
+		//bits_SOUND_COMBAT |
+		//bits_SOUND_PLAYER;
+	return bits_ALL_SOUNDS;
 }
 
 //=========================================================
