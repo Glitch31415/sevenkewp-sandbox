@@ -118,11 +118,13 @@ int CAGrunt::IRelationship ( CBaseEntity *pTarget )
 //=========================================================
 int CAGrunt :: ISoundMask ( void )
 {
-	return	bits_SOUND_WORLD	|
-			bits_SOUND_COMBAT	|
-			bits_SOUND_PLAYER	|
-			bits_SOUND_DANGER;
+	//return	bits_SOUND_WORLD	|
+			//bits_SOUND_COMBAT	|
+			//bits_SOUND_PLAYER	|
+			//bits_SOUND_DANGER;
+	return bits_ALL_SOUNDS;
 }
+
 
 //=========================================================
 // TraceAttack

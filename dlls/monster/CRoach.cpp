@@ -68,7 +68,8 @@ LINK_ENTITY_TO_CLASS( monster_cockroach, CRoach )
 //=========================================================
 int CRoach :: ISoundMask ( void )
 {
-	return	bits_SOUND_CARCASS | bits_SOUND_MEAT;
+	//return	bits_SOUND_CARCASS | bits_SOUND_MEAT;
+	return bits_ALL_SOUNDS;
 }
 
 //=========================================================
