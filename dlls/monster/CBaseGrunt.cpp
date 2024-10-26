@@ -1619,19 +1619,19 @@ Task_t	tlGruntRangeAttack1A[] =
 	{ TASK_STOP_MOVING,			(float)0		},
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,		(float)ACT_CROUCH },
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim      },
+	{ TASK_WAIT_FACE_ENEMY,                10f      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                10f/2      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                10f/2      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                10f/2      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 };
 
@@ -2486,7 +2486,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		break;
 	case SCHED_RANGE_ATTACK1:
 		{
-			reactiontim = RANDOM_FLOAT(0.25, distfactor + 0.25);
+			reactiontim = RANDOM_FLOAT((distfactor*0.75) + 0.25, (distfactor*1.25) + 0.25);
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("distfactor: %f", distfactor));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("reactiontim: %f", reactiontim));
 			// randomly stand or crouch
@@ -2500,9 +2500,9 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		}
 	case SCHED_RANGE_ATTACK2:
 		{
+			reactiontim = RANDOM_FLOAT((distfactor*0.75) + 0.25, (distfactor*1.25) + 0.25);
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("distfactor: %f", distfactor));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("reactiontim: %f", reactiontim));
-			reactiontim = RANDOM_FLOAT(0.25, distfactor + 0.25);
 			return &slGruntRangeAttack2[ 0 ];
 		}
 	case SCHED_COMBAT_FACE:
