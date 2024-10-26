@@ -136,6 +136,11 @@ void CHGrunt::Precache()
 	if (RANDOM_LONG(0, 99) < 50) {
 		pev->weapons |= HGRUNT_SHOTGUN;
 	}
+	else {
+		if (FBitSet(pev->weapons, HGRUNT_SHOTGUN)) {
+			pev->weapons - HGRUNT_SHOTGUN;
+		}
+	}
 	if (RANDOM_LONG(0, 1))
 		m_voicePitch = 109 + RANDOM_LONG(0, 7);
 	else
