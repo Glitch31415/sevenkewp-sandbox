@@ -665,7 +665,7 @@ void CBaseGrunt::ShootUzis(Vector& vecShootOrigin, Vector& vecShootDir) {
 	Vector	rightShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40, 90)*-1 + gpGlobals->v_up * RANDOM_FLOAT(75, 200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass(vecShootOrigin - vecShootDir * 24, leftShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
 	EjectBrass(vecShootOrigin - vecShootDir * 24, rightShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
-	FireBullets(2, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES*2, 131072, BULLET_MONSTER_MP5); // shoot +-5 degrees;
+	FireBullets(2, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES*5, 131072, BULLET_MONSTER_MP5); // shoot +-5 degrees;
 	
 	const char* sound = RANDOM_LONG(0, 1) ? "weapons/uzi/fire_both1.wav" : "weapons/uzi/fire_both2.wav";
 	EMIT_SOUND(ENT(pev), CHAN_STATIC, sound, 1, ATTN_NORM);
