@@ -18,7 +18,7 @@
 
 int g_fGruntQuestion;
 
-static float reactiontim;
+static float reactiontim = 10.0;
 static float distfactor = 0.0;
 
 TYPEDESCRIPTION	CBaseGrunt::m_SaveData[] = 
@@ -1125,7 +1125,12 @@ void CBaseGrunt :: StartTask ( Task_t *pTask )
 			m_IdealActivity = ACT_GLIDE;
 		}
 		break;
-
+	case TASK_WAIT_FACE_ENEMY:
+	{
+		// need to override this to get the dynamic aiming time to work
+		m_flWaitFinished = gpGlobals->time + reactiontim;
+		break;
+	}
 	default: 
 		CTalkSquadMonster :: StartTask( pTask );
 		break;
@@ -1145,6 +1150,18 @@ void CBaseGrunt :: RunTask ( Task_t *pTask )
 			if ( FacingIdeal() )
 			{
 				m_iTaskStatus = TASKSTATUS_COMPLETE;
+			}
+			break;
+		}
+	case TASK_WAIT_FACE_ENEMY:
+		{
+			// need to override this to get the dynamic aiming time to work
+			MakeIdealYaw ( m_vecEnemyLKP );
+			ChangeYaw( pev->yaw_speed ); 
+
+			if ( gpGlobals->time >= m_flWaitFinished )
+			{
+				TaskComplete();
 			}
 			break;
 		}
@@ -1620,19 +1637,19 @@ Task_t	tlGruntRangeAttack1A[] =
 	{ TASK_STOP_MOVING,			(float)0		},
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,		(float)ACT_CROUCH },
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim      },
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 };
 
@@ -1661,15 +1678,15 @@ Task_t	tlGruntRangeAttack1B[] =
 	{ TASK_STOP_MOVING,				(float)0		},
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,(float)ACT_IDLE_ANGRY  },
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim      },
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 };
 
@@ -1697,15 +1714,15 @@ Task_t	tlGruntRangeAttack1C[] =
 	{ TASK_STOP_MOVING,			(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim      },
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_FACE_ENEMY,                reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 };
 
