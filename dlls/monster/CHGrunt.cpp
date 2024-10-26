@@ -98,11 +98,10 @@ const char* CDeadHGrunt::m_szPoses[] = { "deadstomach", "deadside", "deadsitting
 void CHGrunt::Spawn() {
 	m_skinFrames = 2;
 	BaseSpawn();
-	static int shotgunspawn = 0;
 	if (RANDOM_LONG(0, 99) < 50) {
-		shotgunspawn = 1;
+		pev->weapons |= HGRUNT_SHOTGUN;
 	}
-	if (FBitSet(pev->weapons, HGRUNT_SHOTGUN) || shotgunspawn == 1)
+	if (FBitSet(pev->weapons, HGRUNT_SHOTGUN))
 	{
 		SetBodygroup(GUN_GROUP, GUN_SHOTGUN);
 		m_cClipSize = 8;
@@ -118,7 +117,7 @@ void CHGrunt::Spawn() {
 	else
 		pev->skin = m_skinBase + 1;	// dark skin
 
-	if (FBitSet(pev->weapons, HGRUNT_SHOTGUN) || shotgunspawn == 1)
+	if (FBitSet(pev->weapons, HGRUNT_SHOTGUN))
 	{
 		SetBodygroup(HEAD_GROUP, HEAD_SHOTGUN);
 	}
