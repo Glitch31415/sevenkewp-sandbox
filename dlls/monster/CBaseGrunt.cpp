@@ -224,7 +224,7 @@ BOOL CBaseGrunt :: CheckMeleeAttack1 ( float flDot, float flDist )
 //=========================================================
 BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 {
-	distfactor = flDist / 1000;
+	distfactor = flDist / 2000;
 	if (!HasEquipment(ANY_RANGED_WEAPON)) {
 		return FALSE;
 	}
@@ -710,7 +710,7 @@ void CBaseGrunt ::ShootShotgun(Vector& vecShootOrigin, Vector& vecShootDir)
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass ( vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iShotgunShell, TE_BOUNCE_SHOTSHELL); 
-	FireBullets(gSkillData.sk_hgrunt_pellets, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES*2, 131072, BULLET_PLAYER_BUCKSHOT, 0 ); // shoot +-7.5 degrees
+	FireBullets(gSkillData.sk_hgrunt_pellets, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 131072, BULLET_PLAYER_BUCKSHOT, 0 ); // shoot +-7.5 degrees
 
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/sbarrel1.wav", 1, ATTN_NORM);
 	PLAY_DISTANT_SOUND(edict(), DISTANT_556);
