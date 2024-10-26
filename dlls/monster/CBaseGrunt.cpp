@@ -17,7 +17,8 @@
 #include	"skill.h"
 
 int g_fGruntQuestion;
-static float reactiontim = 0.5;
+static float reactiontim = 0.25;
+static float distfactor = 0;
 
 TYPEDESCRIPTION	CBaseGrunt::m_SaveData[] = 
 {
@@ -223,6 +224,7 @@ BOOL CBaseGrunt :: CheckMeleeAttack1 ( float flDot, float flDist )
 //=========================================================
 BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 {
+	distfactor = fldist / 1000;
 	if (!HasEquipment(ANY_RANGED_WEAPON)) {
 		return FALSE;
 	}
@@ -260,6 +262,7 @@ BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 //=========================================================
 BOOL CBaseGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 {
+	distfactor = fldist / 1000;
 	if (!HasEquipment(MEQUIP_HAND_GRENADE | MEQUIP_GRENADE_LAUNCHER))
 	{
 		return FALSE;
@@ -1616,19 +1619,19 @@ Task_t	tlGruntRangeAttack1A[] =
 	{ TASK_STOP_MOVING,			(float)0		},
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,		(float)ACT_CROUCH },
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_RANDOM,                (float)reactiontim      },
+	{ TASK_WAIT_FACE_ENEMY,                (float)reactiontim      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_RANDOM,                (float)reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                (float)reactiontim/2      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_RANDOM,                (float)reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                (float)reactiontim/2      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_RANDOM,                (float)reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                (float)reactiontim/2      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 };
 
@@ -1657,15 +1660,15 @@ Task_t	tlGruntRangeAttack1B[] =
 	{ TASK_STOP_MOVING,				(float)0		},
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,(float)ACT_IDLE_ANGRY  },
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_RANDOM,                (float)reactiontim      },
+	{ TASK_WAIT_FACE_ENEMY,                (float)reactiontim      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_RANDOM,                (float)reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                (float)reactiontim/2      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_RANDOM,                (float)reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                (float)reactiontim/2      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 };
 
@@ -1693,15 +1696,15 @@ Task_t	tlGruntRangeAttack1C[] =
 	{ TASK_STOP_MOVING,			(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_RANDOM,                (float)reactiontim      },
+	{ TASK_WAIT_FACE_ENEMY,                (float)reactiontim      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_RANDOM,                (float)reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                (float)reactiontim/2      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_WAIT_RANDOM,                (float)reactiontim/2      },
+	{ TASK_WAIT_FACE_ENEMY,                (float)reactiontim/2      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
 };
 
@@ -2483,7 +2486,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		break;
 	case SCHED_RANGE_ATTACK1:
 		{
-			reactiontim = RANDOM_FLOAT(0.0, 0.5);
+			reactiontim = RANDOM_FLOAT(0.25, distfactor + 0.25);
 			// randomly stand or crouch
 			if (RANDOM_LONG(0,9) == 0)
 				m_fStanding = RANDOM_LONG(0,1);
@@ -2495,7 +2498,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		}
 	case SCHED_RANGE_ATTACK2:
 		{
-			reactiontim = RANDOM_FLOAT(0.0, 0.5);
+			reactiontim = RANDOM_FLOAT(0.25, distfactor + 0.25);
 			return &slGruntRangeAttack2[ 0 ];
 		}
 	case SCHED_COMBAT_FACE:
