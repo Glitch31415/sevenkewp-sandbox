@@ -1608,6 +1608,7 @@ Schedule_t	slGruntSweep[] =
 // grunt's grenade toss requires the enemy be occluded.
 //=========================================================
 static float reactiontim = 0.5;
+reactiontim = RANDOM_FLOAT(0.0, 0.5);
 Task_t	tlGruntRangeAttack1A[] =
 {
 
