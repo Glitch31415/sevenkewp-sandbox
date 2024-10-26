@@ -2488,7 +2488,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 	case SCHED_RANGE_ATTACK1:
 		{
 			//reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
-			float* srt = &reactiontim;
+			float srt = &reactiontim;
 			srt = 2.5f;
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("distfactor: %f", distfactor));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("reactiontim: %f", reactiontim));
@@ -2504,7 +2504,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 	case SCHED_RANGE_ATTACK2:
 		{
 			//reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
-			float* srt = &reactiontim;
+			float srt = &reactiontim;
 			srt = 2.5f;
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("distfactor: %f", distfactor));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("reactiontim: %f", reactiontim));
