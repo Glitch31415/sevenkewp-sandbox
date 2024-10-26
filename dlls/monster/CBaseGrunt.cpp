@@ -2489,7 +2489,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		{
 			//reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
 			float* srt = &reactiontim;
-			srt = 2.5;
+			srt = 2.50;
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("distfactor: %f", distfactor));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("reactiontim: %f", reactiontim));
 			// randomly stand or crouch
@@ -2505,7 +2505,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		{
 			//reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
 			float* srt = &reactiontim;
-			srt = 2.5;
+			srt = 2.50;
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("distfactor: %f", distfactor));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("reactiontim: %f", reactiontim));
 			return &slGruntRangeAttack2[ 0 ];
