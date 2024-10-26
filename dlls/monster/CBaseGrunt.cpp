@@ -17,6 +17,7 @@
 #include	"skill.h"
 
 int g_fGruntQuestion;
+static float reactiontim = 0.5;
 
 TYPEDESCRIPTION	CBaseGrunt::m_SaveData[] = 
 {
@@ -1607,8 +1608,7 @@ Schedule_t	slGruntSweep[] =
 // primary range attack. Overriden because base class stops attacking when the enemy is occluded.
 // grunt's grenade toss requires the enemy be occluded.
 //=========================================================
-float reactiontim = 0.5;
-reactiontim = UTIL_SharedRandomFloat((int)gpGlobals->time, 0.0, 0.5);
+
 Task_t	tlGruntRangeAttack1A[] =
 {
 
@@ -2483,6 +2483,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		break;
 	case SCHED_RANGE_ATTACK1:
 		{
+			reactiontim = RANDOM_FLOAT(0.0, 0.5);
 			// randomly stand or crouch
 			if (RANDOM_LONG(0,9) == 0)
 				m_fStanding = RANDOM_LONG(0,1);
@@ -2494,6 +2495,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		}
 	case SCHED_RANGE_ATTACK2:
 		{
+			reactiontim = RANDOM_FLOAT(0.0, 0.5);
 			return &slGruntRangeAttack2[ 0 ];
 		}
 	case SCHED_COMBAT_FACE:
