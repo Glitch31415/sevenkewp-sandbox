@@ -1607,7 +1607,8 @@ Schedule_t	slGruntSweep[] =
 // primary range attack. Overriden because base class stops attacking when the enemy is occluded.
 // grunt's grenade toss requires the enemy be occluded.
 //=========================================================
-static float reactiontim = UTIL_SharedRandomFloat((int)gpGlobals->time, 0.0, 0.5);
+float reactiontim = 0.5;
+reactiontim = UTIL_SharedRandomFloat((int)gpGlobals->time, 0.0, 0.5);
 Task_t	tlGruntRangeAttack1A[] =
 {
 
