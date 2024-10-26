@@ -599,35 +599,35 @@ void CBaseGrunt::Shoot(bool firstRound)
 
 	Vector vecShootDir = ShootAtEnemy(vecShootOrigin);
 
-	if (HasEquipment(MEQUIP_MP5)) {
+	if (HasEquipment(MEQUIP_MP5) && gpGlobals->time - m_flLastShot > 0.50) {
 		ShootMp5(vecShootOrigin, vecShootDir);
 		if (firstRound) {
 			// the first round of the three round burst plays the sound and puts a sound in the world sound list.
 			EMIT_SOUND(ENT(pev), CHAN_WEAPON, RANDOM_LONG(0, 1) ? "hgrunt/gr_mgun1.wav" : "hgrunt/gr_mgun2.wav", 1, ATTN_NORM);
 		}
 	}
-	else if (HasEquipment(MEQUIP_AKIMBO_UZIS)) {
+	else if (HasEquipment(MEQUIP_AKIMBO_UZIS) && gpGlobals->time - m_flLastShot > 0.50) {
 		ShootUzis(vecShootOrigin, vecShootDir);
 	}
-	else if (HasEquipment(MEQUIP_MINIGUN)) {
+	else if (HasEquipment(MEQUIP_MINIGUN) && gpGlobals->time - m_flLastShot > 0.50) {
 		ShootMinigun(vecShootOrigin, vecShootDir);
 	}
-	else if (HasEquipment(MEQUIP_SNIPER) && gpGlobals->time - m_flLastShot > 0.11) {
+	else if (HasEquipment(MEQUIP_SNIPER) && gpGlobals->time - m_flLastShot > 2.5) {
 		ShootSniper(vecShootOrigin, vecShootDir);
 	}
-	else if (HasEquipment(MEQUIP_SHOTGUN)) {
+	else if (HasEquipment(MEQUIP_SHOTGUN) && gpGlobals->time - m_flLastShot > 0.75) {
 		ShootShotgun(vecShootOrigin, vecShootDir);
 	}
-	else if (HasEquipment(MEQUIP_SAW)) {
+	else if (HasEquipment(MEQUIP_SAW) && gpGlobals->time - m_flLastShot > 0.50) {
 		ShootSaw(vecShootOrigin, vecShootDir);
 	}
-	else if (HasEquipment(MEQUIP_GLOCK) && gpGlobals->time - m_flLastShot > 0.11) {
+	else if (HasEquipment(MEQUIP_GLOCK) && gpGlobals->time - m_flLastShot > 0.50) {
 		ShootGlock(vecShootOrigin, vecShootDir);
 	}
-	else if (HasEquipment(MEQUIP_DEAGLE) && gpGlobals->time - m_flLastShot > 0.11) {
+	else if (HasEquipment(MEQUIP_DEAGLE) && gpGlobals->time - m_flLastShot > 0.75) {
 		ShootDeagle(vecShootOrigin, vecShootDir);
 	}
-	else if (HasEquipment(MEQUIP_357) && gpGlobals->time - m_flLastShot > 0.11) {
+	else if (HasEquipment(MEQUIP_357) && gpGlobals->time - m_flLastShot > 0.75) {
 		Shoot357(vecShootOrigin, vecShootDir);
 	}
 	else {
