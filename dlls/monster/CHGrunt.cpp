@@ -102,7 +102,7 @@ void CHGrunt::Spawn() {
 	{
 		UTIL_ClientPrintAll(print_console, UTIL_VarArgs("shotgun"));
 		SetBodygroup(GUN_GROUP, GUN_SHOTGUN);
-		m_cClipSize = 4;
+		m_cClipSize = 8;
 	}
 	else
 	{
