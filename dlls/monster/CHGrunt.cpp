@@ -103,11 +103,13 @@ void CHGrunt::Spawn() {
 	}
 	if (FBitSet(pev->weapons, HGRUNT_SHOTGUN))
 	{
+		print_console("shotgun");
 		SetBodygroup(GUN_GROUP, GUN_SHOTGUN);
 		m_cClipSize = 8;
 	}
 	else
 	{
+		print_console("mp5");
 		m_cClipSize = GRUNT_CLIP_SIZE;
 	}
 	m_cAmmoLoaded = m_cClipSize;
