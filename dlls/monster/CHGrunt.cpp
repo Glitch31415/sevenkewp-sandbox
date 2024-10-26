@@ -98,7 +98,7 @@ const char* CDeadHGrunt::m_szPoses[] = { "deadstomach", "deadside", "deadsitting
 void CHGrunt::Spawn() {
 	m_skinFrames = 2;
 	BaseSpawn();
-	shotgunspawn = 0;
+	static int shotgunspawn = 0;
 	if (RANDOM_LONG(0, 99) < 50) {
 		shotgunspawn = 1;
 	}
