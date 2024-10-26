@@ -226,9 +226,6 @@ BOOL CBaseGrunt :: CheckMeleeAttack1 ( float flDot, float flDist )
 BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 {
 	distfactor = flDist / 1500;
-	reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
-	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("distfactor: %f", distfactor));
-	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("reactiontim: %f", reactiontim));
 	if (!HasEquipment(ANY_RANGED_WEAPON)) {
 		return FALSE;
 	}
@@ -267,9 +264,6 @@ BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 BOOL CBaseGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 {
 	distfactor = flDist / 1500;
-	reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
-	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("distfactor: %f", distfactor));
-	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("reactiontim: %f", reactiontim));
 	if (!HasEquipment(MEQUIP_HAND_GRENADE | MEQUIP_GRENADE_LAUNCHER))
 	{
 		return FALSE;
@@ -2493,6 +2487,10 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		break;
 	case SCHED_RANGE_ATTACK1:
 		{
+			//reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+			reactiontim = 2.5;
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("distfactor: %f", distfactor));
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("reactiontim: %f", reactiontim));
 			// randomly stand or crouch
 			if (RANDOM_LONG(0,9) == 0)
 				m_fStanding = RANDOM_LONG(0,1);
@@ -2504,6 +2502,8 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		}
 	case SCHED_RANGE_ATTACK2:
 		{
+			//reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+			reactiontim = 2.5;
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("distfactor: %f", distfactor));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("reactiontim: %f", reactiontim));
 			return &slGruntRangeAttack2[ 0 ];
