@@ -17,8 +17,8 @@
 #include	"skill.h"
 
 int g_fGruntQuestion;
-static float reactiontim = 0.25;
-static float distfactor = 0;
+static float reactiontim = 10.0;
+static float distfactor = 0.0;
 
 TYPEDESCRIPTION	CBaseGrunt::m_SaveData[] = 
 {
