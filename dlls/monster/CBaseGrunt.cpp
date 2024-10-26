@@ -612,10 +612,10 @@ void CBaseGrunt::Shoot(bool firstRound)
 	else if (HasEquipment(MEQUIP_MINIGUN) && gpGlobals->time - m_flLastShot > 0.50) {
 		ShootMinigun(vecShootOrigin, vecShootDir);
 	}
-	else if (HasEquipment(MEQUIP_SNIPER) && gpGlobals->time - m_flLastShot > 2.5) {
+	else if (HasEquipment(MEQUIP_SNIPER) && gpGlobals->time - m_flLastShot > 5.0) {
 		ShootSniper(vecShootOrigin, vecShootDir);
 	}
-	else if (HasEquipment(MEQUIP_SHOTGUN) && gpGlobals->time - m_flLastShot > 0.75) {
+	else if (HasEquipment(MEQUIP_SHOTGUN) && gpGlobals->time - m_flLastShot > 1.5) {
 		ShootShotgun(vecShootOrigin, vecShootDir);
 	}
 	else if (HasEquipment(MEQUIP_SAW) && gpGlobals->time - m_flLastShot > 0.50) {
