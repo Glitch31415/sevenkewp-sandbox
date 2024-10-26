@@ -999,7 +999,7 @@ void CBaseGrunt::BaseSpawn()
 
 void CBaseGrunt::InitAiFlags() {
 	// default to HL Grunt AI
-	canBeMadAtPlayer = false;
+	canBeMadAtPlayer = true;
 	waitForEnemyFire = false;
 	runFromHeavyDamage = false;
 	canCallMedic = false;

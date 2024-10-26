@@ -269,7 +269,7 @@ void ClientPutInServer( edict_t *pEntity )
 	}
 	else {
 		// stop any music from the previous map/server
-		UTIL_StopGlobalMp3(pEntity);
+		//UTIL_StopGlobalMp3(pEntity);
 	}
 
 	// Allocate a CBasePlayer for pev, and call spawn
