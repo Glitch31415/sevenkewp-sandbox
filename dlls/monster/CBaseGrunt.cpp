@@ -1607,9 +1607,11 @@ Schedule_t	slGruntSweep[] =
 // primary range attack. Overriden because base class stops attacking when the enemy is occluded.
 // grunt's grenade toss requires the enemy be occluded.
 //=========================================================
+reactiontim = RANDOM_FLOAT(0.0, 0.5);
 Task_t	tlGruntRangeAttack1A[] =
 {
-	static float reactiontim = RANDOM_FLOAT(0.0, 0.5);
+
+
 	{ TASK_STOP_MOVING,			(float)0		},
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,		(float)ACT_CROUCH },
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
@@ -1651,7 +1653,6 @@ Schedule_t	slGruntRangeAttack1A[] =
 // Range attack with an "angry idle" animation instead of crouching
 Task_t	tlGruntRangeAttack1B[] =
 {
-	static float reactiontim = RANDOM_FLOAT(0.0, 0.5);
 	{ TASK_STOP_MOVING,				(float)0		},
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,(float)ACT_IDLE_ANGRY  },
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
@@ -1688,7 +1689,6 @@ Schedule_t	slGruntRangeAttack1B[] =
 // Range attack with no crouching/idle animations (for bodyguard/hwgrunt)
 Task_t	tlGruntRangeAttack1C[] =
 {
-	static float reactiontim = RANDOM_FLOAT(0.0, 0.5);
 	{ TASK_STOP_MOVING,			(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
