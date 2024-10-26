@@ -2486,7 +2486,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		break;
 	case SCHED_RANGE_ATTACK1:
 		{
-			reactiontim = RANDOM_FLOAT((distfactor*0.75) + 0.25, (distfactor*1.25) + 0.25);
+			reactiontim = RANDOM_FLOAT((distfactor*75), (distfactor*125));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("distfactor: %f", distfactor));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("reactiontim: %f", reactiontim));
 			// randomly stand or crouch
@@ -2500,7 +2500,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		}
 	case SCHED_RANGE_ATTACK2:
 		{
-			reactiontim = RANDOM_FLOAT((distfactor*0.75) + 0.25, (distfactor*1.25) + 0.25);
+			reactiontim = RANDOM_FLOAT((distfactor*75), (distfactor*125));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("distfactor: %f", distfactor));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("reactiontim: %f", reactiontim));
 			return &slGruntRangeAttack2[ 0 ];
