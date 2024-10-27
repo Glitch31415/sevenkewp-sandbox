@@ -225,7 +225,7 @@ BOOL CBaseGrunt :: CheckMeleeAttack1 ( float flDot, float flDist )
 //=========================================================
 BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 {
-	distfactor = flDist / 1500;
+	distfactor = flDist / 2000;
 	if (!HasEquipment(ANY_RANGED_WEAPON)) {
 		return FALSE;
 	}
@@ -263,7 +263,7 @@ BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 //=========================================================
 BOOL CBaseGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 {
-	distfactor = flDist / 1500;
+	distfactor = flDist / 2000;
 	if (!HasEquipment(MEQUIP_HAND_GRENADE | MEQUIP_GRENADE_LAUNCHER))
 	{
 		return FALSE;
