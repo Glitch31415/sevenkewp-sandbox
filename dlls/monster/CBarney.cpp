@@ -40,6 +40,9 @@
 #define	BARNEY_BODY_GUNDRAWN		1
 #define BARNEY_BODY_GUNGONE			2
 
+static float reactiontim = 10.0;
+static float distfactor = 0.0;
+
 class CBarney : public CTalkSquadMonster
 {
 public:
@@ -236,7 +239,23 @@ IMPLEMENT_CUSTOM_SCHEDULES( CBarney, CTalkSquadMonster )
 
 void CBarney :: StartTask( Task_t *pTask )
 {
-	CTalkSquadMonster::StartTask( pTask );	
+	m_iTaskStatus = TASKSTATUS_RUNNING;
+
+	switch ( pTask->iTask )
+	{
+	
+	case TASK_WAIT_FACE_ENEMY:
+	{
+		// need to override this to get the dynamic aiming time to work
+		m_flWaitFinished = gpGlobals->time + reactiontim;
+		break;
+	}
+
+	default:
+		CTalkSquadMonster::StartTask( pTask );	
+		break;
+	
+	}
 }
 
 void CBarney :: RunTask( Task_t *pTask )
@@ -341,7 +360,8 @@ void CBarney :: SetYawSpeed ( void )
 //=========================================================
 BOOL CBarney :: CheckRangeAttack1 ( float flDot, float flDist )
 {
-	if ( flDist <= 1024 && flDot >= 0.5 )
+	distfactor = flDist / 2000;
+	if (flDot >= 0.5 )
 	{
 		if ( gpGlobals->time > m_checkAttackTime )
 		{
@@ -698,6 +718,12 @@ Schedule_t* CBarney :: GetScheduleOfType ( int Type )
 		}
 		else
 			return psched;	
+	case SCHED_RANGE_ATTACK1:
+		reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+		return &slRangeAttack1[0];
+	case SCHED_RANGE_ATTACK2:
+		reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+		return &slRangeAttack2[0];
 	}
 
 	return CTalkSquadMonster::GetScheduleOfType( Type );
