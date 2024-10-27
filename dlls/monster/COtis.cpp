@@ -40,8 +40,7 @@
 #define	OTIS_BODY_GUNDRAWN		1
 #define OTIS_BODY_GUNGONE			2
 
-static float reactiontim = 10.0;
-static float distfactor = 0.0;
+
 
 namespace OtisBodyGroup
 {

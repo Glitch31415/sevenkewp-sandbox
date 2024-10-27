@@ -64,8 +64,7 @@ enum
 #define HASS_FOLLOW_SOUND "buttons/blip2.wav"
 #define HASS_UNFOLLOW_SOUND "buttons/blip1.wav"
 
-static float reactiontim = 10.0;
-static float distfactor = 0.0;
+
 
 class CHAssassin : public CBaseMonster
 {
