@@ -119,6 +119,7 @@ void CWorld::Precache(void)
 	}
 
 	g_pGameRules = InstallGameRules();
+	g_pluginManager.UpdateServerPlugins();
 	loadReplacementFiles();
 
 	//!!!UNDONE why is there so much Spawn code in the Precache function? I'll just keep it here 
@@ -185,7 +186,7 @@ void CWorld::Precache(void)
 				continue;
 			}
 
-			if (wad.find("xeno.wad") != -1 || wad.find("halflife.wad") != -1) {
+			if (wad.find("xeno.wad") != std::string::npos || wad.find("halflife.wad") != std::string::npos) {
 				// bad logic copied from the engine. This explains why "nwxeno.wad" fails to transfer
 				bool unexpected = wad != "xeno.wad" && wad != "halflife.wad";
 				ALERT(unexpected ? at_error : at_console, "Engine blacklisted WAD: %s\n", wad.c_str());
@@ -344,7 +345,7 @@ void CWorld::Precache(void)
 		CVAR_SET_FLOAT("mp_defaultteam", 0);
 	}
 
-	g_pluginManager.CallHooks(&HLCOOP_PLUGIN_HOOKS::pfnMapInit);
+	CALL_HOOKS_VOID(&HLCOOP_PLUGIN_HOOKS::pfnMapInit);
 }
 
 
