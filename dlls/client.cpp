@@ -45,6 +45,7 @@
 #include "skill.h"
 #include "CGamePlayerEquip.h"
 #include "PluginManager.h"
+#include "Scheduler.h"
 
 #if !defined ( _WIN32 )
 #include <ctype.h>
@@ -89,7 +90,9 @@ called when a player connects to a server
 ============
 */
 BOOL ClientConnect( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[ 128 ]  )
-{	
+{
+	CALL_HOOKS(BOOL, pfnClientConnect, pEntity, pszName, pszAddress, szRejectReason);
+
 	return g_pGameRules->ClientConnected( pEntity, pszName, pszAddress, szRejectReason );
 
 // a client connecting during an intermission can cause problems
@@ -110,6 +113,8 @@ GLOBALS ASSUMED SET:  g_fGameOver
 */
 void ClientDisconnect( edict_t *pEntity )
 {
+	CALL_HOOKS_VOID(pfnClientDisconnect, pEntity);
+
 	if (mp_debugmsg.value) {
 		writeNetworkMessageHistory(std::string(STRING(pEntity->v.netname)) 
 			+ " dropped on map " + STRING(gpGlobals->mapname));
@@ -272,18 +277,20 @@ void ClientPutInServer( edict_t *pEntity )
 		//UTIL_StopGlobalMp3(pEntity);
 	}
 
-	// Allocate a CBasePlayer for pev, and call spawn
-	pPlayer->Spawn();
 	pPlayer->m_initSoundTime = gpGlobals->time + 1.0f;
-
-	// Reset interpolation during first frame
-	pPlayer->pev->effects |= EF_NOINTERP;
 
 	pPlayer->pev->iuser1 = 0;	// disable any spec modes
 	pPlayer->pev->iuser2 = 0;
 
-	if (g_pGameRules->IsMultiplayer())
-	{
+	// Reset interpolation during first frame
+	pPlayer->pev->effects |= EF_NOINTERP;
+
+	CALL_HOOKS_VOID(pfnClientPutInServer, pPlayer);
+
+	// Allocate a CBasePlayer for pev, and call spawn
+	pPlayer->Spawn();
+
+	if (g_pGameRules->IsMultiplayer()) {
 		FireTargets("game_playerjoin", pPlayer, pPlayer, USE_TOGGLE, 0);
 	}
 }
@@ -302,6 +309,8 @@ void ClientUserInfoChanged( edict_t *pEntity, char *infobuffer )
 	// Is the client spawned yet?
 	if ( !pEntity->pvPrivateData )
 		return;
+
+	CALL_HOOKS_VOID(pfnClientUserInfoChanged, pEntity, infobuffer);
 
 	// msg everyone if someone changes their name,  and it isn't the first time (changing no name to current name)
 	if ( pEntity->v.netname && STRING(pEntity->v.netname)[0] != 0 && !FStrEq( STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue( infobuffer, "name" )) )
@@ -416,6 +425,8 @@ void ServerDeactivate( void )
 	// below and try keenrace instead.
 	//    SHA-1: 0c95b51652eda12e0b268631d1421634614c661f
 	//    fix physics breaking after long uptime
+
+	CALL_HOOKS_VOID(pfnMapChange);
 }
 
 #include "lagcomp.h"
@@ -760,7 +771,9 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 		}
 	}
 
-	CALL_HOOKS_VOID(&HLCOOP_PLUGIN_HOOKS::pfnMapActivate);
+	LoadAdminList();
+
+	CALL_HOOKS_VOID(pfnMapActivate);
 }
 
 /*
@@ -878,6 +891,8 @@ void StartFrame( void )
 	}
 
 	lagcomp_update();
+
+	g_Scheduler.Think();
 }
 
 

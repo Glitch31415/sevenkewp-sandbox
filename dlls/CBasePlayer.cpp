@@ -745,7 +745,7 @@ void CBasePlayer::PackDeadPlayerItems( void )
 	if (iWeaponRules == GR_PLR_DROP_GUN_ACTIVE && firstWep && !strcmp(STRING(firstWep->pev->classname), "weapon_shockrifle")) {
 		if (RemovePlayerItem(firstWep)) {
 			// fixme: logic duplicated in weapon drop code
-			static std::map<std::string, std::string> keys = { {"is_player_ally", "1"} };
+			static std::unordered_map<std::string, std::string> keys = { {"is_player_ally", "1"} };
 			Vector angles(0, pev->angles.y, 0);
 			CBaseEntity* pRoach = CBaseEntity::Create("monster_shockroach",
 				pev->origin + gpGlobals->v_forward * 10, angles, edict(), keys);
@@ -1688,7 +1688,7 @@ void CBasePlayer::LeaveObserver()
 //
 void CBasePlayer::PlayerUse ( void )
 {
-	CALL_HOOKS_VOID(&HLCOOP_PLUGIN_HOOKS::pfnPlayerUse, this);
+	CALL_HOOKS_VOID(pfnPlayerUse, this);
 
 	if ( IsObserver() )
 		return;
@@ -2226,7 +2226,7 @@ void CBasePlayer::UpdateStatusBar()
 
 void CBasePlayer::PreThink(void)
 {
-	CALL_HOOKS_VOID(&HLCOOP_PLUGIN_HOOKS::pfnPlayerPreThink, this);
+	CALL_HOOKS_VOID(pfnPlayerPreThink, this);
 
 	int buttonsChanged = (m_afButtonLast ^ pev->button);	// These buttons have changed this frame
 	
@@ -2998,7 +2998,7 @@ void CBasePlayer :: UpdatePlayerSound ( void )
 
 void CBasePlayer::PostThink()
 {
-	CALL_HOOKS_VOID(&HLCOOP_PLUGIN_HOOKS::pfnPlayerPostThink, this);
+	CALL_HOOKS_VOID(pfnPlayerPostThink, this);
 
 	if ( g_fGameOver )
 		goto pt_end;         // intermission or finale
@@ -5005,7 +5005,7 @@ void CBasePlayer::DropPlayerItem ( char *pszItemName )
 			if (!strcmp(STRING(pWeapon->pev->classname), "weapon_shockrifle")) {
 				// fixme: logic duplicated in kill code
 				if (RemovePlayerItem(pWeapon)) {
-					static std::map<std::string, std::string> keys = { {"is_player_ally", "1"} };
+					static std::unordered_map<std::string, std::string> keys = { {"is_player_ally", "1"} };
 					Vector angles(0, pev->angles.y, 0);
 					CBaseEntity* pRoach = CBaseEntity::Create("monster_shockroach",
 						pev->origin + gpGlobals->v_forward * 10, angles, edict(), keys);

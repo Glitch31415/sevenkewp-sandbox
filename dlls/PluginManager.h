@@ -5,20 +5,22 @@
 #include "const.h"
 
 struct Plugin {
-	std::string fpath;
-	void* h_module; // handle to the library
 	HLCOOP_PLUGIN_HOOKS hooks;
+	const char* name; // must be unique. Each plugin defines this
+	void* h_module; // handle to the library
 	bool isMapPlugin;
+	int id; // unique per server instance
 	int sortId; // not unique
+	std::string fpath;
 };
 
 typedef void(*ENTITYINIT)(struct entvars_s*);
 
 #define CALL_HOOKS_VOID(...) \
-	if (g_pluginManager.CallHooks(__VA_ARGS__).code & HOOKBIT_OVERRIDE) { return; }
+	if (g_pluginManager.CallHooks(&HLCOOP_PLUGIN_HOOKS::__VA_ARGS__).code & HOOKBIT_OVERRIDE) { return; }
 
 #define CALL_HOOKS(type, ...) { \
-	HOOK_RETURN_DATA ret = g_pluginManager.CallHooks(__VA_ARGS__); \
+	HOOK_RETURN_DATA ret = g_pluginManager.CallHooks(&HLCOOP_PLUGIN_HOOKS::__VA_ARGS__); \
 	if (ret.code & HOOKBIT_OVERRIDE) { \
 		return (type)ret.data; \
 	} \
@@ -36,6 +38,8 @@ public:
 
 	void RemovePlugin(const Plugin& plugin);
 
+	void RemovePlugin(const char* name);
+
 	void RemovePlugins(bool mapPluginsOnly);
 
 	// will conditionally load/unload plugins if the config has been updated since the last call, unless forceUpdate=true
@@ -46,6 +50,8 @@ public:
 
 	// print loaded server and map plugins to console or client
 	void ListPlugins(edict_t* plr);
+
+	Plugin* FindPlugin(int id);
 
 	template<typename Func, typename... Args>
 	HOOK_RETURN_DATA CallHooks(Func hookFunction, Args&&... args) {
@@ -60,7 +66,7 @@ public:
 			
 			if (ret.code & HOOKBIT_OVERRIDE) {
 				if (totalRet.code & HOOKBIT_OVERRIDE) {
-					ALERT(at_console, "Multiple plugins want to override a function return value\n");
+					ALERT(at_console, "%s", "Multiple plugins want to override a function return value\n");
 				}
 				totalRet.code |= HOOKBIT_OVERRIDE;
 				totalRet.data = ret.data;

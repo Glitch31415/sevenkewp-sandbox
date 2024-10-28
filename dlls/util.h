@@ -29,47 +29,33 @@
 #include <vector>
 #include <string>
 #include "game.h"
-#include <map>
 #include <unordered_map>
-#include <set>
+#include <unordered_set>
 #include <string>
-#include "Bsp.h"
 #include "mstream.h"
 #include <float.h>
 #include "mod_api.h"
 #include "shared_util.h"
 #include "studio.h"
+#include "debug.h"
+#include "eng_wrappers.h"
+#include "wav.h"
 
 class CBasePlayer;
 
-inline void MESSAGE_BEGIN( int msg_dest, int msg_type, const float *pOrigin, entvars_t *ent );  // implementation later in this file
-
-struct WavInfo {
-	int durationMillis;
-	bool isLooped; // sound is looped with cue points
-};
-
 extern EXPORT globalvars_t				*gpGlobals;
 
-// resources that were successfully precached
-extern std::map<std::string, std::string> g_precachedModels; // storing values so GET_MODEL can be used with MAKE_STRING
-extern std::set<std::string> g_missingModels; // storing values so GET_MODEL can be used with MAKE_STRING
-extern std::set<std::string> g_precachedSounds;
-extern std::set<std::string> g_precachedGeneric;
-extern std::map<std::string, int> g_precachedEvents;
-
-// resources that attempted to precache but may have been replaced with a failure model
-extern std::set<std::string> g_tryPrecacheModels;
-extern std::set<std::string> g_tryPrecacheSounds;
-extern std::set<std::string> g_tryPrecacheGeneric;
-extern std::set<std::string> g_tryPrecacheEvents;
-
-extern std::map<std::string, WavInfo> g_wavInfos; // cached wav info, cleared on map change
-
-extern std::set<std::string> g_weaponClassnames;
+extern std::unordered_set<std::string> g_weaponClassnames;
 
 extern int g_serveractive; // 1 if ServerActivate was called (no longer safe to precache)
 extern int g_edictsinit; // 1 if all edicts were allocated so that relocations can begin
+
+extern std::unordered_map<std::string, int> g_admins;
+
+extern std::string g_mp3Command; // current global mp3 command
+
+extern TYPEDESCRIPTION	gEntvarsDescription[];
+extern const int ENTVARS_COUNT;
 
 #define NOT_PRECACHED_MODEL "models/" MOD_MODEL_FOLDER "not_precached.mdl"
 #define MERGED_ITEMS_MODEL "models/" MOD_MODEL_FOLDER "w_items_v2.mdl"
@@ -78,6 +64,12 @@ extern int g_edictsinit; // 1 if all edicts were allocated so that relocations c
 #define MAX_PRECACHE_SOUND 511
 #define MAX_PRECACHE_MODEL 510
 #define MAX_PRECACHE_EVENT 256
+
+enum AdminLevel {
+	ADMIN_NO,
+	ADMIN_YES,
+	ADMIN_OWNER
+};
 
 enum merged_item_bodies {
 	MERGE_MDL_W_9MMAR,
@@ -117,10 +109,6 @@ enum merged_item_bodies {
 	MERGE_MDL_SPORE,
 	MERGE_MDL_SHOCK_EFFECT,
 };
-
-extern Bsp g_bsp;
-
-extern std::string g_mp3Command; // current global mp3 command
 
 struct RGBA {
 	uint8_t r, g, b, a;
@@ -316,8 +304,9 @@ EXPORT CBaseEntity	*UTIL_FindEntityGeneric(const char *szName, Vector &vecSrc, f
 // returns a CBaseEntity pointer to a player by index.  Only returns if the player is spawned and connected
 // otherwise returns NULL
 // Index is 1 based
-extern CBasePlayer	*UTIL_PlayerByIndex( int playerIndex );
-extern CBasePlayer	*UTIL_PlayerByUserId( int userid );
+EXPORT extern CBasePlayer	*UTIL_PlayerByIndex( int playerIndex );
+EXPORT extern CBasePlayer	*UTIL_PlayerByUserId( int userid );
+EXPORT extern CBasePlayer	*UTIL_PlayerByUniqueId(const char* id);
 
 #define UTIL_EntitiesInPVS(pent)			(*g_engfuncs.pfnEntitiesInPVS)(pent)
 EXPORT edict_t*		UTIL_ClientsInPVS(edict_t* edict, int& playerCount);
@@ -402,7 +391,7 @@ EXPORT void			UTIL_Bubbles( Vector mins, Vector maxs, int count );
 EXPORT void			UTIL_BubbleTrail( Vector from, Vector to, int count );
 
 // allows precacheing of other entities
-EXPORT void			UTIL_PrecacheOther( const char *szClassname, std::map<std::string, std::string> keys=std::map<std::string, std::string>() );
+EXPORT void			UTIL_PrecacheOther( const char *szClassname, std::unordered_map<std::string, std::string> keys=std::unordered_map<std::string, std::string>() );
 
 // prints a message to each client
 EXPORT void			UTIL_ClientPrintAll( int msg_dest, const char *msg);
@@ -420,7 +409,7 @@ EXPORT void UTIL_ClientPrint(edict_t* client, int msg_dest, const char *msg );
 
 // prints a message to the HUD say (chat)
 EXPORT void			UTIL_SayText( const char *pText, CBaseEntity *pEntity );
-EXPORT void			UTIL_SayTextAll( const char *pText, CBaseEntity *pEntity );
+EXPORT void			UTIL_SayTextAll( const char *pText, CBaseEntity *pEntity=NULL );
 
 
 typedef struct hudtextparms_s
@@ -460,20 +449,7 @@ EXPORT void SetMovedir(entvars_t* pev);
 EXPORT Vector VecBModelOrigin( entvars_t* pevBModel );
 EXPORT int BuildChangeList( LEVELLIST *pLevelList, int maxList );
 
-//
-// How did I ever live without ASSERT?
-//
-#ifdef	DEBUG
-void DBG_AssertFunction(BOOL fExpr, const char* szExpr, const char* szFile, int szLine, const char* szMessage);
-#define ASSERT(f)		DBG_AssertFunction(f, #f, __FILE__, __LINE__, NULL)
-#define ASSERTSZ(f, sz)	DBG_AssertFunction(f, #f, __FILE__, __LINE__, sz)
-#else	// !DEBUG
-#define ASSERT(f)
-#define ASSERTSZ(f, sz)
-#endif	// !DEBUG
-
-
-extern DLL_GLOBAL const Vector g_vecZero;
+EXPORT extern const Vector g_vecZero;
 
 //
 // Constants that were used only by QC (maybe not used at all now)
@@ -741,60 +717,6 @@ EXPORT float UTIL_SharedRandomFloat( unsigned int seed, float low, float high );
 
 EXPORT float UTIL_WeaponTimeBase( void );
 
-#ifdef CLIENT_DLL
-#define PRECACHE_MODEL	(*g_engfuncs.pfnPrecacheModel)
-#define SET_MODEL		(*g_engfuncs.pfnSetModel)
-#define PRECACHE_SOUND	(*g_engfuncs.pfnPrecacheSound)
-#define PRECACHE_EVENT	(*g_engfuncs.pfnPrecacheEvent)
-#define MODEL_INDEX		(*g_engfuncs.pfnModelIndex)
-#define GET_MODEL(model) model
-inline void MESSAGE_BEGIN(int msg_dest, int msg_type, const float* pOrigin = NULL, edict_t* ed = NULL) {
-	(*g_engfuncs.pfnMessageBegin)(msg_dest, msg_type, pOrigin, ed);
-}
-#define MESSAGE_END		(*g_engfuncs.pfnMessageEnd)
-#define WRITE_BYTE		(*g_engfuncs.pfnWriteByte)
-#define WRITE_CHAR		(*g_engfuncs.pfnWriteChar)
-#define WRITE_SHORT		(*g_engfuncs.pfnWriteShort)
-#define WRITE_LONG		(*g_engfuncs.pfnWriteLong)
-#define WRITE_ANGLE		(*g_engfuncs.pfnWriteAngle)
-#define WRITE_COORD		(*g_engfuncs.pfnWriteCoord)
-#define WRITE_STRING	(*g_engfuncs.pfnWriteString)
-#define WRITE_ENTITY	(*g_engfuncs.pfnWriteEntity)
-#define GET_MODEL_PTR	(*g_engfuncs.pfnGetModelPtr)
-#define CREATE_NAMED_ENTITY		(*g_engfuncs.pfnCreateNamedEntity)
-#else
-// engine wrappers which handle model/sound replacement logic
-EXPORT int PRECACHE_GENERIC(const char* path);
-EXPORT int PRECACHE_SOUND_ENT(CBaseEntity* ent, const char* path);
-EXPORT int PRECACHE_SOUND_NULLENT(const char* path);
-EXPORT int PRECACHE_MODEL(const char* model);
-EXPORT int PRECACHE_REPLACEMENT_MODEL(const char* model); // only precache the model if it will be replaced
-EXPORT int PRECACHE_EVENT(int id, const char* path);
-EXPORT bool SET_MODEL(edict_t* edict, const char* model); // returns true if the given model was swapped with something else
-EXPORT bool SET_MODEL_MERGED(edict_t* edict, const char* model, int mergeId); // will set the merged model and body if the given model was not replaced
-EXPORT const char* GET_MODEL(const char* model); // return replacement model, if one exists, or the given model
-EXPORT int MODEL_INDEX(const char* model);
-EXPORT void* GET_MODEL_PTR(edict_t* edict);
-EXPORT edict_t* CREATE_NAMED_ENTITY(string_t cname);
-#define PRECACHE_SOUND(path) PRECACHE_SOUND_ENT(this, path)
-
-EXPORT void PRECACHE_DETAIL_TEXTURES();
-
-// called automatically for custom weapons during registration
-EXPORT void PRECACHE_HUD_FILES(const char* path);
-
-EXPORT void MESSAGE_BEGIN(int msg_dest, int msg_type, const float* pOrigin = NULL, edict_t* ed = NULL);
-EXPORT void MESSAGE_END();
-EXPORT void WRITE_BYTE(int iValue);
-EXPORT void WRITE_CHAR(int iValue);
-EXPORT void WRITE_SHORT(int iValue);
-EXPORT void WRITE_LONG(int iValue);
-EXPORT void WRITE_ANGLE(float fValue);
-EXPORT void WRITE_COORD(float iValue);
-EXPORT void WRITE_STRING(const char* sValue);
-EXPORT void WRITE_ENTITY(int iValue);
-#endif
-
 EXPORT void InitEdictRelocations();
 EXPORT void PrintEntindexStats();
 EXPORT CBaseEntity* RelocateEntIdx(CBaseEntity* pEntity);
@@ -808,12 +730,6 @@ inline void WRITE_COORD_VECTOR(const Vector& vec)
 	WRITE_COORD(vec.y);
 	WRITE_COORD(vec.z);
 }
-
-// write the most recent X seconds of message history for debugging client disconnects 
-// due to malformed network messages.
-// reason = reason for writing the message history
-EXPORT void writeNetworkMessageHistory(std::string reason);
-EXPORT void clearNetworkMessageHistory();
 
 EXPORT std::vector<std::string> splitString(std::string str, const char* delimitters);
 
@@ -844,11 +760,9 @@ EXPORT std::string getGameFilePath(const char* path);
 
 // loads a global model/sound replacement file
 // format: "file_path" "replacement_file_path"
-EXPORT std::map<std::string, std::string> loadReplacementFile(const char* path);
+EXPORT std::unordered_map<std::string, std::string> loadReplacementFile(const char* path);
 
 EXPORT void te_debug_beam(Vector start, Vector end, uint8_t life, RGBA c, int msgType=MSG_BROADCAST, edict_t* dest=NULL);
-
-EXPORT WavInfo getWaveFileInfo(const char* path);
 
 //
 // BModelOrigin - calculates origin of a bmodel from absmin/size because all bmodel origins are 0 0 0
@@ -857,13 +771,25 @@ EXPORT Vector VecBModelOrigin(entvars_t* pevBModel);
 
 EXPORT void PlayCDTrack(int iTrack);
 
-// same as the STRING macro but defined as a function for easy calling in the debugger
-const char* cstr(string_t s);
-
 // strips unsafe chars from value to prevent sneaky stuff like "sv_gravity 800;rcon_password lololol"
-std::string sanitize_cvar_value(std::string val);
+EXPORT std::string sanitize_cvar_value(std::string val);
 
-const char* getActiveWeapon(entvars_t* pev);
+EXPORT const char* getActiveWeapon(entvars_t* pev);
 
-// for debugging
-bool ModelIsValid(entvars_t* edict, studiohdr_t* header);
+EXPORT const char* getPlayerUniqueId(edict_t* plr);
+
+EXPORT uint64_t steamid_to_steamid64(const char* steamid);
+
+EXPORT std::string steamid64_to_steamid(uint64_t steam64);
+
+EXPORT uint64_t getPlayerCommunityId(edict_t* plr);
+
+EXPORT void LoadAdminList(bool forceUpdate=false); // call on each map change, so AdminLevel can work
+
+EXPORT int AdminLevel(edict_t* player);
+
+EXPORT uint64_t getEpochMillis();
+
+EXPORT double TimeDifference(uint64_t start, uint64_t end);
+
+EXPORT std::vector<std::string> getDirFiles(std::string path, std::string extension, std::string startswith, bool onlyOne);

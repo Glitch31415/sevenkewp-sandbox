@@ -59,7 +59,8 @@ cvar_t	mp_edictsorting ={"mp_edictsorting","1", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_shitcode ={"mp_shitcode","0", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_mergemodels ={"mp_mergemodels","0", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_killfeed ={"mp_killfeed","1", FCVAR_SERVER, 0, 0 };
-cvar_t	pluginlist ={"pluginlist","plugins.txt", FCVAR_SERVER, 0, 0 };
+cvar_t	pluginlistfile ={"pluginlistfile","plugins.txt", FCVAR_SERVER, 0, 0 };
+cvar_t	adminlistfile ={"adminlistfile","admins.txt", FCVAR_SERVER, 0, 0 };
 
 cvar_t	soundvariety={"mp_soundvariety","0", FCVAR_SERVER, 0, 0 };
 
@@ -86,17 +87,17 @@ cvar_t	*sv_lowercase = NULL;
 
 // END Cvars for Skill Level settings
 
-std::map<std::string, std::string> g_modelReplacementsMod;
-std::map<std::string, std::string> g_modelReplacementsMap;
-std::map<std::string, std::string> g_modelReplacements;
+std::unordered_map<std::string, std::string> g_modelReplacementsMod;
+std::unordered_map<std::string, std::string> g_modelReplacementsMap;
+std::unordered_map<std::string, std::string> g_modelReplacements;
 
-std::map<std::string, std::string> g_soundReplacementsMod;
-std::map<std::string, std::string> g_soundReplacementsMap;
-std::map<std::string, std::string> g_soundReplacements;
+std::unordered_map<std::string, std::string> g_soundReplacementsMod;
+std::unordered_map<std::string, std::string> g_soundReplacementsMap;
+std::unordered_map<std::string, std::string> g_soundReplacements;
 
-std::set<std::string> g_mapWeapons;
+std::unordered_set<std::string> g_mapWeapons;
 
-std::map<std::string, const char*> g_itemNameRemap = {
+std::unordered_map<std::string, const char*> g_itemNameRemap = {
 	{"weapon_9mmar", "weapon_9mmAR"},
 	{"weapon_mp5", "weapon_9mmAR"},
 	{"weapon_uzi", "weapon_9mmAR"},
@@ -152,7 +153,7 @@ void dump_missing_files() {
 
 	std::vector<std::string> resList;
 
-	std::set<std::string> allPrecacheFiles;
+	std::unordered_set<std::string> allPrecacheFiles;
 	allPrecacheFiles.insert(g_tryPrecacheModels.begin(), g_tryPrecacheModels.end());
 	allPrecacheFiles.insert(g_missingModels.begin(), g_missingModels.end());
 	allPrecacheFiles.insert(g_tryPrecacheGeneric.begin(), g_tryPrecacheGeneric.end());
@@ -211,6 +212,14 @@ void list_plugins() {
 	g_pluginManager.ListPlugins(NULL);
 }
 
+void remove_plugin() {
+	if (CMD_ARGC() < 2) {
+		return;
+	}
+
+	g_pluginManager.RemovePlugin(CMD_ARGV(1));
+}
+
 void test_command() {
 }
 
@@ -229,6 +238,7 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("edicts", PrintEntindexStats);
 	g_engfuncs.pfnAddServerCommand("reloadplugins", reload_plugins);
 	g_engfuncs.pfnAddServerCommand("listplugins", list_plugins);
+	g_engfuncs.pfnAddServerCommand("removeplugin", remove_plugin);
 	// Register cvars here:
 
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
@@ -281,7 +291,8 @@ void GameDLLInit( void )
 	CVAR_REGISTER (&mp_shitcode);
 	CVAR_REGISTER (&mp_mergemodels);
 	CVAR_REGISTER (&mp_killfeed);
-	CVAR_REGISTER (&pluginlist);
+	CVAR_REGISTER (&pluginlistfile);
+	CVAR_REGISTER (&adminlistfile);
 
 	CVAR_REGISTER (&mp_chattime);
 
