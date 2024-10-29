@@ -4558,6 +4558,7 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		if (pev->frags < -1000) {
 			pev->frags = -1000;
 		}
+		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f\n", pev->frags));
 	}
 
 	// do the damage
@@ -4702,7 +4703,7 @@ void CBaseMonster::GiveScorePoints(entvars_t* pevAttacker, float damageDealt) {
 		if (pevAttacker->frags > 1000) {
 			pevAttacker->frags = 1000;
 		}
-		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", pevAttacker->frags));
+		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f\n", pevAttacker->frags));
 
 		LogPlayerDamage(pevAttacker, damageDealt);
 	}
