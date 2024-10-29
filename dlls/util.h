@@ -34,7 +34,7 @@
 #include <string>
 #include "mstream.h"
 #include <float.h>
-#include "mod_api.h"
+#include "PluginHooks.h"
 #include "shared_util.h"
 #include "studio.h"
 #include "debug.h"
@@ -69,6 +69,13 @@ enum AdminLevel {
 	ADMIN_NO,
 	ADMIN_YES,
 	ADMIN_OWNER
+};
+
+enum distant_sound_types {
+	DISTANT_9MM, // light tapping noise
+	DISTANT_357, // deeper tap
+	DISTANT_556, // deep tap / small explosion
+	DISTANT_BOOM // big explosion
 };
 
 enum merged_item_bodies {
@@ -793,3 +800,7 @@ EXPORT uint64_t getEpochMillis();
 EXPORT double TimeDifference(uint64_t start, uint64_t end);
 
 EXPORT std::vector<std::string> getDirFiles(std::string path, std::string extension, std::string startswith, bool onlyOne);
+
+EXPORT short FixedSigned16(float value, float scale);
+
+EXPORT unsigned short FixedUnsigned16(float value, float scale);

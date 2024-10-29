@@ -426,6 +426,8 @@ set(UTIL_HDR
 	vector.h
 	Scheduler.h
 	TextMenu.h
+	ThreadSafeInt.h
+	ThreadSafeQueue.h
 	wav.h
 	../game_shared/shared_util.h
 )
@@ -444,6 +446,8 @@ set(UTIL_SRC
 	saverestore.cpp
 	Scheduler.cpp
 	TextMenu.cpp
+	ThreadSafeInt.cpp
+	ThreadSafeQueue.cpp
 	wav.cpp
 	../pm_shared/pm_debug.cpp
 	../pm_shared/pm_math.cpp
@@ -460,7 +464,6 @@ set(GAME_HDR
 	skill.h
 	teamplay_gamerules.h
 	user_messages.h
-	mod_api.h
 	PluginHooks.h
 	PluginManager.h
 )
@@ -477,7 +480,6 @@ set(GAME_SRC
 	teamplay_gamerules.cpp
 	user_messages.cpp
 	../game_shared/voice_gamemgr.cpp
-	mod_api.cpp
 	PluginManager.cpp
 )
 
