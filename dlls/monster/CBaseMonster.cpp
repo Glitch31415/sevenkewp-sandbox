@@ -4545,18 +4545,27 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	if (flTake > 2520) { // maximum damage from a double shotgun headshot
 		flTake = 2520;
 	}
+	if (flTake < 0) {
+		flTake = 0;
+	}
+
 	if (pevAttacker != pev) {
 		GiveScorePoints(pevAttacker, flTake);
 	}
 	pev->frags -= flTake/100;
+	if (std::isnan(pev->frags) || pev->frags < -30000) {
+		pev->frags = -30000;
+	}
+
 	if (V_min(pev->max_health, pev->health - flTake) <= 0) {
 		// double score changes if kill
 		if (pevAttacker != pev) {
 			GiveScorePoints(pevAttacker, flTake);
 		}
 		pev->frags -= flTake/100;
-		if (std::isnan(pev->frags)) {
-			pev->frags = -99999;
+		
+		if (std::isnan(pev->frags) || pev->frags < -30000) {
+			pev->frags = -30000;
 		}
 		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f\n", pev->frags));
 	}
@@ -4700,8 +4709,8 @@ void CBaseMonster::GiveScorePoints(entvars_t* pevAttacker, float damageDealt) {
 		// float damageAmt = damageDealt > 0 ? V_min(damageDealt, pev->health) : V_min(damageDealt, pev->max_health - pev->health);
 		// bool isFriendly = attackMon->IRelationship(this) == R_AL;
 		pevAttacker->frags += damageDealt * 1 * MONSTER_POINTS_PER_HP;
-		if (std::isnan(pevAttacker->frags)) {
-			pevAttacker->frags = 99999;
+		if (std::isnan(pevAttacker->frags) || pevAttacker->frags > 30000) {
+			pevAttacker->frags = 30000;
 		}
 		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f\n", pevAttacker->frags));
 
