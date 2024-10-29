@@ -4702,7 +4702,7 @@ void CBaseMonster::GiveScorePoints(entvars_t* pevAttacker, float damageDealt) {
 		if (pevAttacker->frags > 1000) {
 			pevAttacker->frags = 1000;
 		}
-		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", frags));
+		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", pevAttacker->frags));
 
 		LogPlayerDamage(pevAttacker, damageDealt);
 	}
