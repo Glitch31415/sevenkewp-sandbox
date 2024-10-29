@@ -108,7 +108,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				if (flAdjustedDamage > 2*flDamage) {
 					flAdjustedDamage = 2*flDamage;
 				}
-				if (std:isnan(flAdjustedDamage)) {
+				if (std::isnan(flAdjustedDamage)) {
 					flAdjustedDamage = 2*flDamage;
 				}
 			
