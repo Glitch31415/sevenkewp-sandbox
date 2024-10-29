@@ -4548,7 +4548,7 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	if (flTake < 0) {
 		flTake = 0;
 	}
-
+	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f\n", flTake));
 	if (pevAttacker != pev) {
 		GiveScorePoints(pevAttacker, flTake);
 	}
@@ -4563,11 +4563,9 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 			GiveScorePoints(pevAttacker, flTake);
 		}
 		pev->frags -= flTake/100;
-		
 		if (std::isnan(pev->frags) || pev->frags < -30000) {
 			pev->frags = -30000;
 		}
-		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f\n", pev->frags));
 	}
 
 	// do the damage
@@ -4708,12 +4706,11 @@ void CBaseMonster::GiveScorePoints(entvars_t* pevAttacker, float damageDealt) {
 		const float MONSTER_POINTS_PER_HP = 0.01f; // how many points to give per hitpoint of damage dealt
 		// float damageAmt = damageDealt > 0 ? V_min(damageDealt, pev->health) : V_min(damageDealt, pev->max_health - pev->health);
 		// bool isFriendly = attackMon->IRelationship(this) == R_AL;
+		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f\n", damageDealt));
 		pevAttacker->frags += damageDealt * 1 * MONSTER_POINTS_PER_HP;
 		if (std::isnan(pevAttacker->frags) || pevAttacker->frags > 30000) {
 			pevAttacker->frags = 30000;
 		}
-		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f\n", pevAttacker->frags));
-
 		LogPlayerDamage(pevAttacker, damageDealt);
 	}
 }
