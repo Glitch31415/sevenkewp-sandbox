@@ -4555,6 +4555,9 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 			GiveScorePoints(pevAttacker, flTake);
 		}
 		pev->frags -= flTake/100;
+		if (pev->frags < -1000) {
+			pev->frags = -1000;
+		}
 	}
 
 	// do the damage
@@ -4696,6 +4699,9 @@ void CBaseMonster::GiveScorePoints(entvars_t* pevAttacker, float damageDealt) {
 		// float damageAmt = damageDealt > 0 ? V_min(damageDealt, pev->health) : V_min(damageDealt, pev->max_health - pev->health);
 		// bool isFriendly = attackMon->IRelationship(this) == R_AL;
 		pevAttacker->frags += damageDealt * 1 * MONSTER_POINTS_PER_HP;
+		if (pevAttacker->frags > 1000) {
+			pevAttacker->frags = 1000;
+		}
 
 		LogPlayerDamage(pevAttacker, damageDealt);
 	}
