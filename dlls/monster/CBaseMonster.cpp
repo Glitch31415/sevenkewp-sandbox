@@ -4540,9 +4540,11 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	// if this is a player, move him around!
 	if ((!FNullEnt(pevInflictor)) && (pev->movetype == MOVETYPE_WALK) && (!pevAttacker || pevAttacker->solid != SOLID_TRIGGER))
 	{
-		pev->velocity = pev->velocity + vecDir * -DamageForce(flDamage);
+		//pev->velocity = pev->velocity + vecDir * -DamageForce(flDamage);
 	}
-
+	if (flTake > 2520) { // maximum damage from a double shotgun headshot
+		flTake = 2520;
+	}
 	if (pevAttacker != pev) {
 		GiveScorePoints(pevAttacker, flTake);
 	}
