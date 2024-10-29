@@ -382,7 +382,7 @@ void CISlave :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			// speed up attack when on hard
 			if (g_iSkillLevel == SKILL_HARD)
 				pev->framerate = 1.5;
-			pev->framerate = 2.5; // these guys needed a buff
+			//pev->framerate = 2.5;  these guys needed a buff
 			UTIL_MakeAimVectors( pev->angles );
 
 			if (m_iBeams == 0)
