@@ -90,7 +90,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 					distance = (((((-100) * distance) / drf) / distance) + 1) + distance;
 				}
 				else {
-					distance = (((((-1 * distance) / 10) / (drf - 200)) * distance) - ((distance^2.0)/1000)) + distance;
+					distance = (((((-1 * distance) / 10) / (drf - 200)) * distance) - ((pow(distance, 2))/1000)) + distance;
 				}
 				flAdjustedDamage = (flDamage/(distance * 0.00318198051534)) - (distance * 0.00795495128835);
 				//flAdjustedDamage = flDamage - flAdjustedDamage;
