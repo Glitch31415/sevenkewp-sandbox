@@ -63,7 +63,7 @@ float CGauss::GetFullChargeTime( void )
 	if ( g_pGameRules->IsMultiplayer() )
 #endif
 	{
-		return 1.5;
+		return 4;
 	}
 
 	return 4;
@@ -263,7 +263,7 @@ void CGauss::SecondaryAttack()
 #endif
 			{
 				m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
-				m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase() + 0.1;
+				m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase() + 0.3;
 			}
 			else
 			{
@@ -515,7 +515,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 				fHasPunched = 1;
 
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
-				if ( !m_fPrimaryFire )
+				if ( 1 == 1 )
 				{
 					UTIL_TraceLine( tr.vecEndPos + vecDir * 8, vecDest, dont_ignore_monsters, pentIgnore, &beam_tr);
 					if (!beam_tr.fAllSolid)
