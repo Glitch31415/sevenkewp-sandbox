@@ -895,6 +895,8 @@ void StartFrame( void )
 	lagcomp_update();
 
 	g_Scheduler.Think();
+
+	handleThreadPrints();
 }
 
 
