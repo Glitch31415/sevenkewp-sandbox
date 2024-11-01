@@ -84,6 +84,7 @@ public:
 	BOOL	m_fGunDrawn;
 	float	m_painTime;
 	float	m_checkAttackTime;
+	float   m_timefinishcheck;
 	BOOL	m_lastAttackCheck;
 
 	// UNDONE: What is this for?  It isn't used?
