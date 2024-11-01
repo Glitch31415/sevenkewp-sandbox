@@ -340,7 +340,7 @@ Task_t	tlOtisEnemyDraw[] =
 	{ TASK_STOP_MOVING,					0				},
 	{ TASK_FACE_ENEMY,					0				},
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,	(float) ACT_ARM },
-	{ TASK_WAIT_FACE_ENEMY,             (float) reactiontim },
+	{ TASK_WAIT_FACE_ENEMY,             10 },
 };
 
 Schedule_t slOtisEnemyDraw[] = 
