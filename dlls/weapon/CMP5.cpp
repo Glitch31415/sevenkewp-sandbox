@@ -136,12 +136,12 @@ void CMP5::PrimaryAttack()
 		return;
 
 	// don't fire underwater
-	if (m_pPlayer->pev->waterlevel == 3)
-	{
-		PlayEmptySound( );
-		m_flNextPrimaryAttack = 0.15;
-		return;
-	}
+	//if (m_pPlayer->pev->waterlevel == 3)
+	//{
+		//PlayEmptySound( );
+		//m_flNextPrimaryAttack = 0.15;
+		//return;
+	//}
 
 	if (m_iClip <= 0)
 	{
@@ -216,12 +216,12 @@ void CMP5::SecondaryAttack( void )
 		return;
 
 	// don't fire underwater
-	if (m_pPlayer->pev->waterlevel == 3)
-	{
-		PlayEmptySound( );
-		m_flNextPrimaryAttack = 0.15;
-		return;
-	}
+	//if (m_pPlayer->pev->waterlevel == 3)
+	//{
+		//PlayEmptySound( );
+		//m_flNextPrimaryAttack = 0.15;
+		//return;
+	//}
 
 	if (m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] == 0)
 	{

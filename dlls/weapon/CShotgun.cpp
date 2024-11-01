@@ -129,12 +129,12 @@ void CShotgun::PrimaryAttack()
 		return;
 
 	// don't fire underwater
-	if (m_pPlayer->pev->waterlevel == 3)
-	{
-		PlayEmptySound( );
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
-		return;
-	}
+	//if (m_pPlayer->pev->waterlevel == 3)
+	//{
+		//PlayEmptySound( );
+		//m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
+		//return;
+	//}
 
 	if (m_iClip <= 0)
 	{
@@ -212,12 +212,12 @@ void CShotgun::SecondaryAttack( void )
 		return;
 
 	// don't fire underwater
-	if (m_pPlayer->pev->waterlevel == 3)
-	{
-		PlayEmptySound( );
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
-		return;
-	}
+	//if (m_pPlayer->pev->waterlevel == 3)
+	//{
+		//PlayEmptySound( );
+		//m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
+		//return;
+	//}
 
 	if (m_iClip <= 1)
 	{

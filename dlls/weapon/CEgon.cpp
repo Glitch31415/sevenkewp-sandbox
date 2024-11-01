@@ -190,20 +190,20 @@ void CEgon::Attack( void )
 		return;
 
 	// don't fire underwater
-	if ( m_pPlayer->pev->waterlevel == 3 )
-	{
-		CBeam* beam = (CBeam*)m_hBeam.GetEntity();
+	//if ( m_pPlayer->pev->waterlevel == 3 )
+	//{
+		//CBeam* beam = (CBeam*)m_hBeam.GetEntity();
 
-		if ( m_fireState != FIRE_OFF || beam)
-		{
-			EndAttack();
-		}
-		else
-		{
-			PlayEmptySound( );
-		}
-		return;
-	}
+		//if ( m_fireState != FIRE_OFF || beam)
+		//{
+			//EndAttack();
+		//}
+		//else
+		//{
+			//PlayEmptySound( );
+		//}
+		//return;
+	//}
 
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 	Vector vecAiming = gpGlobals->v_forward;

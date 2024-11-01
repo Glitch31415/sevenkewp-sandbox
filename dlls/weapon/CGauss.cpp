@@ -163,12 +163,12 @@ void CGauss::PrimaryAttack()
 		return;
 
 	// don't fire underwater
-	if ( m_pPlayer->pev->waterlevel == 3 )
-	{
-		PlayEmptySound( );
-		m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
-		return;
-	}
+	//if ( m_pPlayer->pev->waterlevel == 3 )
+	//{
+		//PlayEmptySound( );
+		//m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
+		//return;
+	//}
 
 	if ( m_pPlayer->m_rgAmmo[ m_iPrimaryAmmoType ] < 2 )
 	{
@@ -199,22 +199,22 @@ void CGauss::SecondaryAttack()
 	m_pPlayer->m_flStartCharge = V_min(m_pPlayer->m_flStartCharge, gpGlobals->time);
 
 	// don't fire underwater
-	if ( m_pPlayer->pev->waterlevel == 3 )
-	{
-		if ( m_fInAttack != 0 )
-		{
-			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/electro4.wav", 1.0, ATTN_NORM, 0, 80 + RANDOM_LONG(0,0x3f));
-			SendWeaponAnim( GAUSS_IDLE );
-			m_fInAttack = 0;
-		}
-		else
-		{
-			PlayEmptySound( );
-		}
+	//if ( m_pPlayer->pev->waterlevel == 3 )
+	//{
+		//if ( m_fInAttack != 0 )
+		//{
+			//EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/electro4.wav", 1.0, ATTN_NORM, 0, 80 + RANDOM_LONG(0,0x3f));
+			//SendWeaponAnim( GAUSS_IDLE );
+			//m_fInAttack = 0;
+		//}
+		//else
+		//{
+			//PlayEmptySound( );
+		//}
 
-		m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
-		return;
-	}
+		//m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
+		//return;
+	//}
 
 	if ( m_fInAttack == 0 )
 	{
