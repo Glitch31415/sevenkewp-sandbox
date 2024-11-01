@@ -340,6 +340,7 @@ Task_t	tlOtisEnemyDraw[] =
 	{ TASK_STOP_MOVING,					0				},
 	{ TASK_FACE_ENEMY,					0				},
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,	(float) ACT_ARM },
+	{ TASK_WAIT_FACE_ENEMY,             (float) reactiontim },
 };
 
 Schedule_t slOtisEnemyDraw[] = 
@@ -546,7 +547,8 @@ void COtis :: SetYawSpeed ( void )
 BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 {
 	distfactor = flDist / 2000;
-	if (flDot >= 0.5 )
+	reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+	if (flDot >= 0.5)
 	{
 		if ( gpGlobals->time > m_checkAttackTime )
 		{
@@ -582,8 +584,8 @@ BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 //=========================================================
 void COtis :: OtisFirePistol ( void )
 {
-	reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
-	if (gpGlobals->time >= (m_timefinishcheck+reactiontim)) {
+	//reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+	//if (gpGlobals->time >= (m_timefinishcheck+reactiontim)) {
 	Vector vecShootOrigin;
 
 	UTIL_MakeVectors(pev->angles);
@@ -609,7 +611,7 @@ void COtis :: OtisFirePistol ( void )
 
 	// UNDONE: Reload?
 	m_cAmmoLoaded--;// take away a bullet!
-	}
+	//}
 }
 		
 //=========================================================
