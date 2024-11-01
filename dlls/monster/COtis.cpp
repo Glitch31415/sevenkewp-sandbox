@@ -455,6 +455,18 @@ void COtis :: RunTask( Task_t *pTask )
 		}
 		CTalkSquadMonster::RunTask( pTask );
 		break;
+	case TASK_WAIT_FACE_ENEMY:
+		{
+			// need to override this to get the dynamic aiming time to work
+			MakeIdealYaw ( m_vecEnemyLKP );
+			ChangeYaw( pev->yaw_speed ); 
+
+			if ( gpGlobals->time >= m_flWaitFinished )
+			{
+				TaskComplete();
+			}
+			break;
+		}
 	default:
 		CTalkSquadMonster::RunTask( pTask );
 		break;
