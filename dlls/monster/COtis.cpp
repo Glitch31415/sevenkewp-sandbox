@@ -339,8 +339,8 @@ Task_t	tlOtisEnemyDraw[] =
 {
 	{ TASK_STOP_MOVING,					0				},
 	{ TASK_FACE_ENEMY,					0				},
-	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,	(float) ACT_ARM },
 	{ TASK_WAIT_FACE_ENEMY,             10 },
+	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,	(float) ACT_ARM },
 };
 
 Schedule_t slOtisEnemyDraw[] = 
@@ -448,20 +448,20 @@ void COtis :: RunTask( Task_t *pTask )
 {
 	switch ( pTask->iTask )
 	{
-	case TASK_RANGE_ATTACK1:
-		if (m_hEnemy != NULL && (m_hEnemy->IsPlayer()))
-		{
-			pev->framerate = 1.5;
-		}
-		CTalkSquadMonster::RunTask( pTask );
-		break;
+	//case TASK_RANGE_ATTACK1:
+		//if (m_hEnemy != NULL && (m_hEnemy->IsPlayer()))
+		//{
+			//pev->framerate = 1.5;
+		//}
+		//CTalkSquadMonster::RunTask( pTask );
+		//break;
 	case TASK_WAIT_FACE_ENEMY:
 		{
 			// need to override this to get the dynamic aiming time to work
-			MakeIdealYaw ( m_vecEnemyLKP );
-			ChangeYaw( pev->yaw_speed ); 
+			MakeIdealYaw(m_vecEnemyLKP);
+			ChangeYaw(pev->yaw_speed);
 
-			if ( gpGlobals->time >= m_flWaitFinished )
+			if (gpGlobals->time >= m_flWaitFinished)
 			{
 				TaskComplete();
 			}
