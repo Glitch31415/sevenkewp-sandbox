@@ -597,7 +597,7 @@ BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 void COtis :: OtisFirePistol ( void )
 {
 	//reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
-	//if (gpGlobals->time >= (m_timefinishcheck+reactiontim)) {
+	if (gpGlobals->time >= (m_timefinishcheck+reactiontim)) {
 	Vector vecShootOrigin;
 
 	UTIL_MakeVectors(pev->angles);
@@ -623,7 +623,7 @@ void COtis :: OtisFirePistol ( void )
 
 	// UNDONE: Reload?
 	m_cAmmoLoaded--;// take away a bullet!
-	//}
+	}
 }
 		
 //=========================================================
