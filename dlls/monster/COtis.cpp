@@ -119,6 +119,7 @@ public:
 	BOOL	m_fGunDrawn;
 	float	m_painTime;
 	float	m_checkAttackTime;
+	float   m_timefinishcheck;
 	BOOL	m_lastAttackCheck;
 
 	//These were originally used to store off the setting AND track state,
@@ -562,6 +563,7 @@ BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 			m_checkAttackTime = gpGlobals->time + 1;
 			if ( tr.flFraction == 1.0 || (tr.pHit != NULL && CBaseEntity::Instance(tr.pHit) == pEnemy) )
 				m_lastAttackCheck = TRUE;
+				m_timefinishcheck = gpGlobals->time;
 			else
 				m_lastAttackCheck = FALSE;
 			m_checkAttackTime = gpGlobals->time + 1.5;
@@ -578,6 +580,8 @@ BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 //=========================================================
 void COtis :: OtisFirePistol ( void )
 {
+	reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+	if (gpGlobals->time >= (m_timefinishcheck+reactiontim)) {
 	Vector vecShootOrigin;
 
 	UTIL_MakeVectors(pev->angles);
@@ -603,6 +607,7 @@ void COtis :: OtisFirePistol ( void )
 
 	// UNDONE: Reload?
 	m_cAmmoLoaded--;// take away a bullet!
+	}
 }
 		
 //=========================================================
