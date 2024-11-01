@@ -339,7 +339,6 @@ Task_t	tlOtisEnemyDraw[] =
 {
 	{ TASK_STOP_MOVING,					0				},
 	{ TASK_FACE_ENEMY,					0				},
-	{ TASK_WAIT_FACE_ENEMY,             10 },
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,	(float) ACT_ARM },
 };
 
@@ -448,25 +447,13 @@ void COtis :: RunTask( Task_t *pTask )
 {
 	switch ( pTask->iTask )
 	{
-	//case TASK_RANGE_ATTACK1:
-		//if (m_hEnemy != NULL && (m_hEnemy->IsPlayer()))
-		//{
-			//pev->framerate = 1.5;
-		//}
-		//CTalkSquadMonster::RunTask( pTask );
-		//break;
-	case TASK_WAIT_FACE_ENEMY:
+	case TASK_RANGE_ATTACK1:
+		if (m_hEnemy != NULL && (m_hEnemy->IsPlayer()))
 		{
-			// need to override this to get the dynamic aiming time to work
-			MakeIdealYaw(m_vecEnemyLKP);
-			ChangeYaw(pev->yaw_speed);
-
-			if (gpGlobals->time >= m_flWaitFinished)
-			{
-				TaskComplete();
-			}
-			break;
+			pev->framerate = 1.5;
 		}
+		CTalkSquadMonster::RunTask( pTask );
+		break;
 	default:
 		CTalkSquadMonster::RunTask( pTask );
 		break;
@@ -559,8 +546,7 @@ void COtis :: SetYawSpeed ( void )
 BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 {
 	distfactor = flDist / 2000;
-	reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
-	if (flDot >= 0.5)
+	if (flDot >= 0.5 )
 	{
 		if ( gpGlobals->time > m_checkAttackTime )
 		{
@@ -596,7 +582,7 @@ BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 //=========================================================
 void COtis :: OtisFirePistol ( void )
 {
-	//reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+	reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
 	if (gpGlobals->time >= (m_timefinishcheck+reactiontim)) {
 	Vector vecShootOrigin;
 
