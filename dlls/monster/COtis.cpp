@@ -561,11 +561,13 @@ BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 
 			UTIL_TraceLine( shootOrigin, shootTarget, dont_ignore_monsters, ENT(pev), &tr );
 			m_checkAttackTime = gpGlobals->time + 1;
-			if ( tr.flFraction == 1.0 || (tr.pHit != NULL && CBaseEntity::Instance(tr.pHit) == pEnemy) )
+			if ( tr.flFraction == 1.0 || (tr.pHit != NULL && CBaseEntity::Instance(tr.pHit) == pEnemy) ) {
 				m_lastAttackCheck = TRUE;
 				m_timefinishcheck = gpGlobals->time;
-			else
+			}
+			else {
 				m_lastAttackCheck = FALSE;
+			}
 			m_checkAttackTime = gpGlobals->time + 1.5;
 		}
 		return m_lastAttackCheck;
