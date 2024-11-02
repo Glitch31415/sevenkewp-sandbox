@@ -1277,7 +1277,7 @@ BOOL CHalfLifeMultiplay :: PlayFootstepSounds( CBasePlayer *pl, float fvol )
 	if ( g_footsteps && g_footsteps->value == 0 )
 		return FALSE;
 
-	if ( pl->IsOnLadder() || pl->pev->velocity.Length2D() > 22 )
+	if ( pl->IsOnLadder() || pl->pev->velocity.Length2D() > 40 )
 		return TRUE;  // only make step sounds in multiplayer if the player is moving fast enough
 
 	return FALSE;

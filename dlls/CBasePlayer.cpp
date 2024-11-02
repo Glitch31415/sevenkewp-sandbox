@@ -1201,7 +1201,6 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 
 	if ( FBitSet( pev->flags, FL_DUCKING ) )
 	{
-		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f\n", speed));
 		if ( speed == 0)
 		{
 			pev->gaitsequence	= LookupActivity( ACT_CROUCHIDLE );
