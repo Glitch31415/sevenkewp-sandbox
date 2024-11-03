@@ -1305,15 +1305,12 @@ WaterMove
 ============
 */
 
-int bci;
-float bciu;
-bci = 45;
-
 
 void CBasePlayer::WaterMove()
 {
 	int air;
-
+	int bci;
+	bci = pev->air_finished - gpGlobals->time;
 
 	if (pev->movetype == MOVETYPE_NOCLIP)
 		return;
@@ -1325,7 +1322,7 @@ void CBasePlayer::WaterMove()
 	// waterlevel 1 - feet in water
 	// waterlevel 2 - waist in water
 	// waterlevel 3 - head in water
-
+	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
 	if (pev->waterlevel != 3) 
 	{
 		// not underwater
@@ -1366,17 +1363,14 @@ void CBasePlayer::WaterMove()
 		m_bitsDamageType &= ~DMG_DROWNRECOVER;
 		m_rgbTimeBasedDamage[itbd_DrownRecover] = 0;
 
-		if (bciu < gpGlobals->time) {
+		if (pev->pain_finished < gpGlobals->time)
+		{
 			bci = bci - 1;
 			if (bci <= 0) {
 				bci = 0;
 				pev->air_finished = gpGlobals->time - 0.1; // start fucking drowning already
 			}
-			bciu = gpGlobals->time + 1;
-		}
-		if (pev->air_finished < gpGlobals->time)		// drown!
-		{
-			if (pev->pain_finished < gpGlobals->time)
+			if (pev->air_finished < gpGlobals->time)		// drown!
 			{
 				bci = 0;
 				// take drowning damage
@@ -1384,18 +1378,19 @@ void CBasePlayer::WaterMove()
 				//if (pev->dmg > 5)
 					//pev->dmg = 5;
 				TakeDamage(VARS(eoNullEntity), VARS(eoNullEntity), pev->dmg, DMG_DROWN);
-				pev->pain_finished = gpGlobals->time + 1;
+
 				
 				// track drowning damage, give it back when
 				// player finally takes a breath
 
 				m_idrowndmg += pev->dmg;
-			} 
-		}
-		else
-		{
-			m_bitsDamageType &= ~DMG_DROWN;
-		}
+			}
+			else
+			{
+				m_bitsDamageType &= ~DMG_DROWN;
+			}
+			pev->pain_finished = gpGlobals->time + 1;
+		} 
 	}
 
 	if (!pev->waterlevel)
