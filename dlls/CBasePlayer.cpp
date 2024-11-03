@@ -3235,8 +3235,6 @@ void CBasePlayer::Spawn( void )
 	pev->flags		   &= FL_PROXY;	// keep proxy flag sey by engine
 	pev->flags		   |= FL_CLIENT;
 	pev->air_finished	= gpGlobals->time + 45;
-	bci            = 45;
-	bciu           = gpGlobals->time;
 	pev->dmg			= 2;				// initial water damage
 	pev->effects		= 0;
 	pev->deadflag		= DEAD_NO;
