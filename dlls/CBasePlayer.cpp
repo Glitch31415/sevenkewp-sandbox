@@ -1304,8 +1304,7 @@ void CBasePlayer::ReleaseControlledObjects() {
 WaterMove
 ============
 */
-int bci = 45;
-double bciu = gpGlobals->time;
+
 
 void CBasePlayer::WaterMove()
 {
@@ -1332,11 +1331,11 @@ void CBasePlayer::WaterMove()
 		else if (pev->air_finished < gpGlobals->time + 15)
 			EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_wade2.wav", 1, ATTN_NORM);
 		
-		bci = bci + 2;
-		if (bci > AIRTIME) {
-			bci = AIRTIME;
+		pev->bci = pev->bci + 2;
+		if (pev->bci > AIRTIME) {
+			pev->bci = AIRTIME;
 		}
-		pev->air_finished = gpGlobals->time + bci;
+		pev->air_finished = gpGlobals->time + pev->bci;
 		pev->dmg = 2;
 
 		// if we took drowning damage, give it back slowly
@@ -1361,19 +1360,19 @@ void CBasePlayer::WaterMove()
 		m_bitsDamageType &= ~DMG_DROWNRECOVER;
 		m_rgbTimeBasedDamage[itbd_DrownRecover] = 0;
 
-		if (bciu < gpGlobals->time) {
-			bci = bci - 1;
-			if (bci <= 0) {
-				bci = 0;
+		if (pev->bciu < gpGlobals->time) {
+			pev->bci = pev->bci - 1;
+			if (pev->bci <= 0) {
+				pev->bci = 0;
 				pev->air_finished = gpGlobals->time - 0.1; // start fucking drowning already
 			}
-			bciu = gpGlobals->time + 1;
+			pev->bciu = gpGlobals->time + 1;
 		}
 		if (pev->air_finished < gpGlobals->time)		// drown!
 		{
 			if (pev->pain_finished < gpGlobals->time)
 			{
-				bci = 0;
+				pev->bci = 0;
 				// take drowning damage
 				pev->dmg += 0.1;
 				//if (pev->dmg > 5)
