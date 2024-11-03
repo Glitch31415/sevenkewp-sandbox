@@ -12,6 +12,7 @@ PluginManager g_pluginManager;
 
 struct ExternalCvar {
 	int pluginId;
+	std::string name;
 	cvar_t cvar;
 };
 
@@ -68,6 +69,15 @@ bool PluginManager::AddPlugin(const char* fpath, bool isMapPlugin) {
 	plugin.fpath = fpath;
 	plugin.id = g_plugin_id++;
 
+	if (LoadPlugin(plugin)) {
+		plugins.push_back(plugin);
+		return true;
+	}
+	
+	return false;
+}
+
+bool PluginManager::LoadPlugin(Plugin& plugin) {
 #ifdef _WIN32
 	plugin.h_module = LoadLibraryA(plugin.fpath.c_str());
 #else
@@ -76,7 +86,7 @@ bool PluginManager::AddPlugin(const char* fpath, bool isMapPlugin) {
 
 	if (!plugin.h_module) {
 		ALERT(at_error, "Plugin load failed '%s' (" LOADLIB_FUNC_NAME " error code %d)\n",
-			fpath, GetLastError());
+			plugin.fpath.c_str(), GetLastError());
 		return false;
 	}
 
@@ -87,7 +97,8 @@ bool PluginManager::AddPlugin(const char* fpath, bool isMapPlugin) {
 		int apiVersion = HLCOOP_API_VERSION;
 		if (apiFunc(&plugin, apiVersion)) {
 			ALERT(at_console, "Loaded plugin '%s'\n", plugin.fpath.c_str());
-		} else {
+		}
+		else {
 			ALERT(at_error, "PluginInit call failed in plugin '%s'.\n", plugin.fpath.c_str());
 			FreeLibrary((HMODULE)plugin.h_module);
 			return false;
@@ -99,7 +110,6 @@ bool PluginManager::AddPlugin(const char* fpath, bool isMapPlugin) {
 		return false;
 	}
 
-	plugins.push_back(plugin);
 	return true;
 }
 
@@ -146,6 +156,31 @@ void PluginManager::RemovePlugin(const char* name) {
 
 	if (numFound == 1) {
 		RemovePlugin(plugins[bestIdx]);
+	}
+	else if (numFound > 1) {
+		g_engfuncs.pfnServerPrint(UTIL_VarArgs("Multiple plugins contain '%s'. Be more specific.\n", name));
+	}
+	else {
+		g_engfuncs.pfnServerPrint(UTIL_VarArgs("No plugin found by name '%s'\n", name));
+	}
+}
+
+void PluginManager::ReloadPlugin(const char* name) {
+	int bestIdx = -1;
+	int numFound = 0;
+
+	std::string lowerName = toLowerCase(name);
+
+	for (int i = 0; i < (int)plugins.size(); i++) {
+		if (toLowerCase(plugins[i].fpath).find(lowerName) != std::string::npos) {
+			bestIdx = i;
+			numFound++;
+		}
+	}
+
+	if (numFound == 1) {
+		UnloadPlugin(plugins[bestIdx]);
+		LoadPlugin(plugins[bestIdx]);
 	}
 	else if (numFound > 1) {
 		g_engfuncs.pfnServerPrint(UTIL_VarArgs("Multiple plugins contain '%s'. Be more specific.\n", name));
@@ -400,9 +435,10 @@ cvar_t* RegisterPluginCVar(void* pluginptr, const char* name, const char* strDef
 	}
 
 	ExternalCvar& extvar = g_plugin_cvars[g_plugin_cvar_count];
-
-	extvar.cvar.name = STRING(ALLOC_STRING(name));
-	extvar.cvar.string = STRING(ALLOC_STRING(strDefaultValue));
+	
+	extvar.name = name;
+	extvar.cvar.name = extvar.name.c_str();
+	extvar.cvar.string = STRING(MAKE_STRING(strDefaultValue));
 	extvar.cvar.flags = flags | FCVAR_EXTDLL;
 	extvar.cvar.value = intDefaultValue;
 	extvar.cvar.next = NULL;
@@ -481,7 +517,11 @@ void RegisterPlugin(void* pluginptr, HLCOOP_PLUGIN_HOOKS* hooks, const char* nam
 	Plugin* plugin = (Plugin*)pluginptr;
 
 	plugin->name = name;
-	memcpy(&plugin->hooks, hooks, sizeof(HLCOOP_PLUGIN_HOOKS));
+
+	if (hooks)
+		memcpy(&plugin->hooks, hooks, sizeof(HLCOOP_PLUGIN_HOOKS));
+	else
+		memset(&plugin->hooks, 0, sizeof(HLCOOP_PLUGIN_HOOKS));
 }
 
 // custom entity loader called by the engine during map load

@@ -96,14 +96,14 @@ EXPORT void DEBUG_MSG(ALERT_TYPE target, const char* format, ...);
 #if defined(PLUGIN_BUILD) && defined(PLUGIN_NAME)
 #define ALERT(target, fmt, ...) { \
 	DEBUG_MSG(target, "[" PLUGIN_NAME "] "); \
-	DEBUG_MSG(target, fmt, ##__VA_ARGS__ ); \
+	DEBUG_MSG(target, fmt, ##__VA_ARGS__); \
 }
 #else
 #define ALERT DEBUG_MSG
 #endif
 
-#define print(...)	{ALERT(at_console, __VA_ARGS__);}
-#define println(...)	{ALERT(at_console, __VA_ARGS__); DEBUG_MSG(at_console, "\n");}
+#define print(...)	{ALERT(at_console, __VA_ARGS__, NULL);}
+#define println(...)	{ALERT(at_console, __VA_ARGS__, NULL); DEBUG_MSG(at_console, "\n", NULL);}
 #define ENGINE_FPRINTF	(*g_engfuncs.pfnEngineFprintf)
 #define ALLOC_PRIVATE	(*g_engfuncs.pfnPvAllocEntPrivateData)
 inline void *GET_PRIVATE( const edict_t *pent )
@@ -120,7 +120,6 @@ inline void *GET_PRIVATE( const edict_t *pent )
 #define GETENTITYILLUM	(*g_engfuncs.pfnGetEntityIllum)
 #define FIND_ENTITY_IN_SPHERE		(*g_engfuncs.pfnFindEntityInSphere)
 #define FIND_CLIENT_IN_PVS			(*g_engfuncs.pfnFindClientInPVS) // Doesn't work as expected in multiplayer.
-#define EMIT_AMBIENT_SOUND			(*g_engfuncs.pfnEmitAmbientSound)
 #define GET_BONE_POSITION			(*g_engfuncs.pfnGetBonePosition)
 #define FUNCTION_FROM_NAME			(*g_engfuncs.pfnFunctionFromName)
 #define NAME_FOR_FUNCTION			(*g_engfuncs.pfnNameForFunction)
