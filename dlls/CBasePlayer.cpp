@@ -1309,7 +1309,7 @@ WaterMove
 void CBasePlayer::WaterMove()
 {
 	int air;
-	int bci;
+	float bci;
 	bci = pev->air_finished - gpGlobals->time;
 
 	if (pev->movetype == MOVETYPE_NOCLIP)
@@ -1322,7 +1322,6 @@ void CBasePlayer::WaterMove()
 	// waterlevel 1 - feet in water
 	// waterlevel 2 - waist in water
 	// waterlevel 3 - head in water
-	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
 	if (pev->waterlevel != 3) 
 	{
 		// not underwater
@@ -1337,10 +1336,11 @@ void CBasePlayer::WaterMove()
 			if (bci > AIRTIME) {
 				bci = AIRTIME;
 			}
+			pev->air_finished = gpGlobals->time + bci;
 			pev->pain_finished = gpGlobals->time + 1;
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
 		}
-		pev->air_finished = gpGlobals->time + bci;
-		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
+
 		pev->dmg = 0;
 
 		// if we took drowning damage, give it back slowly
@@ -1368,11 +1368,13 @@ void CBasePlayer::WaterMove()
 		if (pev->pain_finished < gpGlobals->time)
 		{
 			bci = bci - 1;
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
 			if (bci <= 0) {
 				bci = 0;
-				pev->air_finished = gpGlobals->time - 0.1; // start fucking drowning already
+				// start fucking drowning already
 			}
-			if (pev->air_finished < gpGlobals->time)		// drown!
+			pev->air_finished = gpGlobals->time + bci;
+			if (pev->air_finished <= gpGlobals->time)		// drown!
 			{
 				bci = 0;
 				// take drowning damage
@@ -1391,9 +1393,11 @@ void CBasePlayer::WaterMove()
 			{
 				m_bitsDamageType &= ~DMG_DROWN;
 			}
+			pev->air_finished = gpGlobals->time + bci;
 			pev->pain_finished = gpGlobals->time + 1;
 		} 
 	}
+	pev->air_finished = gpGlobals->time + bci;
 
 	if (!pev->waterlevel)
 	{
@@ -1434,6 +1438,7 @@ void CBasePlayer::WaterMove()
 		SetBits(pev->flags, FL_INWATER);
 		pev->dmgtime = 0;
 	}
+	
 }
 
 // TRUE if the player is attached to a ladder
@@ -2518,8 +2523,8 @@ void CBasePlayer::PreThink(void)
 void CBasePlayer::CheckTimeBasedDamage() 
 {
 	int i;
-	int pdd = 0;
-	int ddr = 19;
+	//int pdd = 0;
+	//int ddr = 19;
 	BYTE bDuration = 0;
 
 	if (!(m_bitsDamageType & DMG_TIMEBASED))
@@ -2568,24 +2573,24 @@ void CBasePlayer::CheckTimeBasedDamage()
 				// after the player has been drowning and finally takes a breath
 				if (m_idrowndmg > m_idrownrestored)
 				{
-					if (m_idrowndmg > pdd) {
+					//if (m_idrowndmg > pdd) {
 						// new drowning cycle?
-						ddr = 19;
-					}
-					pdd = m_idrowndmg;
-					ddr = ddr - 2;
-					if (ddr < 1) {
-						ddr = 1;
-					}
-					int idif = V_min(m_idrowndmg - m_idrownrestored, ddr);
-					if (ddr == 1) {
-						ddr = 19;
-					}
+						//ddr = 19;
+					//}
+					//pdd = m_idrowndmg;
+					//ddr = ddr - 2;
+					//if (ddr < 1) {
+						//ddr = 1;
+					//}
+					//int idif = V_min(m_idrowndmg - m_idrownrestored, ddr);
+					//if (ddr == 1) {
+						//ddr = 19;
+					//}
 
-					TakeHealth(idif, DMG_GENERIC);
-					m_idrownrestored += idif;
+					TakeHealth(1, DMG_GENERIC);
+					m_idrownrestored += 1;
 				}
-				bDuration = 9;	// get up to 19+17+15+13+11+9+7+5+3+1 = exactly 100 points back B)
+				bDuration = 99;
 				break;
 			case itbd_Acid:
 //				TakeDamage(pev, pev, ACID_DAMAGE, DMG_GENERIC);
