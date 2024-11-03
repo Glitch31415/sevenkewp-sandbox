@@ -1308,6 +1308,8 @@ WaterMove
 void CBasePlayer::WaterMove()
 {
 	int air;
+	int bci;
+	float bciu;
 
 	if (pev->movetype == MOVETYPE_NOCLIP)
 		return;
