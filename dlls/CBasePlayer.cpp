@@ -1322,6 +1322,7 @@ void CBasePlayer::WaterMove()
 	// waterlevel 1 - feet in water
 	// waterlevel 2 - waist in water
 	// waterlevel 3 - head in water
+	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
 	if (pev->waterlevel != 3) 
 	{
 		// not underwater
@@ -1337,9 +1338,9 @@ void CBasePlayer::WaterMove()
 				bci = AIRTIME;
 			}
 			pev->pain_finished = gpGlobals->time + 1;
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
 		}
-
+		pev->air_finished = gpGlobals->time + bci;
+		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
 		pev->dmg = 0;
 
 		// if we took drowning damage, give it back slowly
@@ -1367,12 +1368,10 @@ void CBasePlayer::WaterMove()
 		if (pev->pain_finished < gpGlobals->time)
 		{
 			bci = bci - 1;
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
 			if (bci <= 0) {
 				bci = 0;
-				// start fucking drowning already
+				pev->air_finished = gpGlobals->time - 0.1; // start fucking drowning already
 			}
-			pev->air_finished = gpGlobals->time + bci;
 			if (pev->air_finished < gpGlobals->time)		// drown!
 			{
 				bci = 0;
@@ -1395,7 +1394,6 @@ void CBasePlayer::WaterMove()
 			pev->pain_finished = gpGlobals->time + 1;
 		} 
 	}
-	pev->air_finished = gpGlobals->time + bci;
 
 	if (!pev->waterlevel)
 	{
@@ -1436,7 +1434,6 @@ void CBasePlayer::WaterMove()
 		SetBits(pev->flags, FL_INWATER);
 		pev->dmgtime = 0;
 	}
-	
 }
 
 // TRUE if the player is attached to a ladder
@@ -2521,8 +2518,8 @@ void CBasePlayer::PreThink(void)
 void CBasePlayer::CheckTimeBasedDamage() 
 {
 	int i;
-	//int pdd = 0;
-	//int ddr = 19;
+	int pdd = 0;
+	int ddr = 19;
 	BYTE bDuration = 0;
 
 	if (!(m_bitsDamageType & DMG_TIMEBASED))
@@ -2571,24 +2568,24 @@ void CBasePlayer::CheckTimeBasedDamage()
 				// after the player has been drowning and finally takes a breath
 				if (m_idrowndmg > m_idrownrestored)
 				{
-					//if (m_idrowndmg > pdd) {
+					if (m_idrowndmg > pdd) {
 						// new drowning cycle?
-						//ddr = 19;
-					//}
-					//pdd = m_idrowndmg;
-					//ddr = ddr - 2;
-					//if (ddr < 1) {
-						//ddr = 1;
-					//}
-					//int idif = V_min(m_idrowndmg - m_idrownrestored, ddr);
-					//if (ddr == 1) {
-						//ddr = 19;
-					//}
+						ddr = 19;
+					}
+					pdd = m_idrowndmg;
+					ddr = ddr - 2;
+					if (ddr < 1) {
+						ddr = 1;
+					}
+					int idif = V_min(m_idrowndmg - m_idrownrestored, ddr);
+					if (ddr == 1) {
+						ddr = 19;
+					}
 
-					TakeHealth(1, DMG_GENERIC);
-					m_idrownrestored += 1;
+					TakeHealth(idif, DMG_GENERIC);
+					m_idrownrestored += idif;
 				}
-				bDuration = 99;
+				bDuration = 9;	// get up to 19+17+15+13+11+9+7+5+3+1 = exactly 100 points back B)
 				break;
 			case itbd_Acid:
 //				TakeDamage(pev, pev, ACID_DAMAGE, DMG_GENERIC);
