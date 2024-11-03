@@ -107,7 +107,7 @@ extern CGraph	WorldGraph;
 
 #define GEIGERDELAY 0.25
 #define SUITUPDATETIME	3.5
-#define AIRTIME	12		// lung full of air lasts this many seconds
+#define AIRTIME	45		// lung full of air lasts this many seconds
 #define SUITFIRSTUPDATETIME 0.1
 
 #define	PLAYER_SEARCH_RADIUS	(float)64 // +use distance
@@ -1359,7 +1359,7 @@ void CBasePlayer::WaterMove()
 			if (pev->pain_finished < gpGlobals->time)
 			{
 				// take drowning damage
-				pev->dmg += 0.1;
+				pev->dmg += 0.5;
 				//if (pev->dmg > 5)
 					//pev->dmg = 5;
 				TakeDamage(VARS(eoNullEntity), VARS(eoNullEntity), pev->dmg, DMG_DROWN);
@@ -3217,7 +3217,7 @@ void CBasePlayer::Spawn( void )
 	pev->max_health		= pev->health;
 	pev->flags		   &= FL_PROXY;	// keep proxy flag sey by engine
 	pev->flags		   |= FL_CLIENT;
-	pev->air_finished	= gpGlobals->time + 12;
+	pev->air_finished	= gpGlobals->time + 45;
 	pev->dmg			= 2;				// initial water damage
 	pev->effects		= 0;
 	pev->deadflag		= DEAD_NO;
