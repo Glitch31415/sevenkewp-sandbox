@@ -1305,11 +1305,16 @@ WaterMove
 ============
 */
 
+int bci;
+float bciu;
+bci = 45;
+bciu = 0;
+
+
 void CBasePlayer::WaterMove()
 {
 	int air;
-	int bci;
-	float bciu;
+
 
 	if (pev->movetype == MOVETYPE_NOCLIP)
 		return;
