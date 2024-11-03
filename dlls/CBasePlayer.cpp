@@ -1332,14 +1332,16 @@ void CBasePlayer::WaterMove()
 			EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_wade1.wav", 1, ATTN_NORM);
 		else if (pev->air_finished < gpGlobals->time + 15)
 			EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_wade2.wav", 1, ATTN_NORM);
-		
-		bci = bci + 2;
-		if (bci > AIRTIME) {
-			bci = AIRTIME;
+		if (pev->pain_finished < gpGlobals->time) {
+			bci = bci + 2;
+			if (bci > AIRTIME) {
+				bci = AIRTIME;
+			}
+			pev->pain_finished = gpGlobals->time;
 		}
 		pev->air_finished = gpGlobals->time + bci;
 		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
-		pev->dmg = 2;
+		pev->dmg = 0;
 
 		// if we took drowning damage, give it back slowly
 		if (m_idrowndmg > m_idrownrestored)
