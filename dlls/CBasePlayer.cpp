@@ -1368,6 +1368,7 @@ void CBasePlayer::WaterMove()
 		if (pev->pain_finished < gpGlobals->time)
 		{
 			bci = bci - 1;
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("this ran, decreasing bci"));
 			if (bci <= 0) {
 				bci = 0;
 				// start fucking drowning already
