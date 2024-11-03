@@ -1311,7 +1311,6 @@ void CBasePlayer::WaterMove()
 	int air;
 	int bci;
 	bci = roundf(pev->air_finished - gpGlobals->time);
-	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("bci: %i\n", bci));
 	if (pev->movetype == MOVETYPE_NOCLIP)
 		return;
 
