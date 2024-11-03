@@ -1359,7 +1359,7 @@ void CBasePlayer::WaterMove()
 			if (pev->pain_finished < gpGlobals->time)
 			{
 				// take drowning damage
-				pev->dmg += 0.5;
+				pev->dmg += 0.1;
 				//if (pev->dmg > 5)
 					//pev->dmg = 5;
 				TakeDamage(VARS(eoNullEntity), VARS(eoNullEntity), pev->dmg, DMG_DROWN);
