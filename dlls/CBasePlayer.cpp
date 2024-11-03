@@ -1332,11 +1332,11 @@ void CBasePlayer::WaterMove()
 		else if (pev->air_finished < gpGlobals->time + 15)
 			EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_wade2.wav", 1, ATTN_NORM);
 		if (pev->pain_finished < gpGlobals->time) {
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("not underwater, bci: %i\n", bci));
-			bci = bci + 2;
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("not underwater, bci: %i\n", bci));
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("not underwater, before change bci: %i\n", bci));
+			bci = bci + (float)2;
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("not underwater, after change bci: %i\n", bci));
 			if (bci > AIRTIME) {
-				bci = AIRTIME;
+				bci = (float)AIRTIME;
 			}
 			pev->air_finished = gpGlobals->time + bci;
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("not underwater, air_finished diff: %f\n", pev->air_finished-gpGlobals->time));
@@ -1370,18 +1370,18 @@ void CBasePlayer::WaterMove()
 
 		if (pev->pain_finished < gpGlobals->time)
 		{
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("underwater, bci: %i\n", bci));
-			bci = bci - 1;
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("underwater, bci: %i\n", bci));
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("underwater, before change bci: %i\n", bci));
+			bci = bci - (float)1;
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("underwater, before change bci: %i\n", bci));
 			if (bci <= 0) {
-				bci = 0;
+				bci = (float)0;
 				// start fucking drowning already
 			}
 			pev->air_finished = gpGlobals->time + bci;
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("underwater, air_finished diff: %f\n", pev->air_finished-gpGlobals->time));
 			if (pev->air_finished <= gpGlobals->time)		// drown!
 			{
-				bci = 0;
+				bci = (float)0;
 				// take drowning damage
 				pev->dmg += 0.1;
 				//if (pev->dmg > 5)
