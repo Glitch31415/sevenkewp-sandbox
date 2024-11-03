@@ -1359,9 +1359,9 @@ void CBasePlayer::WaterMove()
 			if (pev->pain_finished < gpGlobals->time)
 			{
 				// take drowning damage
-				pev->dmg += 1;
-				if (pev->dmg > 5)
-					pev->dmg = 5;
+				pev->dmg += 0.5;
+				//if (pev->dmg > 5)
+					//pev->dmg = 5;
 				TakeDamage(VARS(eoNullEntity), VARS(eoNullEntity), pev->dmg, DMG_DROWN);
 				pev->pain_finished = gpGlobals->time + 1;
 				
@@ -2500,6 +2500,8 @@ void CBasePlayer::PreThink(void)
 void CBasePlayer::CheckTimeBasedDamage() 
 {
 	int i;
+	int pdd = 0;
+	int ddr = 19;
 	BYTE bDuration = 0;
 
 	if (!(m_bitsDamageType & DMG_TIMEBASED))
@@ -2548,12 +2550,18 @@ void CBasePlayer::CheckTimeBasedDamage()
 				// after the player has been drowning and finally takes a breath
 				if (m_idrowndmg > m_idrownrestored)
 				{
-					int idif = V_min(m_idrowndmg - m_idrownrestored, 10);
+					if (m_idrowndmg > pdd) {
+						// new drowning cycle?
+						ddr = 19;
+					}
+					pdd = m_idrowndmg;
+					ddr = ddr - 2;
+					int idif = V_min(m_idrowndmg - m_idrownrestored, ddr);
 
 					TakeHealth(idif, DMG_GENERIC);
 					m_idrownrestored += idif;
 				}
-				bDuration = 4;	// get up to 5*10 = 50 points back
+				bDuration = 9;	// get up to 19+17+15+13+11+9+7+5+3+1 = exactly 100 points back B)
 				break;
 			case itbd_Acid:
 //				TakeDamage(pev, pev, ACID_DAMAGE, DMG_GENERIC);
