@@ -1339,7 +1339,6 @@ void CBasePlayer::WaterMove()
 			}
 			pev->pain_finished = gpGlobals->time + 1;
 		}
-		pev->air_finished = gpGlobals->time + bci;
 		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
 		pev->dmg = 0;
 
@@ -1396,6 +1395,7 @@ void CBasePlayer::WaterMove()
 			pev->pain_finished = gpGlobals->time + 1;
 		} 
 	}
+	pev->air_finished = gpGlobals->time + bci;
 
 	if (!pev->waterlevel)
 	{
@@ -1436,6 +1436,7 @@ void CBasePlayer::WaterMove()
 		SetBits(pev->flags, FL_INWATER);
 		pev->dmgtime = 0;
 	}
+	
 }
 
 // TRUE if the player is attached to a ladder
