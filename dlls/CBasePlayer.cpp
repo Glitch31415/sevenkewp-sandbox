@@ -1311,7 +1311,6 @@ void CBasePlayer::WaterMove()
 	int air;
 	float bci;
 	bci = pev->air_finished - gpGlobals->time;
-
 	if (pev->movetype == MOVETYPE_NOCLIP)
 		return;
 
@@ -1324,6 +1323,7 @@ void CBasePlayer::WaterMove()
 	// waterlevel 3 - head in water
 	if (pev->waterlevel != 3) 
 	{
+		
 		// not underwater
 		
 		// play 'up for air' sound
@@ -1332,13 +1332,16 @@ void CBasePlayer::WaterMove()
 		else if (pev->air_finished < gpGlobals->time + 15)
 			EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_wade2.wav", 1, ATTN_NORM);
 		if (pev->pain_finished < gpGlobals->time) {
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("not underwater, bci: %i\n", bci));
 			bci = bci + 2;
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("not underwater, bci: %i\n", bci));
 			if (bci > AIRTIME) {
 				bci = AIRTIME;
 			}
 			pev->air_finished = gpGlobals->time + bci;
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("not underwater, air_finished diff: %f\n", pev->air_finished-gpGlobals->time));
 			pev->pain_finished = gpGlobals->time + 1;
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
+			
 		}
 
 		pev->dmg = 0;
@@ -1367,13 +1370,15 @@ void CBasePlayer::WaterMove()
 
 		if (pev->pain_finished < gpGlobals->time)
 		{
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("underwater, bci: %i\n", bci));
 			bci = bci - 1;
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("underwater, bci: %i\n", bci));
 			if (bci <= 0) {
 				bci = 0;
 				// start fucking drowning already
 			}
 			pev->air_finished = gpGlobals->time + bci;
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("underwater, air_finished diff: %f\n", pev->air_finished-gpGlobals->time));
 			if (pev->air_finished <= gpGlobals->time)		// drown!
 			{
 				bci = 0;
@@ -1397,7 +1402,8 @@ void CBasePlayer::WaterMove()
 			pev->pain_finished = gpGlobals->time + 1;
 		} 
 	}
-	pev->air_finished = gpGlobals->time + bci;
+	//pev->air_finished = gpGlobals->time + bci;
+	//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("last, air_finished diff: %f\n", pev->air_finished-gpGlobals->time));
 
 	if (!pev->waterlevel)
 	{
