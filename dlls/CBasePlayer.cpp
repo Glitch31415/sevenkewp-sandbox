@@ -1308,7 +1308,6 @@ WaterMove
 int bci;
 float bciu;
 bci = 45;
-bciu = 0;
 
 
 void CBasePlayer::WaterMove()
