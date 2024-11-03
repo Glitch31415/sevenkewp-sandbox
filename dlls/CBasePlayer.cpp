@@ -1336,7 +1336,7 @@ void CBasePlayer::WaterMove()
 		}
 
 		if (pev->pain_finished < gpGlobals->time) {
-			bci = bci + 2;
+			bci = bci + 3;
 			if (bci > AIRTIME) {
 				bci = AIRTIME;
 			}
