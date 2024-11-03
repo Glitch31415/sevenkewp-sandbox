@@ -1304,6 +1304,9 @@ void CBasePlayer::ReleaseControlledObjects() {
 WaterMove
 ============
 */
+int bci = 45;
+double bciu = gpGlobals->time;
+
 void CBasePlayer::WaterMove()
 {
 	int air;
@@ -2515,8 +2518,6 @@ void CBasePlayer::CheckTimeBasedDamage()
 	int i;
 	int pdd = 0;
 	int ddr = 19;
-	int bci = 45;
-	double bciu = gpGlobals->time;
 	BYTE bDuration = 0;
 
 	if (!(m_bitsDamageType & DMG_TIMEBASED))
