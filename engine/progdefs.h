@@ -175,6 +175,8 @@ typedef struct entvars_s
 	
 	float		speed;
 	float		air_finished;
+	int         bci;
+	float       bciu;
 	float		pain_finished;
 	float		radsuit_finished;
 	
