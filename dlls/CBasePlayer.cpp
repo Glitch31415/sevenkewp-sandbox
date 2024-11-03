@@ -1370,8 +1370,9 @@ void CBasePlayer::WaterMove()
 			bci = bci - 1;
 			if (bci <= 0) {
 				bci = 0;
-				pev->air_finished = gpGlobals->time - 0.1; // start fucking drowning already
+				// start fucking drowning already
 			}
+			pev->air_finished = gpGlobals->time + bci;
 			if (pev->air_finished < gpGlobals->time)		// drown!
 			{
 				bci = 0;
@@ -2518,7 +2519,8 @@ void CBasePlayer::PreThink(void)
 void CBasePlayer::CheckTimeBasedDamage() 
 {
 	int i;
-
+	//int pdd = 0;
+	//int ddr = 19;
 	BYTE bDuration = 0;
 
 	if (!(m_bitsDamageType & DMG_TIMEBASED))
@@ -2567,11 +2569,22 @@ void CBasePlayer::CheckTimeBasedDamage()
 				// after the player has been drowning and finally takes a breath
 				if (m_idrowndmg > m_idrownrestored)
 				{
-					int idif = V_min(m_idrowndmg - m_idrownrestored, 1);
+					//if (m_idrowndmg > pdd) {
+						// new drowning cycle?
+						//ddr = 19;
+					//}
+					//pdd = m_idrowndmg;
+					//ddr = ddr - 2;
+					//if (ddr < 1) {
+						//ddr = 1;
+					//}
+					//int idif = V_min(m_idrowndmg - m_idrownrestored, ddr);
+					//if (ddr == 1) {
+						//ddr = 19;
+					//}
 
-
-					TakeHealth(idif, DMG_GENERIC);
-					m_idrownrestored += idif;
+					TakeHealth(1, DMG_GENERIC);
+					m_idrownrestored += 1;
 				}
 				bDuration = 99;
 				break;
