@@ -1322,7 +1322,6 @@ void CBasePlayer::WaterMove()
 	// waterlevel 1 - feet in water
 	// waterlevel 2 - waist in water
 	// waterlevel 3 - head in water
-	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
 	if (pev->waterlevel != 3) 
 	{
 		// not underwater
@@ -1338,8 +1337,9 @@ void CBasePlayer::WaterMove()
 				bci = AIRTIME;
 			}
 			pev->pain_finished = gpGlobals->time + 1;
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
 		}
-		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
+
 		pev->dmg = 0;
 
 		// if we took drowning damage, give it back slowly
@@ -1367,7 +1367,7 @@ void CBasePlayer::WaterMove()
 		if (pev->pain_finished < gpGlobals->time)
 		{
 			bci = bci - 1;
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("this ran, decreasing bci"));
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i\n", bci));
 			if (bci <= 0) {
 				bci = 0;
 				// start fucking drowning already
