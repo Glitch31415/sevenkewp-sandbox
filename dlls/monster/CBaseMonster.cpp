@@ -4853,20 +4853,35 @@ void CBaseMonster::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector ve
 				break;
 			case HITGROUP_HEAD:
 				flDamage *= gSkillData.sk_monster_head;
+				if (flDamage > gSkillData.sk_monster_head*pev->max_health) {
+					flDamage = gSkillData.sk_monster_head*pev->max_health; // damage cap
+				}
 				break;
 			case HITGROUP_CHEST:
 				flDamage *= gSkillData.sk_monster_chest;
+				if (flDamage > gSkillData.sk_monster_chest*pev->max_health) {
+					flDamage = gSkillData.sk_monster_chest*pev->max_health; // damage cap
+				}
 				break;
 			case HITGROUP_STOMACH:
 				flDamage *= gSkillData.sk_monster_stomach;
+				if (flDamage > gSkillData.sk_monster_stomach*pev->max_health) {
+					flDamage = gSkillData.sk_monster_stomach*pev->max_health; // damage cap
+				}
 				break;
 			case HITGROUP_LEFTARM:
 			case HITGROUP_RIGHTARM:
 				flDamage *= gSkillData.sk_monster_arm;
+				if (flDamage > gSkillData.sk_monster_arm*pev->max_health) {
+					flDamage = gSkillData.sk_monster_arm*pev->max_health; // damage cap
+				}
 				break;
 			case HITGROUP_LEFTLEG:
 			case HITGROUP_RIGHTLEG:
 				flDamage *= gSkillData.sk_monster_leg;
+				if (flDamage > gSkillData.sk_monster_leg*pev->max_health) {
+					flDamage = gSkillData.sk_monster_leg*pev->max_health; // damage cap
+				}
 				break;
 			default:
 				break;
