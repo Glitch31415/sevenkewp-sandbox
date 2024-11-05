@@ -4542,9 +4542,9 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	{
 		//pev->velocity = pev->velocity + vecDir * -DamageForce(flDamage);
 	}
-	if (flTake > 2520) { // maximum damage from a double shotgun headshot
-		flTake = 2520;
-	}
+	//if (flTake > 2520) { // maximum damage from a double shotgun headshot
+		//flTake = 2520;
+	//}
 	if (flTake < 0) {
 		flTake = 0;
 	}
