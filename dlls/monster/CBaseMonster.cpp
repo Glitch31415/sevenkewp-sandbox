@@ -4853,9 +4853,9 @@ void CBaseMonster::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector ve
 				break;
 			case HITGROUP_HEAD:
 				flDamage *= gSkillData.sk_monster_head;
-				if (flDamage > gSkillData.sk_monster_head*pev->max_health) {
-					flDamage = gSkillData.sk_monster_head*pev->max_health; // damage cap
-				}
+				//if (flDamage > gSkillData.sk_monster_head*pev->max_health) {
+					//flDamage = gSkillData.sk_monster_head*pev->max_health; // damage cap, none for head
+				//}
 				break;
 			case HITGROUP_CHEST:
 				flDamage *= gSkillData.sk_monster_chest;
