@@ -611,7 +611,7 @@ Schedule_t	slAGruntFail[] =
 		bits_COND_CAN_RANGE_ATTACK1	|
 		bits_COND_CAN_MELEE_ATTACK1,
 		0,
-		"AGrunt Fail"
+		"AGRUNT_FAIL"
 	},
 };
 
@@ -634,7 +634,7 @@ Schedule_t	slAGruntCombatFail[] =
 		bits_COND_CAN_RANGE_ATTACK1	|
 		bits_COND_CAN_MELEE_ATTACK1,
 		0,
-		"AGrunt Combat Fail"
+		"AGRUNT_COMBAT_FAIL"
 	},
 };
 
@@ -662,7 +662,7 @@ Schedule_t slAGruntStandoff[] =
 		bits_COND_HEAR_SOUND,
 		
 		bits_SOUND_DANGER,
-		"Agrunt Standoff"
+		"AGRUNT_STANDOFF"
 	}
 };
 
@@ -682,7 +682,7 @@ Schedule_t slAGruntSuppress[] =
 		ARRAYSIZE ( tlAGruntSuppressHornet ),
 		0,
 		0,
-		"AGrunt Suppress Hornet",
+		"AGRUNT_SUPPRESS_HORNET",
 	},
 };
 
@@ -706,7 +706,7 @@ Schedule_t	slAGruntRangeAttack1[] =
 		bits_COND_HEAVY_DAMAGE,
 		
 		0,
-		"AGrunt Range Attack1"
+		"AGRUNT_RANGE_ATTACK1"
 	},
 };
 
@@ -720,6 +720,7 @@ Task_t	tlAGruntHiddenRangeAttack1[] =
 	{ TASK_RANGE_ATTACK1_NOTURN,		(float)0		},
 };
 
+
 Schedule_t	slAGruntHiddenRangeAttack[] =
 {
 	{ 
@@ -730,7 +731,7 @@ Schedule_t	slAGruntHiddenRangeAttack[] =
 		bits_COND_HEAR_SOUND,
 		
 		bits_SOUND_DANGER,
-		"AGrunt Hidden Range Attack1"
+		"AGRUNT_HIDDEN_RANGE_ATTACK"
 	},
 };
 
@@ -756,7 +757,7 @@ Schedule_t	slAGruntTakeCoverFromEnemy[] =
 		ARRAYSIZE ( tlAGruntTakeCoverFromEnemy ), 
 		bits_COND_NEW_ENEMY,
 		0,
-		"AGruntTakeCoverFromEnemy"
+		"AGRUNT_TAKE_COVER_FROM_ENEMY"
 	},
 };
 
@@ -795,7 +796,7 @@ Schedule_t	slAGruntVictoryDance[] =
 		bits_COND_LIGHT_DAMAGE	|
 		bits_COND_HEAVY_DAMAGE,
 		0,
-		"AGruntVictoryDance"
+		"AGRUNT_VICTORY_DANCE"
 	},
 };
 
@@ -820,7 +821,7 @@ Schedule_t	slAGruntThreatDisplay[] =
 		bits_SOUND_PLAYER			|
 		bits_SOUND_COMBAT			|
 		bits_SOUND_WORLD,
-		"AGruntThreatDisplay"
+		"AGRUNT_THREAT_DISPLAY"
 	},
 };
 
@@ -1142,6 +1143,15 @@ Schedule_t* CAGrunt :: GetScheduleOfType ( int Type )
 	}
 
 	return CTalkSquadMonster :: GetScheduleOfType( Type );
+}
+
+const char* CAGrunt::GetTaskName(int taskIdx) {
+	switch (taskIdx) {
+	case TASK_AGRUNT_SETUP_HIDE_ATTACK: return "TASK_AGRUNT_SETUP_HIDE_ATTACK";
+	case TASK_AGRUNT_GET_PATH_TO_ENEMY_CORPSE: return "TASK_AGRUNT_GET_PATH_TO_ENEMY_CORPSE";
+	default:
+		return CTalkSquadMonster::GetTaskName(taskIdx);
+	}
 }
 
 void CAGrunt::StartFollowingSound() {

@@ -1231,7 +1231,7 @@ Schedule_t slShockTrooperFail[] =
 			bits_COND_CAN_MELEE_ATTACK1 |
 			bits_COND_CAN_MELEE_ATTACK2,
 		0,
-		"Grunt Fail"},
+		"SHOCK_FAIL"},
 };
 
 //=========================================================
@@ -1252,7 +1252,7 @@ Schedule_t slShockTrooperCombatFail[] =
 		bits_COND_CAN_RANGE_ATTACK1 |
 			bits_COND_CAN_RANGE_ATTACK2,
 		0,
-		"Grunt Combat Fail"},
+		"SHOCK_COMBAT_FAIL"},
 };
 
 //=========================================================
@@ -1279,7 +1279,7 @@ Schedule_t slShockTrooperVictoryDance[] =
 			bits_COND_LIGHT_DAMAGE |
 			bits_COND_HEAVY_DAMAGE,
 		0,
-		"GruntVictoryDance"},
+		"SHOCK_VICTORY_DANCE"},
 };
 
 //=========================================================
@@ -1308,7 +1308,7 @@ Schedule_t slShockTrooperEstablishLineOfFire[] =
 			bits_COND_HEAR_SOUND,
 
 		bits_SOUND_DANGER,
-		"GruntEstablishLineOfFire"},
+		"SHOCK_ESTABLISH_LINE_OF_FIRE"},
 };
 
 //=========================================================
@@ -1329,7 +1329,7 @@ Schedule_t slShockTrooperFoundEnemy[] =
 		bits_COND_HEAR_SOUND,
 
 		bits_SOUND_DANGER,
-		"GruntFoundEnemy"},
+		"SHOCK_FOUND_ENEMY"},
 };
 
 //=========================================================
@@ -1353,7 +1353,7 @@ Schedule_t slShockTrooperCombatFace[] =
 			bits_COND_CAN_RANGE_ATTACK1 |
 			bits_COND_CAN_RANGE_ATTACK2,
 		0,
-		"Combat Face"},
+		"SHOCK_COMBAT_FACE"},
 };
 
 //=========================================================
@@ -1394,7 +1394,7 @@ Schedule_t slShockTrooperSignalSuppress[] =
 			bits_COND_NO_AMMO_LOADED,
 
 		bits_SOUND_DANGER,
-		"SignalSuppress"},
+		"SHOCK_SIGNAL_SUPPRESS"},
 };
 
 Task_t tlShockTrooperSuppress[] =
@@ -1429,7 +1429,7 @@ Schedule_t slShockTrooperSuppress[] =
 			bits_COND_NO_AMMO_LOADED,
 
 		bits_SOUND_DANGER,
-		"Suppress"},
+		"SHOCK_SUPPRESS"},
 };
 
 
@@ -1457,7 +1457,7 @@ Schedule_t slShockTrooperWaitInCover[] =
 			bits_COND_CAN_MELEE_ATTACK2,
 
 		bits_SOUND_DANGER,
-		"GruntWaitInCover"},
+		"SHOCK_WAIT_IN_COVER"},
 };
 
 //=========================================================
@@ -1483,7 +1483,7 @@ Schedule_t slShockTrooperTakeCover[] =
 		ARRAYSIZE(tlShockTrooperTakeCover1),
 		0,
 		0,
-		"TakeCover"},
+		"SHOCK_TAKE_COVER"},
 };
 
 //=========================================================
@@ -1507,7 +1507,7 @@ Schedule_t slShockTrooperGrenadeCover[] =
 		ARRAYSIZE(tlShockTrooperGrenadeCover1),
 		0,
 		0,
-		"GrenadeCover"},
+		"SHOCK_GRENADE_COVER"},
 };
 
 
@@ -1527,7 +1527,7 @@ Schedule_t slShockTrooperTossGrenadeCover[] =
 		ARRAYSIZE(tlShockTrooperTossGrenadeCover1),
 		0,
 		0,
-		"TossGrenadeCover"},
+		"SHOCK_TOSS_GRENADE_COVER"},
 };
 
 //=========================================================
@@ -1550,7 +1550,7 @@ Schedule_t slShockTrooperTakeCoverFromBestSound[] =
 		ARRAYSIZE(tlShockTrooperTakeCoverFromBestSound),
 		0,
 		0,
-		"GruntTakeCoverFromBestSound"},
+		"SHOCK_TAKE_COVER_FROM_BEST_SOUND"},
 };
 
 //=========================================================
@@ -1576,7 +1576,7 @@ Schedule_t slShockTrooperHideReload[] =
 			bits_COND_HEAR_SOUND,
 
 		bits_SOUND_DANGER,
-		"GruntHideReload"} };
+		"SHOCK_HIDE_RELOAD"} };
 
 //=========================================================
 // Do a turning sweep of the area
@@ -1605,7 +1605,8 @@ Schedule_t slShockTrooperSweep[] =
 			bits_SOUND_DANGER |
 			bits_SOUND_PLAYER,
 
-		"Grunt Sweep"},
+		"SHOCK_SWEEP"
+	},
 };
 
 //=========================================================
@@ -1642,7 +1643,7 @@ Schedule_t slShockTrooperRangeAttack1A[] =
 			bits_COND_NO_AMMO_LOADED,
 
 		bits_SOUND_DANGER,
-		"Range Attack1A"},
+		"SHOCK_RANGE_ATTACK1A"},
 };
 
 
@@ -1680,7 +1681,7 @@ Schedule_t slShockTrooperRangeAttack1B[] =
 			bits_COND_HEAR_SOUND,
 
 		bits_SOUND_DANGER,
-		"Range Attack1B"},
+		"SHOCK_RANGE_ATTACK1B"},
 };
 
 //=========================================================
@@ -1701,7 +1702,7 @@ Schedule_t slShockTrooperRangeAttack2[] =
 		ARRAYSIZE(tlShockTrooperRangeAttack2),
 		0,
 		0,
-		"RangeAttack2"},
+		"SHOCK_RANGE_ATTACK"},
 };
 
 
@@ -1728,7 +1729,7 @@ Schedule_t slShockTrooperRepel[] =
 		bits_SOUND_DANGER |
 			bits_SOUND_COMBAT |
 			bits_SOUND_PLAYER,
-		"Repel"},
+		"SHOCK_REPEL"},
 };
 
 
@@ -1748,7 +1749,7 @@ Schedule_t slShockTrooperRepelAttack[] =
 		ARRAYSIZE(tlShockTrooperRepelAttack),
 		bits_COND_ENEMY_OCCLUDED,
 		0,
-		"Repel Attack"},
+		"SHOCK_REPEL_ATTACK"},
 };
 
 //=========================================================
@@ -1777,32 +1778,33 @@ Schedule_t slShockTrooperRepelLand[] =
 		bits_SOUND_DANGER |
 			bits_SOUND_COMBAT |
 			bits_SOUND_PLAYER,
-		"Repel Land"},
+		"SHOCK_REPEL_LAND"
+	},
 };
 
 
 DEFINE_CUSTOM_SCHEDULES(CShockTrooper) {
 	slShockTrooperFail,
-		slShockTrooperCombatFail,
-		slShockTrooperVictoryDance,
-		slShockTrooperEstablishLineOfFire,
-		slShockTrooperFoundEnemy,
-		slShockTrooperCombatFace,
-		slShockTrooperSignalSuppress,
-		slShockTrooperSuppress,
-		slShockTrooperWaitInCover,
-		slShockTrooperTakeCover,
-		slShockTrooperGrenadeCover,
-		slShockTrooperTossGrenadeCover,
-		slShockTrooperTakeCoverFromBestSound,
-		slShockTrooperHideReload,
-		slShockTrooperSweep,
-		slShockTrooperRangeAttack1A,
-		slShockTrooperRangeAttack1B,
-		slShockTrooperRangeAttack2,
-		slShockTrooperRepel,
-		slShockTrooperRepelAttack,
-		slShockTrooperRepelLand,
+	slShockTrooperCombatFail,
+	slShockTrooperVictoryDance,
+	slShockTrooperEstablishLineOfFire,
+	slShockTrooperFoundEnemy,
+	slShockTrooperCombatFace,
+	slShockTrooperSignalSuppress,
+	slShockTrooperSuppress,
+	slShockTrooperWaitInCover,
+	slShockTrooperTakeCover,
+	slShockTrooperGrenadeCover,
+	slShockTrooperTossGrenadeCover,
+	slShockTrooperTakeCoverFromBestSound,
+	slShockTrooperHideReload,
+	slShockTrooperSweep,
+	slShockTrooperRangeAttack1A,
+	slShockTrooperRangeAttack1B,
+	slShockTrooperRangeAttack2,
+	slShockTrooperRepel,
+	slShockTrooperRepelAttack,
+	slShockTrooperRepelLand,
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES(CShockTrooper, CTalkSquadMonster)

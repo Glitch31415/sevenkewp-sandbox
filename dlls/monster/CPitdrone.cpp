@@ -241,6 +241,7 @@ public:
 	BOOL FValidateHintType ( short sHint );
 	Schedule_t *GetSchedule( void );
 	Schedule_t *GetScheduleOfType ( int Type );
+	const char* GetTaskName(int taskIdx);
 	int IRelationship ( CBaseEntity *pTarget );
 	int IgnoreConditions ( void );
 	const char* GetDeathNoticeWeapon() { return "weapon_crowbar"; }
@@ -815,7 +816,7 @@ Schedule_t	slPitdroneRangeAttack1[] =
 		bits_COND_ENEMY_OCCLUDED	|
 		bits_COND_NO_AMMO_LOADED,
 		0,
-		"Pitdrone Range Attack1"
+		"PIT_RANGE_ATTACK"
 	},
 };
 
@@ -844,7 +845,7 @@ Schedule_t slPitdroneChaseEnemy[] =
 		
 		bits_SOUND_DANGER			|
 		bits_SOUND_MEAT,
-		"Pitdrone Chase Enemy"
+		"PIT_CHASE_ENEMY"
 	},
 };
 
@@ -863,7 +864,7 @@ Schedule_t slPitdroneHurtHop[] =
 		ARRAYSIZE ( tlPitdroneHurtHop ),
 		0,
 		0,
-		"PitdroneHurtHop"
+		"PIT_HURT_HOP"
 	}
 };
 
@@ -899,7 +900,7 @@ Schedule_t slPitdroneEat[] =
 		// here or the monster won't detect these sounds at ALL while running this schedule.
 		bits_SOUND_MEAT			|
 		bits_SOUND_CARCASS,
-		"PitdroneEat"
+		"PIT_EAT"
 	}
 };
 
@@ -937,7 +938,7 @@ Schedule_t slPitdroneSniffAndEat[] =
 		// here or the monster won't detect these sounds at ALL while running this schedule.
 		bits_SOUND_MEAT			|
 		bits_SOUND_CARCASS,
-		"PitdroneSniffAndEat"
+		"PIT_SNIFF_AND_EAT"
 	}
 };
 
@@ -971,7 +972,7 @@ Schedule_t slPitdroneWallow[] =
 		// here or the monster won't detect these sounds at ALL while running this schedule.
 		bits_SOUND_GARBAGE,
 
-		"PitdroneWallow"
+		"PIT_WALLOW"
 	}
 };
 
@@ -996,7 +997,7 @@ Schedule_t slPitdroneHideReload[] =
 		bits_COND_HEAR_SOUND,
 		bits_SOUND_DANGER,
 
-		"PitdroneHideReload"
+		"PIT_HIDE_RELOAD"
 	}
 };
 
@@ -1020,7 +1021,7 @@ Schedule_t slPitdroneWaitInCover[] =
 		bits_COND_HEAR_SOUND,
 		bits_SOUND_DANGER,
 
-		"PitdroneWaitInCover"
+		"PIT_WAIT_IN_COVER"
 	}
 };
 
@@ -1178,6 +1179,14 @@ Schedule_t* CPitdrone :: GetScheduleOfType ( int Type )
 	}
 
 	return CBaseMonster :: GetScheduleOfType ( Type );
+}
+
+const char* CPitdrone::GetTaskName(int taskIdx) {
+	switch (taskIdx) {
+	case TASK_PITDRONE_HOPTURN: return "TASK_PITDRONE_HOPTURN";
+	default:
+		return CBaseMonster::GetTaskName(taskIdx);
+	}
 }
 
 //=========================================================

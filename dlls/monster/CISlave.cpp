@@ -670,7 +670,7 @@ Schedule_t	slSlaveAttack1[] =
 		bits_COND_HEAVY_DAMAGE, 
 
 		bits_SOUND_DANGER,
-		"Slave Range Attack1"
+		"SLAVE_RANGE_ATTACK1"
 	},
 };
 

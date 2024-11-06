@@ -211,6 +211,7 @@ public:
 	BOOL FValidateHintType ( short sHint );
 	Schedule_t *GetSchedule( void );
 	Schedule_t *GetScheduleOfType ( int Type );
+	const char* GetTaskName(int taskIdx);
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	int IRelationship ( CBaseEntity *pTarget );
 	int IgnoreConditions ( void );
@@ -826,7 +827,7 @@ Schedule_t	slSquidRangeAttack1[] =
 		bits_COND_ENEMY_OCCLUDED	|
 		bits_COND_NO_AMMO_LOADED,
 		0,
-		"Squid Range Attack1"
+		"SQUID_RANGE_ATTACK1"
 	},
 };
 
@@ -855,7 +856,7 @@ Schedule_t slSquidChaseEnemy[] =
 		
 		bits_SOUND_DANGER			|
 		bits_SOUND_MEAT,
-		"Squid Chase Enemy"
+		"SQUID_CHASE_ENEMY"
 	},
 };
 
@@ -874,7 +875,7 @@ Schedule_t slSquidHurtHop[] =
 		ARRAYSIZE ( tlSquidHurtHop ),
 		0,
 		0,
-		"SquidHurtHop"
+		"SQUID_HURT_HOP"
 	}
 };
 
@@ -894,7 +895,7 @@ Schedule_t slSquidSeeCrab[] =
 		bits_COND_LIGHT_DAMAGE		|
 		bits_COND_HEAVY_DAMAGE,
 		0,
-		"SquidSeeCrab"
+		"SQUID_SEE_CRAB"
 	}
 };
 
@@ -930,7 +931,7 @@ Schedule_t slSquidEat[] =
 		// here or the monster won't detect these sounds at ALL while running this schedule.
 		bits_SOUND_MEAT			|
 		bits_SOUND_CARCASS,
-		"SquidEat"
+		"SQUID_EAT"
 	}
 };
 
@@ -968,7 +969,7 @@ Schedule_t slSquidSniffAndEat[] =
 		// here or the monster won't detect these sounds at ALL while running this schedule.
 		bits_SOUND_MEAT			|
 		bits_SOUND_CARCASS,
-		"SquidSniffAndEat"
+		"SQUID_SNIFF_AND_EAT"
 	}
 };
 
@@ -1002,7 +1003,7 @@ Schedule_t slSquidWallow[] =
 		// here or the monster won't detect these sounds at ALL while running this schedule.
 		bits_SOUND_GARBAGE,
 
-		"SquidWallow"
+		"SQUID_WALLOW"
 	}
 };
 
@@ -1149,6 +1150,14 @@ Schedule_t* CBullsquid :: GetScheduleOfType ( int Type )
 		return &slSquidChaseEnemy[ 0 ];
 	default:
 		return CBaseMonster::GetScheduleOfType(Type);
+	}
+}
+
+const char* CBullsquid::GetTaskName(int taskIdx) {
+	switch (taskIdx) {
+	case TASK_SQUID_HOPTURN: return "TASK_SQUID_HOPTURN";
+	default:
+		return CBaseMonster::GetTaskName(taskIdx);
 	}
 }
 
