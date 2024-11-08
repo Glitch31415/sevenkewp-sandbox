@@ -7067,6 +7067,8 @@ int CBaseMonster::GetScheduleTableIdx() {
 			return i;
 		}
 	}
+
+	return -1;
 }
 
 //=========================================================
