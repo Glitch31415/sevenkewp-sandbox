@@ -401,9 +401,12 @@ void ServerDeactivate( void )
 	g_precachedModels.clear();
 	g_missingModels.clear();
 	g_precachedSounds.clear();
+	g_precachedEvents.clear();
 	g_tryPrecacheGeneric.clear();
 	g_tryPrecacheModels.clear();
 	g_tryPrecacheSounds.clear();
+	g_tryPrecacheEvents.clear();
+	g_allocedStrings.clear();
 	g_mapWeapons.clear();
 	g_wavInfos.clear();
 	g_weaponClassnames.clear();
@@ -1896,6 +1899,8 @@ This is the time to examine the usercmd for anything extra.  This call happens e
 */
 void CmdStart( const edict_t *player, const struct usercmd_s *cmd, unsigned int random_seed )
 {
+	CALL_HOOKS_VOID(pfnCmdStart, player, cmd, random_seed);
+
 	entvars_t *pev = (entvars_t *)&player->v;
 	CBasePlayer *pl = dynamic_cast< CBasePlayer *>( CBasePlayer::Instance( pev ) );
 
