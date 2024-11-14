@@ -388,21 +388,13 @@ void ClientCommand(edict_t* pEntity)
 
 	CALL_HOOKS_VOID(pfnClientCommand, pPlayer);
 
-	TextMenuClientCommandHook(pEntity);
+	TextMenuClientCommandHook(pPlayer);
 
 	const char* pcmd = CMD_ARGV(0);
 	const char* pstr;
 
 	if (CheatCommand(pEntity)) {
 		return;
-	}
-	else if (FStrEq(pcmd, "say"))
-	{
-		Host_Say(pEntity, 0);
-	}
-	else if (FStrEq(pcmd, "say_team"))
-	{
-		Host_Say(pEntity, 1);
 	}
 	else if (FStrEq(pcmd, "fullupdate"))
 	{
@@ -494,7 +486,7 @@ void ClientCommand(edict_t* pEntity)
 
 				if (FNullEnt(pentSpawnSpot)) {
 					pPlayer->m_wantToExitObserver = true;
-					UTIL_ClientPrint(pPlayer->edict(), print_chat, "Can't stop spectating. No spawn points are available.\n");
+					UTIL_ClientPrint(pPlayer, print_chat, "Can't stop spectating. No spawn points are available.\n");
 				}
 				else {
 					pPlayer->LeaveObserver();
@@ -504,7 +496,7 @@ void ClientCommand(edict_t* pEntity)
 			}
 		}
 		else
-			UTIL_ClientPrint(pEntity, print_console, "Spectator mode is disabled.\n");
+			UTIL_ClientPrint(pPlayer, print_console, "Spectator mode is disabled.\n");
 
 	}
 	else if (FStrEq(pcmd, "specmode"))	// new spectator mode
@@ -523,11 +515,22 @@ void ClientCommand(edict_t* pEntity)
 	}
 	else if (FStrEq(pcmd, "listplugins"))
 	{
-		g_pluginManager.ListPlugins(pEntity);
+		g_pluginManager.ListPlugins(pPlayer);
 	}
 	else if (g_pGameRules->ClientCommand(pPlayer, pcmd))
 	{
 		// MenuSelect returns true only if the command is properly handled,  so don't print a warning
+	}
+	else if (g_pluginManager.ClientCommand(pPlayer)) {
+		// plugin handled the command
+	}
+	else if (FStrEq(pcmd, "say"))
+	{
+		Host_Say(pEntity, 0);
+	}
+	else if (FStrEq(pcmd, "say_team"))
+	{
+		Host_Say(pEntity, 1);
 	}
 	else
 	{
@@ -548,6 +551,6 @@ void ClientCommand(edict_t* pEntity)
 		}
 
 		// tell the user they entered an unknown command
-		UTIL_ClientPrint(pEntity, print_console, UTIL_VarArgs("Unknown command: %s\n", command));
+		UTIL_ClientPrint(pPlayer, print_console, UTIL_VarArgs("Unknown command: %s\n", command));
 	}
 }
