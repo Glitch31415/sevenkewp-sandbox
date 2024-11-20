@@ -49,6 +49,7 @@ void CGrenade::Explode( Vector vecSrc, Vector vecAim )
 // UNDONE: temporary scorching for PreAlpha - find a less sleazy permenant solution.
 void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 {
+	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f, %f, %f", pev->origin[0], pev->origin[1], pev->origin[2]));
 	pev->model = iStringNull;//invisible
 	pev->solid = SOLID_NOT;// intangible
 
