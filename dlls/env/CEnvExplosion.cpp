@@ -73,7 +73,9 @@ void CEnvExplosion::Spawn(void)
 
 void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	UTIL_ClientPrintAll(print_chat, pev->origin);
+	UTIL_ClientPrintAll(print_chat, pev->origin.X);
+	UTIL_ClientPrintAll(print_chat, pev->origin.Y);
+	UTIL_ClientPrintAll(print_chat, pev->origin.Z);
 	TraceResult tr;
 
 	pev->model = iStringNull;//invisible
