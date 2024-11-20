@@ -5,7 +5,7 @@ project(${SERVER_DLL_NAME})
 set(MISC_HDR
 	../engine/studio.h
 	../common/Platform.h
-	cdll_dll.h
+	../game_shared/cdll_dll.h
 	enginecallback.h
 	extdll.h
 )
@@ -19,6 +19,7 @@ set(MONSTER_HDR
 	monster/CBaseGruntOp4.h
 	monster/CBaseMonster.h
 	monster/CBaseTurret.h
+	monster/CCineMonster.h
 	monster/CFlyingMonster.h
 	monster/CGargantua.h
 	monster/CHornet.h
@@ -28,6 +29,7 @@ set(MONSTER_HDR
 	monster/monsterevent.h
 	monster/monsters.h
 	monster/schedule.h
+	monster/nodes.h
 )
 set(MONSTER_SRC
 	monster/CBaseMonster.cpp
@@ -38,7 +40,7 @@ set(MONSTER_SRC
 	monster/CCineAI.cpp
 	monster/CCineMonster.cpp
 	monster/CScriptedSentence.cpp
-	nodes.cpp
+	monster/nodes.cpp
 )
 set(MONSTER_MISC_SRC
 	monster/CActAnimating.cpp
@@ -81,6 +83,7 @@ set(MONSTER_HUMAN_SRC
 	monster/CHWGrunt.cpp
 	monster/CMassn.cpp
 	monster/COtis.cpp
+	monster/CPlayerMonster.cpp
 	monster/CScientist.cpp
 )
 set(MONSTER_ALIEN_SRC
@@ -138,6 +141,7 @@ set(ENV_SRC
 	env/CEnvFunnel.cpp
 	env/CEnvGlobal.cpp
 	env/CEnvLight.cpp
+	env/CEnvSentence.cpp
 	env/CEnvShooter.cpp
 	env/CEnvSound.cpp
 	env/CEnvSpark.cpp
@@ -180,6 +184,7 @@ set(TRIGGER_HDR
 	triggers/CBaseTrigger.h
 	triggers/CGamePlayerEquip.h
 	triggers/CFireAndDie.h
+	triggers/CMultiSource.h
 	triggers/CRuleEntity.h
 	triggers/CTriggerMultiple.h
 	triggers/CTriggerVote.h
@@ -297,12 +302,14 @@ set(FUNC_SRC
 )
 
 set(ENTITY_HDR
-	cbase.h
-	ent_globals.h
-	nodes.h
-	CKeyValue.h
-	scripted.h
-	scriptevent.h
+	CBaseAnimating.h
+	CBaseDelay.h
+	CBaseEntity.h
+	CPointEntity.h
+	CBaseToggle.h
+	CWorld.h
+	EHandle.h
+	monster/scriptevent.h
 	path/CPathCorner.h
 	path/CPathTrack.h
 	../engine/progs.h
@@ -312,7 +319,6 @@ set(ENTITY_HDR
 	../common/const.h
 )
 set(ENTITY_SRC
-	cbase.cpp
 	CBaseAnimating.cpp
 	CBaseEntity.cpp
 	CBaseDelay.cpp
@@ -321,6 +327,7 @@ set(ENTITY_SRC
 	CNullEntity.cpp
 	CPointEntity.cpp
 	CWorld.cpp
+	EHandle.cpp
 	path/CPathCorner.cpp
 	path/CPathTrack.cpp
 )
@@ -405,45 +412,46 @@ set(AMMO_SRC
 )
 
 set(UTIL_HDR
-	animation.h
-	Bsp.h
-	bsptypes.h
-	bsplimits.h
-	CommandArgs.h
-	debug.h
-	eng_wrappers.h
-	plane.h
-	saverestore.h
-	util.h
-	mstream.h
-	lagcomp.h
-	vector.h
-	Scheduler.h
-	TextMenu.h
-	ThreadSafeInt.h
-	ThreadSafeQueue.h
-	wav.h
+	util/animation.h
+	util/Bsp.h
+	util/bsptypes.h
+	util/bsplimits.h
+	util/CKeyValue.h
+	util/CommandArgs.h
+	util/debug.h
+	util/eng_wrappers.h
+	util/plane.h
+	util/saverestore.h
+	util/util.h
+	util/mstream.h
+	util/lagcomp.h
+	util/vector.h
+	util/Scheduler.h
+	util/TextMenu.h
+	util/ThreadSafeInt.h
+	util/ThreadSafeQueue.h
+	util/wav.h
 	../game_shared/shared_util.h
 )
 set(UTIL_SRC
-	animation.cpp
-	Bsp.cpp
-	bsptypes.cpp
-	CommandArgs.cpp
-	debug.cpp
-	eng_wrappers.cpp
-	plane.cpp
-	sound.cpp
-	util.cpp
-	mstream.cpp
-	lagcomp.cpp
-	saverestore.cpp
-	Scheduler.cpp
-	subs.cpp
-	TextMenu.cpp
-	ThreadSafeInt.cpp
-	ThreadSafeQueue.cpp
-	wav.cpp
+	util/animation.cpp
+	util/Bsp.cpp
+	util/bsptypes.cpp
+	util/CommandArgs.cpp
+	util/debug.cpp
+	util/eng_wrappers.cpp
+	util/plane.cpp
+	util/sound.cpp
+	util/util.cpp
+	util/mstream.cpp
+	util/lagcomp.cpp
+	util/saverestore.cpp
+	util/Scheduler.cpp
+	util/subs.cpp
+	util/TextMenu.cpp
+	util/ThreadSafeInt.cpp
+	util/ThreadSafeQueue.cpp
+	util/wav.cpp
 	../game_shared/shared_util.cpp
 )
 set(PLAYER_HDR
@@ -453,16 +461,16 @@ set(PLAYER_HDR
 	../pm_shared/pm_materials.h
 	../pm_shared/pm_movevars.h
 	../pm_shared/pm_shared.h
-	CBasePlayer.h
-	CBaseSpectator.h
+	player/CBasePlayer.h
+	player/CBaseSpectator.h
 )
 set(PLAYER_SRC
 	../pm_shared/pm_shared.cpp
 	../pm_shared/pm_debug.cpp
 	../pm_shared/pm_math.cpp
-	CBaseDMStart.cpp
-	CBasePlayer.cpp
-	CBaseSpectator.cpp
+	player/CBaseDMStart.cpp
+	player/CBasePlayer.cpp
+	player/CBaseSpectator.cpp
 )
 set(HOOKS_HDR
 	../engine/custom.h
@@ -499,22 +507,22 @@ else()
 endif()
 
 set(GAME_HDR
-	game.h
-	gamerules.h
-	skill.h
-	teamplay_gamerules.h
-	user_messages.h
+	game/game.h
+	game/gamerules.h
+	game/skill.h
+	game/teamplay_gamerules.h
+	game/user_messages.h
 )
 set(GAME_SRC
-	game.cpp
-	gamerules.cpp
-	globals.cpp
-	multiplay_gamerules.cpp
-	singleplay_gamerules.cpp
-	skill.cpp
-	teamplay_gamerules.cpp
+	game/game.cpp
+	game/gamerules.cpp
+	game/globals.cpp
+	game/multiplay_gamerules.cpp
+	game/singleplay_gamerules.cpp
+	game/skill.cpp
+	game/teamplay_gamerules.cpp
 	../game_shared/voice_gamemgr.cpp
-	user_messages.cpp
+	game/user_messages.cpp
 )
 
 set(ALL_TRIGGER_MISC_SRC ${TRIGGER_SRC} ${TRIGGER_OBSOLETE_SRC})
@@ -644,8 +652,7 @@ if(UNIX)
 	)
 	
 elseif(MSVC)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W4") 
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/hl.def\"") 
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP /W4")
 	
 	set_target_properties(${SERVER_DLL_NAME} PROPERTIES
 		VS_DEBUGGER_COMMAND "${SERVER_WORK_DIR}/${SERVER_EXE}"

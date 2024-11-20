@@ -1,6 +1,5 @@
 #include "extdll.h"
 #include "util.h"
-#include "cbase.h"
 #include "monsters.h"
 
 #ifndef ANIMATION_H
@@ -8,7 +7,7 @@
 #endif
 
 #include "schedule.h"
-#include "scripted.h"
+#include "CCineMonster.h"
 #include "defaultai.h"
 
 #define CLASSNAME "scripted_sequence"

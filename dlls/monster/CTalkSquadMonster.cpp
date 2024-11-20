@@ -14,12 +14,11 @@
 ****/
 #include "extdll.h"
 #include "util.h"
-#include "cbase.h"
 #include "monsters.h"
 #include "schedule.h"
 #include "CTalkSquadMonster.h"
 #include "defaultai.h"
-#include "scripted.h"
+#include "CCineMonster.h"
 #include "env/CSoundEnt.h"
 #include "animation.h"
 #include "plane.h"
