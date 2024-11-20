@@ -205,8 +205,10 @@ void CGrenade::ExplodeTouch( CBaseEntity *pOther )
 	Vector		vecSpot;// trace starts here!
 
 	pev->enemy = pOther->edict();
+	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i", pev->enemy));
 
 	vecSpot = pev->origin - pev->velocity.Normalize() * 32;
+	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f, %f, %f", vecSpot[0], vecSpot[1], vecSpot[2]));
 	UTIL_TraceLine( vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, ENT(pev), &tr );
 
 	Explode( &tr, DMG_BLAST );
