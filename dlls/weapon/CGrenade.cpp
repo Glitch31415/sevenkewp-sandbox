@@ -60,7 +60,7 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 	{
 		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
 	}
-	pev->origin.z = pev->origin.z-1;
+	//pev->origin.z = pev->origin.z-1;
 	int iContents = UTIL_PointContents ( pev->origin );
 	
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );

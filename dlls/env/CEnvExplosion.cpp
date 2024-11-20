@@ -94,7 +94,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	{
 		pev->origin = pev->origin;
 	}
-	pev->origin.z = pev->origin.z-1;
+	//pev->origin.z = pev->origin.z-1;
 
 	// draw decal
 	if (!(pev->spawnflags & SF_ENVEXPLOSION_NODECAL))
