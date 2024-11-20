@@ -49,7 +49,7 @@ void CGrenade::Explode( Vector vecSrc, Vector vecAim )
 // UNDONE: temporary scorching for PreAlpha - find a less sleazy permenant solution.
 void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 {
-	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f, %f, %f", pev->origin[0], pev->origin[1], pev->origin[2]));
+
 	pev->model = iStringNull;//invisible
 	pev->solid = SOLID_NOT;// intangible
 
@@ -58,9 +58,9 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 	// Pull out of the wall a bit
 	if ( pTrace->flFraction != 1.0 )
 	{
-		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * (pev->dmg - 24) * 0.6);
+		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
 	}
-
+	pev->origin.z = pev->origin.z-1;
 	int iContents = UTIL_PointContents ( pev->origin );
 	
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
@@ -205,10 +205,10 @@ void CGrenade::ExplodeTouch( CBaseEntity *pOther )
 	Vector		vecSpot;// trace starts here!
 
 	pev->enemy = pOther->edict();
-	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i", pev->enemy));
+
 
 	vecSpot = pev->origin - pev->velocity.Normalize() * 32;
-	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f, %f, %f", vecSpot[0], vecSpot[1], vecSpot[2]));
+
 	UTIL_TraceLine( vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, ENT(pev), &tr );
 
 	Explode( &tr, DMG_BLAST );
