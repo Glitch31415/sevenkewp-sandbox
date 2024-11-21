@@ -441,7 +441,8 @@ void UTIL_MoveToOrigin( edict_t *pent, const Vector &vecGoal, float flDist, int 
 }
 
 
-int UTIL_EntitiesInBox( CBaseEntity **pList, int listMax, const Vector &mins, const Vector &maxs, int flagMask, bool ignoreDead )
+int UTIL_EntitiesInBox( CBaseEntity **pList, int listMax, const Vector &mins, const Vector &maxs,
+	int flagMask, bool ignoreDead, bool collisionOnly )
 {
 	edict_t		*pEdict = g_engfuncs.pfnPEntityOfEntIndex( 1 );
 	CBaseEntity *pEntity;
@@ -463,13 +464,25 @@ int UTIL_EntitiesInBox( CBaseEntity **pList, int listMax, const Vector &mins, co
 		if (ignoreDead && pEdict->v.deadflag >= DEAD_DEAD)
 			continue;
 
-		if ( mins.x > pEdict->v.absmax.x ||
-			 mins.y > pEdict->v.absmax.y ||
-			 mins.z > pEdict->v.absmax.z ||
-			 maxs.x < pEdict->v.absmin.x ||
-			 maxs.y < pEdict->v.absmin.y ||
-			 maxs.z < pEdict->v.absmin.z )
-			 continue;
+		Vector edMin;
+		Vector edMax;
+		if (collisionOnly) {
+			edMin = pEdict->v.origin - pEdict->v.mins;
+			edMax = pEdict->v.origin - pEdict->v.maxs;
+		}
+		else {
+			edMin = pEdict->v.absmin;
+			edMax = pEdict->v.absmin;
+		}
+			
+		if (mins.x > edMax.x ||
+			mins.y > edMax.y ||
+			mins.z > edMax.z ||
+			maxs.x < edMin.x ||
+			maxs.y < edMin.y ||
+			maxs.z < edMin.z)
+			continue;
+		
 
 		pEntity = CBaseEntity::Instance(pEdict);
 		if ( !pEntity )
@@ -718,19 +731,15 @@ void UTIL_MakeAimVectors( const Vector &vecAngles )
 	MAKE_VECTORS(rgflVec);
 }
 
-
-#define SWAP(a,b,temp)	((temp)=(a),(a)=(b),(b)=(temp))
-
 void UTIL_MakeInvVectors( const Vector &vec, globalvars_t *pgv )
 {
 	MAKE_VECTORS(vec);
 
-	float tmp;
 	pgv->v_right = pgv->v_right * -1;
 
-	SWAP(pgv->v_forward.y, pgv->v_right.x, tmp);
-	SWAP(pgv->v_forward.z, pgv->v_up.x, tmp);
-	SWAP(pgv->v_right.z, pgv->v_up.y, tmp);
+	SWAP(pgv->v_forward.y, pgv->v_right.x, float);
+	SWAP(pgv->v_forward.z, pgv->v_up.x, float);
+	SWAP(pgv->v_right.z, pgv->v_up.y, float);
 }
 
 // copied from rehlds
