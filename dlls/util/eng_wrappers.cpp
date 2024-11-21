@@ -159,11 +159,17 @@ int PRECACHE_GENERIC(const char* path) {
 	std::string lowerPath = toLowerCase(path);
 	path = lowerPath.c_str();
 
+	std::string soundPath = lowerPath;
+	if (lowerPath.find("sound/") == 0) {
+		soundPath = lowerPath.substr(6);
+	}
+
 	if (g_modelReplacements.find(path) != g_modelReplacements.end()) {
 		path = g_modelReplacements[path].c_str();
 	}
-	if (g_soundReplacements.find(path) != g_soundReplacements.end()) {
-		path = g_soundReplacements[path].c_str();
+	if (g_soundReplacements.find(soundPath) != g_soundReplacements.end()) {
+		lowerPath = "sound/" + g_soundReplacements[soundPath];
+		path = lowerPath.c_str();
 	}
 
 	if (g_serveractive) {
@@ -717,7 +723,7 @@ void PLAYBACK_EVENT_FULL(int flags, const edict_t* pInvoker, unsigned short even
 		iparam1, iparam2, bparam1, bparam2);
 }
 
-EXPORT string_t ALLOC_STRING(const char* str) {
+string_t ALLOC_STRING(const char* str) {
 	auto existing = g_allocedStrings.find(str);
 
 	if (existing != g_allocedStrings.end()) {
@@ -728,4 +734,27 @@ EXPORT string_t ALLOC_STRING(const char* str) {
 	g_allocedStrings[str] = newStr;
 
 	return newStr;
+}
+
+edict_t* FIND_ENTITY_BY_TARGETNAME(edict_t* entStart, const char* pszName) {
+	/*
+	edict_t* edicts = ENT(0);
+	int startAfter = entStart ? ENTINDEX(entStart) : 0;
+
+	for (int e = startAfter + 1; e < gpGlobals->maxEntities; e++)
+	{
+		edict_t* ed = &edicts[e];
+		if (ed->free)
+			continue;
+
+		if (!ed->v.targetname)
+			continue;
+
+		if (!strcmp(STRING(ed->v.targetname), pszName))
+			return ed;
+
+	}
+	return &edicts[0];
+	*/
+	return FIND_ENTITY_BY_STRING(entStart, "targetname", pszName);
 }
