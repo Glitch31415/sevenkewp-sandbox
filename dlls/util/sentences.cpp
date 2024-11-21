@@ -4,6 +4,7 @@
 #include "CBaseToggle.h"
 #include "wav.h"
 #include "eng_wrappers.h"
+#include <cstdint>
 
 std::unordered_map<std::string, CustomSentence> g_customSentencesMod;
 std::unordered_map<std::string, CustomSentence> g_customSentencesMap;
