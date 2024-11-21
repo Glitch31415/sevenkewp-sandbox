@@ -65,6 +65,7 @@ set(MONSTER_MACHINE_SRC
 	monster/CApache.cpp
 	monster/CBaseTurret.cpp
 	monster/CMiniTurret.cpp
+	monster/COp4Mortar.cpp
 	monster/COsprey.cpp
 	monster/CRoboGrunt.cpp
 	monster/CSentry.cpp
@@ -427,6 +428,7 @@ set(UTIL_HDR
 	util/lagcomp.h
 	util/vector.h
 	util/Scheduler.h
+	util/sentences.h
 	util/TextMenu.h
 	util/ThreadSafeInt.h
 	util/ThreadSafeQueue.h
@@ -447,6 +449,7 @@ set(UTIL_SRC
 	util/lagcomp.cpp
 	util/saverestore.cpp
 	util/Scheduler.cpp
+	util/sentences.cpp
 	util/subs.cpp
 	util/TextMenu.cpp
 	util/ThreadSafeInt.cpp

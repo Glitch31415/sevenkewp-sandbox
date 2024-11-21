@@ -45,6 +45,7 @@
 #include "CGamePlayerEquip.h"
 #include "PluginManager.h"
 #include "Scheduler.h"
+#include "sentences.h"
 
 #if !defined ( _WIN32 )
 #include <ctype.h>
@@ -991,6 +992,8 @@ void StartFrame( void )
 	lagcomp_update();
 
 	g_Scheduler.Think();
+
+	PlayCustomSentences();
 
 	handleThreadPrints();
 }
