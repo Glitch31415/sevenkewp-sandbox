@@ -246,7 +246,6 @@ CustomSentence* GetRandomCustomSentence(std::string sentenceGroupName) {
 
 void AddCustomSentencePlayer(CBaseToggle* ent, CustomSentence* sent, float volume, float attn) {
 	if (ent) {
-		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i", ent->edict()));
 		ent->m_customSent = sent;
 		ent->m_customSentLastWord = -1;
 		ent->m_customSentStartTime = g_engfuncs.pfnTime();
