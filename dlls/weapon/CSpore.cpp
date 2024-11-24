@@ -98,13 +98,7 @@ void CSpore::Spawn()
 		pev->friction = 0.7;
 	}
 
-<<<<<<< HEAD
-	CBaseEntity* owner = CBaseEntity::Instance(pev->owner);
-	CBaseMonster* ownerMon = owner ? owner->MyMonsterPointer() : NULL;
-	float dmg_mult = ownerMon ? ownerMon->m_damage_modifier : 1.0f;
-=======
 	float dmg_mult = GetDamageModifier();
->>>>>>> 47d72303aeaada86eb2d3e42124ea7713051d7c9
 
 	pev->dmg = gSkillData.sk_plr_spore * dmg_mult;
 
