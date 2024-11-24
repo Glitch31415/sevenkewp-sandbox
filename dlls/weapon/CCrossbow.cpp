@@ -109,9 +109,13 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 		// UNDONE: this needs to call TraceAttack instead
 		ClearMultiDamage( );
 
+<<<<<<< HEAD
 		CBaseEntity* owner = CBaseEntity::Instance(pev->owner);
 		CBaseMonster* ownerMon = owner ? owner->MyMonsterPointer() : NULL;
 		float dmg_mult = ownerMon ? ownerMon->m_damage_modifier : 1.0f;
+=======
+		float dmg_mult = GetDamageModifier();
+>>>>>>> 47d72303aeaada86eb2d3e42124ea7713051d7c9
 
 		if ( pOther->IsPlayer() )
 		{
@@ -383,7 +387,7 @@ void CCrossbow::FireSniperBolt()
 #ifndef CLIENT_DLL
 	if ( tr.pHit->v.takedamage )
 	{
-		float dmg_mult = m_pPlayer->m_damage_modifier;
+		float dmg_mult = GetDamageModifier();
 
 		ClearMultiDamage( );
 		CBaseEntity::Instance(tr.pHit)->TraceAttack(m_pPlayer->pev,
