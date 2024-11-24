@@ -673,6 +673,12 @@ UTIL_PrecacheOther("monster_gman");
 	if (g_mapWeapons.find("weapon_sporelauncher") != g_mapWeapons.end()) {
 		UTIL_PrecacheOther("weapon_sporelauncher");
 	}
+	if (g_mapWeapons.find("weapon_medkit") != g_mapWeapons.end()) {
+		UTIL_PrecacheOther("weapon_medkit");
+	}
+	if (g_mapWeapons.find("weapon_inventory") != g_mapWeapons.end()) {
+		UTIL_PrecacheOther("weapon_inventory");
+	}
 }
 
 void PrecacheTextureSounds() {

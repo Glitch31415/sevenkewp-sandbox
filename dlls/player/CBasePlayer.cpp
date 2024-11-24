@@ -51,6 +51,9 @@
 #include "CFuncVehicle.h"
 #include "PluginManager.h"
 #include "hlds_hooks.h"
+#include "CItemInventory.h"
+#include "CWeaponInventory.h"
+#include "CGamePlayerEquip.h"
 
 // #define DUCKFIX
 
@@ -672,10 +675,11 @@ void CBasePlayer::PackDeadPlayerItems( void )
 	iWeaponRules = g_pGameRules->DeadPlayerWeapons( this );
  	iAmmoRules = g_pGameRules->DeadPlayerAmmo( this );
 
+	DropAllInventoryItems(true, false);
+
 	if ( iWeaponRules == GR_PLR_DROP_GUN_NO && iAmmoRules == GR_PLR_DROP_AMMO_NO )
 	{
 		// nothing to pack. Remove the weapons and return. Don't call create on the box!
-		RemoveAllItems( TRUE );
 		return;
 	}
 
@@ -771,8 +775,6 @@ void CBasePlayer::PackDeadPlayerItems( void )
 		
 		}
 
-		RemoveAllItems(TRUE);// now strip off everything that wasn't handled by the code above.
-
 		return;
 	}
 
@@ -795,6 +797,9 @@ void CBasePlayer::PackDeadPlayerItems( void )
 	{
 		if (firstWep && FClassnameIs(firstWep->pev, "weapon_satchel") && (iPackAmmo[0] == -1 || (m_rgAmmo[iPackAmmo[0]] == 0)))
 		{
+			bPackItems = FALSE;
+		}
+		if (firstWep && FClassnameIs(firstWep->pev, "weapon_inventory")) {
 			bPackItems = FALSE;
 		}
 	}
@@ -834,12 +839,25 @@ void CBasePlayer::PackDeadPlayerItems( void )
 		REMOVE_ENTITY(pWeaponBox->edict());
 	}
 
-	RemoveAllItems( TRUE );// now strip off everything that wasn't handled by the code above.
-
 	CleanupWeaponboxes();
 }
 
-void CBasePlayer::RemoveAllItems( BOOL removeSuit )
+void CBasePlayer::HideAllItems() {
+	pev->viewmodel = 0;
+	pev->weaponmodel = 0;
+	pev->weapons = 0;
+
+	UpdateClientData();
+
+	// send Selected Weapon Message to our client
+	MESSAGE_BEGIN(MSG_ONE, gmsgCurWeapon, NULL, pev);
+	WRITE_BYTE(0);
+	WRITE_BYTE(0);
+	WRITE_BYTE(0);
+	MESSAGE_END();
+}
+
+void CBasePlayer::RemoveAllItems( BOOL removeSuit, BOOL removeItemsOnly)
 {
 	if (!g_serveractive) {
 		// game will crash if removing custom weapons defined in plugins that were unloaded during level change
@@ -855,8 +873,6 @@ void CBasePlayer::RemoveAllItems( BOOL removeSuit )
 	}
 
 	m_pLastItem = NULL;
-
-	ReleaseControlledObjects();
 
 	int i;
 	CBasePlayerItem *pPendingItem;
@@ -874,24 +890,11 @@ void CBasePlayer::RemoveAllItems( BOOL removeSuit )
 	}
 	m_pActiveItem = NULL;
 
-	pev->viewmodel		= 0;
-	pev->weaponmodel	= 0;
-	
-	if ( removeSuit )
-		pev->weapons = 0;
-	else
-		pev->weapons &= ~WEAPON_ALLWEAPONS;
-
-	for ( i = 0; i < MAX_AMMO_SLOTS;i++)
+	for (int i = 0; i < MAX_AMMO_SLOTS; i++)
 		m_rgAmmo[i] = 0;
 
-	UpdateClientData();
-	// send Selected Weapon Message to our client
-	MESSAGE_BEGIN( MSG_ONE, gmsgCurWeapon, NULL, pev );
-		WRITE_BYTE(0);
-		WRITE_BYTE(0);
-		WRITE_BYTE(0);
-	MESSAGE_END();
+	if (!removeItemsOnly)
+		HideAllItems();
 }
 
 /*
@@ -910,6 +913,8 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 		return; // don't repeat kill messages when gibbed
 	}
 
+	SetRevivalVars();
+
 	m_lastKillTime = gpGlobals->time;
 
 	// Holster weapon immediately, to allow it to cleanup
@@ -918,6 +923,7 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 
 	g_pGameRules->PlayerKilled( this, pevAttacker, g_pevLastInflictor );
 
+	HideAllItems();
 	ReleaseControlledObjects();
 
 	// this client isn't going to be thinking for a while, so reset the sound until they respawn
@@ -1267,6 +1273,22 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 	ResetSequenceInfo( );
 }
 
+void CBasePlayer::TabulateWeapons(void) {
+	for (int i = 0; i < MAX_ITEM_TYPES; i++) {
+		if (m_rgpPlayerItems[i]) {
+			CBasePlayerItem* pPlayerItem = (CBasePlayerItem*)m_rgpPlayerItems[i].GetEntity();
+
+			while (pPlayerItem) {
+				pev->weapons |= (1 << pPlayerItem->m_iId);
+				pPlayerItem = (CBasePlayerItem*)pPlayerItem->m_pNext.GetEntity();
+			}
+		}
+	}
+
+	if (!g_noSuit)
+		pev->weapons |= (1 << WEAPON_SUIT);
+}
+
 /*
 ===========
 TabulateAmmo
@@ -1432,7 +1454,7 @@ void CBasePlayer::WaterMove()
 	// make bubbles
 
 	air = (int)(pev->air_finished - gpGlobals->time);
-	if (!RANDOM_LONG(0,0x1f) && RANDOM_LONG(0,AIRTIME-1) >= air && IsAlive())
+	if (!RANDOM_LONG(0,0x1f) && RANDOM_LONG(0,(AIRTIME + m_airTimeModifier)-1) >= air && IsAlive())
 	{
 		switch (RANDOM_LONG(0,3))
 			{
@@ -1481,13 +1503,14 @@ void CBasePlayer::PlayerDeathThink(void)
 			pev->velocity = flForward * pev->velocity.Normalize();
 	}
 
-	if ( HasWeapons() )
+	if ( !m_droppedDeathWeapons )
 	{
 		// we drop the guns here because weapons that have an area effect and can kill their user
 		// will sometimes crash coming back from CBasePlayer::Killed() if they kill their owner because the
 		// player class sometimes is freed. It's safer to manipulate the weapons once we know
 		// we aren't calling into any of their code anymore through the player pointer.
 		PackDeadPlayerItems();
+		m_droppedDeathWeapons = true;
 	}
 
 	float deadTime = gpGlobals->time - m_lastKillTime;
@@ -1649,6 +1672,9 @@ void CBasePlayer::StartDeathCam( void )
 
 void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 {
+	if (IsAlive())
+		SetRevivalVars();
+
 	// clear any clientside entities attached to this player
 	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
 		WRITE_BYTE( TE_KILLPLAYERATTACHMENTS );
@@ -1694,15 +1720,13 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 	pev->health = 1;
 	m_isObserver = true;
 	m_lastObserverSwitch = gpGlobals->time;
+	pev->viewmodel = 0; // prevent floating view models
 
 	// Clear out the status bar
 	m_fInitHUD = TRUE;
 
 	pev->team =  0;
 	UpdateTeamInfo();
-
-	// Remove all the player's stuff
-	RemoveAllItems( FALSE );
 
 	// Move them to the new position
 	UTIL_SetOrigin( pev, vecPosition );
@@ -1712,13 +1736,22 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 	Observer_SetMode( m_iObserverLastMode );
 }
 
-void CBasePlayer::LeaveObserver()
+void CBasePlayer::LeaveObserver(bool respawn)
 {
+	if (!m_isObserver) {
+		return;
+	}
+
 	ClearBits( m_afPhysicsFlags, PFLAG_OBSERVER );
 	pev->iuser1 = OBS_NONE;
+	pev->iuser2 = 0;
+	pev->iuser3 = 0;
 	m_isObserver = false;
 	m_lastObserverSwitch = gpGlobals->time;
 	m_iHideHUD = 0;
+
+	pev->effects &= ~EF_NODRAW;
+	pev->takedamage = DAMAGE_YES;
 
 	UpdateTeamInfo();
 
@@ -1726,7 +1759,8 @@ void CBasePlayer::LeaveObserver()
 	m_fInitHUD = true;
 	m_fGameHUDInitialized = false;
 
-	Spawn();
+	if (respawn)
+		Spawn();
 }
 
 // 
@@ -1775,6 +1809,10 @@ void CBasePlayer::PlayerUse ( void )
 
 				if ( pTrain && !(pev->button & IN_JUMP) && FBitSet(pev->flags, FL_ONGROUND) && (pTrain->ObjectCaps() & FCAP_DIRECTIONAL_USE) && pTrain->OnControls(pev) )
 				{
+					if (!pTrain->RunInventoryRules(this)) {
+						return;
+					}
+
 					m_afPhysicsFlags |= PFLAG_ONTRAIN;
 					m_iTrain = TrainSpeed(pTrain->pev->speed, pTrain->pev->impulse);
 					m_iTrain |= TRAIN_NEW;
@@ -3244,6 +3282,12 @@ pt_end:
 	}
 #endif
 
+	// reset friction if not touching any friction triggers
+	if (m_friction_modifier != 1.0f && (gpGlobals->time - m_last_friction_trigger_touch > 0.2f)) {
+		m_friction_modifier = 1.0f;
+		ApplyEffects();
+	}
+
 	// Track button info so we can detect 'pressed' and 'released' buttons next frame
 	m_afButtonLast = pev->button;
 	pev->oldorigin = pev->origin; // for func_clip
@@ -3251,6 +3295,9 @@ pt_end:
 
 void CBasePlayer::Spawn( void )
 {
+	// not hiding HUD elements because the client can end up with no HUD after spawn finishes
+	RemoveAllItems(TRUE, TRUE);
+
 	m_flStartCharge = gpGlobals->time;
 
 	pev->classname		= MAKE_STRING("player");
@@ -3279,6 +3326,12 @@ void CBasePlayer::Spawn( void )
 	m_lastDropTime = 0;
 	m_lastDamageEnt = NULL;
 	m_lastDamageType = 0;
+	m_friction_modifier = 1.0f;
+	m_gravity_modifier = 0;
+	m_speed_modifier = 0;
+	m_airTimeModifier = 0;
+	m_weaponsDisabled = false;
+	m_droppedDeathWeapons = false;
 	memset(m_nextItemPickups, 0, sizeof(float) * MAX_WEAPONS);
 
 	if( pev->iuser1 != OBS_NONE )
@@ -3398,6 +3451,7 @@ void CBasePlayer::Spawn( void )
 		StartObserver(anySpawnPoint->v.origin, anySpawnPoint->v.angles);
 		m_wantToExitObserver = true;
 	}
+<<<<<<< HEAD
 		GiveNamedItem( "ammo_9mmclip" );
 		GiveNamedItem( "weapon_shotgun" );
 		GiveNamedItem( "ammo_buckshot" );
@@ -3424,6 +3478,11 @@ void CBasePlayer::Spawn( void )
 		GiveNamedItem( "weapon_shockrifle" );
 		GiveNamedItem( "weapon_sporelauncher" );
 
+=======
+
+	DropAllInventoryItems(false, true);
+	ApplyEffects();
+>>>>>>> 892ecf7e235b690144590bc171a9f1ccdde36385
 }
 
 void CBasePlayer :: Precache( void )
@@ -3610,6 +3669,10 @@ void CBasePlayer::SelectItem(const char *pstr)
 	if (!pstr)
 		return;
 
+	if (m_weaponsDisabled) {
+		return;
+	}
+
 	CBasePlayerItem *pItem = NULL;
 
 	for (int i = 0; i < MAX_ITEM_TYPES; i++)
@@ -3660,6 +3723,10 @@ void CBasePlayer::SelectLastItem(void)
 {
 	if (!m_pLastItem)
 	{
+		return;
+	}
+
+	if (m_weaponsDisabled) {
 		return;
 	}
 
@@ -3953,6 +4020,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_displacer" );
 		GiveNamedItem( "weapon_shockrifle" );
 		GiveNamedItem( "weapon_sporelauncher" );
+		GiveNamedItem( "weapon_medkit" );
 		if (!m_fLongJump) {
 			GiveNamedItem("item_longjump");
 		}
@@ -4165,6 +4233,8 @@ int CBasePlayer::RemovePlayerItem( CBasePlayerItem *pItem )
 	}
 	else if ( m_pLastItem.GetEntity() == pItem )
 		m_pLastItem = NULL;
+
+	pev->weapons &= ~(1 << pItem->m_iId); // take item off hud
 
 	CBasePlayerItem *pPrev = (CBasePlayerItem*)m_rgpPlayerItems[pItem->iItemSlot()].GetEntity();
 
@@ -4729,6 +4799,14 @@ void CBasePlayer :: EnableControl(BOOL fControl)
 
 }
 
+void CBasePlayer::DisableWeapons(bool disable) {
+	if (disable) {
+		SelectItem("weapon_inventory");
+	}
+
+	m_weaponsDisabled = disable;
+}
+
 //=========================================================
 // Autoaim
 // set crosshair position to point to enemey
@@ -5070,6 +5148,15 @@ void CBasePlayer::DropPlayerItem ( char *pszItemName )
 
 			pev->weapons &= ~(1<<pWeapon->m_iId);// take item off hud
 
+			SetAnimation(PLAYER_DROP_ITEM);
+
+			if (!strcmp(STRING(pWeapon->pev->classname), "weapon_inventory")) {
+				if (RemovePlayerItem(pWeapon) && m_inventory) {
+					DropAllInventoryItems();
+				}
+				return;
+			}
+
 			if (!strcmp(STRING(pWeapon->pev->classname), "weapon_shockrifle")) {
 				// fixme: logic duplicated in kill code
 				if (RemovePlayerItem(pWeapon)) {
@@ -5140,8 +5227,6 @@ void CBasePlayer::DropPlayerItem ( char *pszItemName )
 			}
 
 			CleanupWeaponboxes();
-
-			SetAnimation(PLAYER_DROP_ITEM);
 
 			return;// we're done, so stop searching with the FOR loop.
 		}
@@ -5260,29 +5345,33 @@ BOOL CBasePlayer::HasPlayerItem( CBasePlayerItem *pCheckItem )
 	return FALSE;
 }
 
-//=========================================================
-// HasNamedPlayerItem Does the player already have this item?
-//=========================================================
-BOOL CBasePlayer::HasNamedPlayerItem( const char *pszItemName )
-{
-	CBasePlayerItem *pItem;
+CBasePlayerItem* CBasePlayer::GetNamedPlayerItem(const char* pszItemName) {
+	CBasePlayerItem* pItem;
 	int i;
- 
-	for ( i = 0 ; i < MAX_ITEM_TYPES ; i++ )
+
+	for (i = 0; i < MAX_ITEM_TYPES; i++)
 	{
 		pItem = (CBasePlayerItem*)m_rgpPlayerItems[i].GetEntity();
-		
+
 		while (pItem)
 		{
-			if ( !strcmp( pszItemName, STRING( pItem->pev->classname ) ) )
+			if (!strcmp(pszItemName, STRING(pItem->pev->classname)))
 			{
-				return TRUE;
+				return pItem;
 			}
 			pItem = (CBasePlayerItem*)pItem->m_pNext.GetEntity();
 		}
 	}
 
-	return FALSE;
+	return NULL;
+}
+
+//=========================================================
+// HasNamedPlayerItem Does the player already have this item?
+//=========================================================
+BOOL CBasePlayer::HasNamedPlayerItem( const char *pszItemName )
+{
+	return GetNamedPlayerItem(pszItemName) ? TRUE : FALSE;
 }
 
 //=========================================================
@@ -5292,6 +5381,10 @@ BOOL CBasePlayer :: SwitchWeapon( CBasePlayerItem *pWeapon )
 {
 	if ( !pWeapon->CanDeploy() )
 	{
+		return FALSE;
+	}
+
+	if (m_weaponsDisabled) {
 		return FALSE;
 	}
 	
@@ -5810,4 +5903,123 @@ uint64_t CBasePlayer::GetSteamID64() {
 
 int CBasePlayer::GetUserID() {
 	return  g_engfuncs.pfnGetPlayerUserId(edict());
+}
+
+void CBasePlayer::ShowInteractMessage(const char* msg) {
+	if (gpGlobals->time - m_lastInteractMessage < 1.0f) {
+		// prevent message spam
+		return;
+	}
+
+	m_lastInteractMessage = gpGlobals->time;
+
+	CWeaponInventory* wep = (CWeaponInventory*)GetNamedPlayerItem("weapon_inventory");
+
+	if (wep && m_pActiveItem.GetEntity() == wep) {
+		// weapon has a constant center print active, so append to that instead of starting a new message
+		wep->SetError(msg);
+	}
+	else {
+		UTIL_ClientPrint(this, print_center, msg);
+	}
+}
+
+void CBasePlayer::DropAllInventoryItems(bool deathDrop, bool respawnDrop) {
+	if (!m_inventory) {
+		return;
+	}
+
+	int itemCount = CountInventoryItems();
+
+	float dropSpread = itemCount == 1 ? 0 : V_min(90, 10.0f * itemCount);
+	float spreadStep = dropSpread / (float)(itemCount - 1);
+
+	// drop all inventory items instead of the weapon itself
+	CItemInventory* item = m_inventory.GetEntity()->MyInventoryPointer();
+	float spread = -dropSpread * 0.5f;
+
+	CWeaponInventory* invWep = (CWeaponInventory*)GetNamedPlayerItem("weapon_inventory");
+
+	Vector old_vangle = pev->v_angle;
+
+	while (item) {
+		CItemInventory* nextItem = item->m_pNext ? item->m_pNext.GetEntity()->MyInventoryPointer() : NULL;
+
+		bool shouldDrop = item->m_holder_can_drop && !deathDrop && !respawnDrop;
+		if (deathDrop) {
+			shouldDrop = !item->m_holder_keep_on_death;
+		}
+		if (respawnDrop) {
+			shouldDrop = !item->m_holder_keep_on_respawn;
+		}
+
+		if (shouldDrop) {
+			pev->v_angle = Vector(old_vangle.x, old_vangle.y + spread, 0);
+			item->Detach(true);
+		}
+		else if (invWep && !deathDrop && !respawnDrop) {
+			invWep->SetError(INV_ERROR_CANT_DROP);
+			item->FireInvTargets(this, item->m_target_cant_drop);
+		}
+
+		item = nextItem;
+		spread += spreadStep;
+	}
+
+	pev->v_angle = old_vangle;
+}
+
+void CBasePlayer::Revive() {
+	LeaveObserver(false);
+
+	// in case revived in a vent or something
+	UTIL_SetSize(pev, VEC_DUCK_HULL_MIN, VEC_DUCK_HULL_MAX);
+	pev->flags |= FL_DUCKING;
+	m_afPhysicsFlags |= PFLAG_DUCKING;
+	pev->view_ofs = VEC_DUCK_VIEW;
+
+	pev->max_health = m_deathHealthMax;
+	pev->movetype = m_deathMovetype;
+	pev->rendermode = m_deathRenderMode;
+	pev->renderamt = m_deathRenderAmt;
+	pev->renderfx = m_deathRenderFx;
+	pev->rendercolor = m_deathRenderColor;
+
+	pev->health = pev->max_health * 0.5f;
+	pev->deadflag = DEAD_NO;
+	pev->solid = SOLID_SLIDEBOX;
+
+	pev->fov = m_iFOV = 0;// init field of view.
+	m_iClientFOV = -1; // make sure fov reset is sent
+	m_flNextAttack = UTIL_WeaponTimeBase();
+	m_flFlashLightTime = 1; // force first message
+	m_deathMessageSent = false;
+	m_droppedDeathWeapons = false;
+
+	m_pLastItem = NULL;
+	m_fInitHUD = TRUE;
+	m_iClientHideHUD = -1;  // force this to be recalculated
+	m_pClientActiveItem = NULL;
+	m_iClientBattery = -1;
+	memset(m_rgAmmoLast, 0, sizeof(int) * MAX_AMMO_SLOTS); // init ammo hud
+
+	pev->nextthink = 0;
+	SetThink(NULL);
+
+	if (!m_hActiveCamera) {
+		SET_VIEW(edict(), edict());
+	}
+
+	TabulateWeapons();
+	ApplyEffects();
+
+	// unholster held weapon
+	CBasePlayerWeapon* wep = m_pActiveItem ? m_pActiveItem->GetWeaponPtr() : NULL;
+	if (wep) {
+		wep->Deploy();
+	}
+	else {
+		// or next best weapon
+		g_pGameRules->GetNextBestWeapon(this, NULL);
+	}
 }

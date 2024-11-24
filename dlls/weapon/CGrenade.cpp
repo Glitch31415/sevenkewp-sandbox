@@ -400,7 +400,10 @@ CGrenade *CGrenade::ShootContact( entvars_t *pevOwner, Vector vecStart, Vector v
 	// Explode on contact
 	pGrenade->SetTouch( &CGrenade::ExplodeTouch );
 
-	pGrenade->pev->dmg = gSkillData.sk_plr_9mmAR_grenade;
+	CBaseEntity* owner = CBaseEntity::Instance(ENT(pevOwner));
+	CBaseMonster* ownerMon = owner ? owner->MyMonsterPointer() : NULL;
+	float dmg_mult = ownerMon ? ownerMon->m_damage_modifier : 1.0f;
+	pGrenade->pev->dmg = gSkillData.sk_plr_9mmAR_grenade * dmg_mult;
 
 	return pGrenade;
 }
@@ -439,8 +442,12 @@ CGrenade * CGrenade:: ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector v
 	pGrenade->pev->gravity = 0.5;
 	pGrenade->pev->friction = 0.8;
 
+	CBaseEntity* owner = CBaseEntity::Instance(ENT(pevOwner));
+	CBaseMonster* ownerMon = owner ? owner->MyMonsterPointer() : NULL;
+	float dmg_mult = ownerMon ? ownerMon->m_damage_modifier : 1.0f;
+	pGrenade->pev->dmg = 100 * dmg_mult;
+
 	SET_MODEL(ENT(pGrenade->pev), model ? model : pGrenade->GetModel());
-	pGrenade->pev->dmg = 100;
 
 	return pGrenade;
 }
@@ -459,7 +466,11 @@ CGrenade * CGrenade :: ShootSatchelCharge( entvars_t *pevOwner, Vector vecStart,
 
 	UTIL_SetSize(pGrenade->pev, Vector( 0, 0, 0), Vector(0, 0, 0));
 
-	pGrenade->pev->dmg = 200;
+	CBaseEntity* owner = CBaseEntity::Instance(ENT(pevOwner));
+	CBaseMonster* ownerMon = owner ? owner->MyMonsterPointer() : NULL;
+	float dmg_mult = ownerMon ? ownerMon->m_damage_modifier : 1.0f;
+	pGrenade->pev->dmg = 200 * dmg_mult;
+
 	UTIL_SetOrigin( pGrenade->pev, vecStart );
 	pGrenade->pev->velocity = vecVelocity;
 	pGrenade->pev->angles = g_vecZero;

@@ -87,6 +87,8 @@ void CBaseGrunt :: GibMonster ( void )
 
 void CBaseGrunt::Killed(entvars_t* pevAttacker, int iGib)
 {
+	m_deadEquipment = m_iEquipment;
+
 	if (m_MonsterState != MONSTERSTATE_DEAD) //TODO: skip this for medic?
 	{
 		if (HasMemory(bits_MEMORY_SUSPICIOUS) || IsFacing(pevAttacker, pev->origin))
@@ -2614,6 +2616,11 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 	}
 }
 
+void CBaseGrunt::Revive() {
+	m_iEquipment = m_deadEquipment;
+
+	CBaseMonster::Revive();
+}
 
 
 void CBaseRepel::Spawn(void) {

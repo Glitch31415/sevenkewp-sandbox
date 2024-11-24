@@ -165,6 +165,7 @@ set(ENV_SRC
 
 set(ITEM_HDR
 	item/CItem.h
+	item/CItemInventory.h
 )
 set(ITEM_SRC
 	item/CAirtank.cpp
@@ -173,6 +174,7 @@ set(ITEM_SRC
 	item/CItemAntidote.cpp
 	item/CItemBattery.cpp
 	item/CItemGeneric.cpp
+	item/CItemInventory.cpp
 	item/CItemLongJump.cpp
 	item/CItemSecurity.cpp
 	item/CItemSoda.cpp
@@ -344,6 +346,7 @@ set(WEAPON_HDR
 	weapon/CGlock.h
 	weapon/CCrowbar.h
 	weapon/CPython.h
+	weapon/CMedkit.h
 	weapon/CMP5.h
 	weapon/CCrossbow.h
 	weapon/CShotgun.h
@@ -360,6 +363,7 @@ set(WEAPON_HDR
 	weapon/CPipewrench.h
 	weapon/CShockRifle.h
 	weapon/CSporeLauncher.h
+	weapon/CWeaponInventory.h
 	weapon/weapons.h
 )
 set(WEAPON_SRC
@@ -372,11 +376,12 @@ set(WEAPON_SRC
 	weapon/CGrenade.cpp
 	weapon/CGrapple.cpp
 	weapon/CGrappleTip.cpp
-	weapon/CHandGrenade.cpp	
+	weapon/CHandGrenade.cpp
 	weapon/CHgun.cpp
 	weapon/CMortar.cpp
 	weapon/CMP5.cpp
 	weapon/CPython.cpp
+	weapon/CMedkit.cpp
 	weapon/CRpg.cpp
 	weapon/CSatchel.cpp
 	weapon/CShockBeam.cpp
@@ -392,6 +397,7 @@ set(WEAPON_SRC
 	weapon/CSporeLauncher.cpp
 	weapon/weapons.cpp
 	weapon/CGlock.cpp
+	weapon/CWeaponInventory.cpp
 	weapon/combat.cpp
 )
 set(AMMO_HDR
@@ -403,6 +409,7 @@ set(AMMO_SRC
 	weapon/CCrossbowAmmo.cpp
 	weapon/CGaussAmmo.cpp
 	weapon/CGlockAmmo.cpp
+	weapon/CMedkitAmmo.cpp
 	weapon/CMP5AmmoBox.cpp
 	weapon/CMP5AmmoClip.cpp
 	weapon/CMP5AmmoGrenade.cpp
