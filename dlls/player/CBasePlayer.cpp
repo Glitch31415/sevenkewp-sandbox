@@ -3451,8 +3451,11 @@ void CBasePlayer::Spawn( void )
 		StartObserver(anySpawnPoint->v.origin, anySpawnPoint->v.angles);
 		m_wantToExitObserver = true;
 	}
-<<<<<<< HEAD
-		GiveNamedItem( "ammo_9mmclip" );
+
+
+	DropAllInventoryItems(false, true);
+	ApplyEffects();
+			GiveNamedItem( "ammo_9mmclip" );
 		GiveNamedItem( "weapon_shotgun" );
 		GiveNamedItem( "ammo_buckshot" );
 		GiveNamedItem( "weapon_9mmAR" );
@@ -3478,11 +3481,6 @@ void CBasePlayer::Spawn( void )
 		GiveNamedItem( "weapon_shockrifle" );
 		GiveNamedItem( "weapon_sporelauncher" );
 
-=======
-
-	DropAllInventoryItems(false, true);
-	ApplyEffects();
->>>>>>> 892ecf7e235b690144590bc171a9f1ccdde36385
 }
 
 void CBasePlayer :: Precache( void )
