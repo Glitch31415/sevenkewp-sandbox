@@ -3689,6 +3689,8 @@ void CBaseMonster::MonsterInitDead(void)
 	BecomeDead();
 	SetThink(&CBaseMonster::CorpseFallThink);
 	pev->nextthink = gpGlobals->time + 0.5;
+	
+	m_startDead = true;
 }
 
 //=========================================================
@@ -6502,10 +6504,13 @@ void CBaseMonster::StartTask(Task_t* pTask)
 		if (m_hTargetEnt != NULL)
 		{
 			Vector scriptOri = m_hTargetEnt->pev->origin;
-			TraceResult tr;
-			TRACE_MONSTER_HULL(edict(), scriptOri, scriptOri - Vector(0, 0, 512), ignore_monsters, edict(), &tr);
-			
-			pev->origin = tr.vecEndPos;	// Plant on floor under script
+
+			if (scriptOri.z > pev->origin.z) {
+				TraceResult tr;
+				TRACE_MONSTER_HULL(edict(), scriptOri, scriptOri - Vector(0, 0, 512), ignore_monsters, edict(), &tr);
+
+				pev->origin = tr.vecEndPos;	// Plant on floor under script
+			}
 		}
 
 		TaskComplete();
@@ -7310,8 +7315,15 @@ void CBaseMonster::StopFollowing(BOOL clearSchedule)
 
 void CBaseMonster::StartFollowing(CBaseEntity* pLeader)
 {
-	if (m_hCine)
-		((CCineMonster*)m_hCine.GetEntity())->CancelScript();
+	if (m_hCine) {
+		CCineMonster* cine = (CCineMonster*)m_hCine.GetEntity();
+		if (!cine->CanInterrupt()) {
+			return;
+		}
+
+		cine->CancelScript();
+	}
+		
 
 	if (m_hEnemy != NULL)
 		m_IdealMonsterState = MONSTERSTATE_ALERT;
