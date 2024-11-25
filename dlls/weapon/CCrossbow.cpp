@@ -438,12 +438,12 @@ void CCrossbow::FireBolt()
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
 		pBolt->pev->velocity = (vecDir * BOLT_WATER_VELOCITY)+m_pPlayer->pev->velocity;
-		pBolt->pev->speed = BOLT_WATER_VELOCITY+m_pPlayer->pev->velocity->magnitude;
+		pBolt->pev->speed = BOLT_WATER_VELOCITY+sqrt((m_pPlayer->pev->velocity.x^2)+(m_pPlayer->pev->velocity.y^2)+(m_pPlayer->pev->velocity.z^2));
 	}
 	else
 	{
 		pBolt->pev->velocity = vecDir * (BOLT_AIR_VELOCITY)+m_pPlayer->pev->velocity;
-		pBolt->pev->speed = BOLT_AIR_VELOCITY+m_pPlayer->pev->velocity->magnitude;
+		pBolt->pev->speed = BOLT_AIR_VELOCITY+sqrt((m_pPlayer->pev->velocity.x^2)+(m_pPlayer->pev->velocity.y^2)+(m_pPlayer->pev->velocity.z^2));
 	}
 	pBolt->pev->avelocity.z = 10;
 #endif
