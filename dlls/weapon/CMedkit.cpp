@@ -166,6 +166,7 @@ void CMedkit::PrimaryAttack()
 		mon = m_pPlayer;
 	}
 	if (ammoLeft <= 0) {
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "items/medshotno1.wav", 1, ATTN_NORM);
 		return;
 	}
 
@@ -202,6 +203,9 @@ void CMedkit::PrimaryAttack()
 		EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_WEAPON, "items/medshot4.wav", 1, ATTN_NORM, 0, pitch);
 
 		m_flNextPrimaryAttack = GetNextAttackDelay(0.5f);
+	}
+	else {
+		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "items/medshotno1.wav", 1, ATTN_NORM);
 	}
 }
 
