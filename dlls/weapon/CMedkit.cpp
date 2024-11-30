@@ -162,8 +162,10 @@ void CMedkit::PrimaryAttack()
 
 	CBaseMonster* mon = tr.pHit ? CBaseEntity::Instance(tr.pHit)->MyMonsterPointer() : NULL;
 	int ammoLeft = m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType];
-
-	if (!mon || ammoLeft <= 0) {
+	if (!mon) {
+		mon = m_pPlayer;
+	}
+	if (ammoLeft <= 0) {
 		return;
 	}
 
