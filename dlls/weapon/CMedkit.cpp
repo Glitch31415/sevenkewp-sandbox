@@ -113,7 +113,7 @@ void CMedkit::WeaponIdle()
 
 	if (m_reviveChargedTime) {
 		m_reviveChargedTime = 0;
-		m_flNextSecondaryAttack = GetNextAttackDelay(0.5f);
+		m_flNextSecondaryAttack = GetNextAttackDelay(1f);
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "items/medshotno1.wav", 1, ATTN_NORM);
 	}
 
@@ -167,7 +167,7 @@ void CMedkit::PrimaryAttack()
 	}
 	if (ammoLeft <= 0) {
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "items/medshotno1.wav", 1, ATTN_NORM);
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.5f);
+		m_flNextPrimaryAttack = GetNextAttackDelay(1f);
 		return;
 	}
 
@@ -203,11 +203,11 @@ void CMedkit::PrimaryAttack()
 		
 		EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_WEAPON, "items/medshot4.wav", 1, ATTN_NORM, 0, pitch);
 
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.5f);
+		m_flNextPrimaryAttack = GetNextAttackDelay(1f);
 	}
 	else {
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "items/medshotno1.wav", 1, ATTN_NORM);
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.5f);
+		m_flNextPrimaryAttack = GetNextAttackDelay(1f);
 	}
 }
 
@@ -221,7 +221,7 @@ void CMedkit::SecondaryAttack()
 
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= gSkillData.sk_plr_medkit_revive_cost) {
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "items/medshotno1.wav", 1, ATTN_NORM);
-		m_flNextSecondaryAttack = GetNextAttackDelay(0.5f);
+		m_flNextSecondaryAttack = GetNextAttackDelay(1f);
 		m_reviveChargedTime = 0;
 		return;
 	}
@@ -257,7 +257,7 @@ void CMedkit::SecondaryAttack()
 
 	if (!bestTarget) {
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "items/medshotno1.wav", 1, ATTN_NORM);
-		m_flNextSecondaryAttack = GetNextAttackDelay(0.5f);
+		m_flNextSecondaryAttack = GetNextAttackDelay(1f);
 		m_reviveChargedTime = 0;
 		return;
 	}
