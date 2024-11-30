@@ -558,6 +558,7 @@ void PrecacheWeapons() {
 	UTIL_PrecacheOther("weapon_displacer");
 	UTIL_PrecacheOther("weapon_shockrifle");
 	UTIL_PrecacheOther("weapon_sporelauncher");
+	UTIL_PrecacheOther("weapon_medkit");
 	UTIL_PrecacheOther("item_longjump");
 
 	UTIL_PrecacheOther("monster_snark");

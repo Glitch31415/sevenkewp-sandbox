@@ -3481,6 +3481,7 @@ void CBasePlayer::Spawn( void )
 		GiveNamedItem( "weapon_displacer" );
 		GiveNamedItem( "weapon_shockrifle" );
 		GiveNamedItem( "weapon_sporelauncher" );
+		GiveNamedItem( "weapon_medkit" );
 
 }
 
