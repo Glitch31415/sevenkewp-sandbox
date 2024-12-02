@@ -145,7 +145,6 @@ Schedule_t slStukabatRetreat[] =
 	{
 		tlStukabatRetreat,
 		ARRAYSIZE(tlStukabatRetreat),
-		bits_COND_NEW_ENEMY |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_TASK_FAILED,
 		0,
@@ -743,8 +742,12 @@ void CStukabat:: Move ( float flInterval )
 			pTargetEnt = m_hEnemy;
 			
 			// aim for enemy's future position since divebomb attack cannot instantly change direction
-			m_Route[m_iRouteIndex].vecLocation = m_hEnemy->Center()
-				+ m_hEnemy->pev->velocity*0.25f;
+
+			if (m_hEnemy) {
+				m_Route[m_iRouteIndex].vecLocation = m_hEnemy->Center()
+					+ m_hEnemy->pev->velocity * 0.25f;
+			}
+
 		}
 		else if ((m_Route[m_iRouteIndex].iType & ~bits_MF_NOT_TO_MASK) == bits_MF_TO_TARGETENT)
 		{
