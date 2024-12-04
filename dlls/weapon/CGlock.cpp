@@ -160,6 +160,9 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
+	float dmg_mult = GetDamageModifier();
+
+	float flDamage = gSkillData.sk_plr_9mm_bullet * dmg_mult;
 	int fHasPunched = 0;
 	int fFirstBeam = 1;
 	int	nMaxHits = 2;
