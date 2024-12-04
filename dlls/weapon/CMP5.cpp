@@ -145,7 +145,9 @@ void CMP5::PrimaryAttack()
 		vecAiming = gpGlobals->v_forward;
 	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
 	Vector vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, VECTOR_CONE_9MMAR, 131072, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
+	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f, %f, %f\n", vecDir.x, vecDir.y, vecDir.z));
 	vecDir = gpGlobals->v_forward;
+	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f, %f, %f\n", vecDir.x, vecDir.y, vecDir.z));
 	
 	float dmg_mult = GetDamageModifier();
 
