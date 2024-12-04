@@ -282,7 +282,7 @@ void CMedkit::SecondaryAttack()
 		m_flNextSecondaryAttack = GetNextAttackDelay(2.0f);
 		bestTarget->Revive();
 
-		bestTarget->pev->health = V_min(bestTarget->pev->max_health, 50);
+		bestTarget->pev->health = V_min(bestTarget->pev->max_health, 1);
 
 		CTalkSquadMonster* talkMon = bestTarget->MyTalkSquadMonsterPointer();
 		if (talkMon) {
