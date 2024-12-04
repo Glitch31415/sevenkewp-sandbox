@@ -91,11 +91,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	// Pull out of the wall a bit
 	if (tr.flFraction != 1.0)
 	{
-<<<<<<< HEAD
-		pev->origin = tr.vecEndPos + (tr.vecPlaneNormal * 0.6);
-=======
 		m_effectOrigin = tr.vecEndPos + (tr.vecPlaneNormal * (m_iMagnitude - 24) * 0.6);
->>>>>>> 540a36c7c71b5484f932a55ddf38e904171a8085
 	}
 
 	if (mp_explosionbug.value) {
@@ -150,13 +146,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	if (!(pev->spawnflags & SF_ENVEXPLOSION_NODAMAGE))
 	{
 		entvars_t* ownerpev = pev->owner ? &pev->owner->v : pev;
-<<<<<<< HEAD
-		pev->origin.z = pev->origin.z - 1;
-		::RadiusDamage(pev->origin, pev, ownerpev, m_iMagnitude, m_iMagnitude * 2.5, CLASS_NONE, DMG_BLAST);
-		pev->origin.z = pev->origin.z + 1;
-=======
 		::RadiusDamage(m_effectOrigin, pev, ownerpev, m_iMagnitude, m_iMagnitude * 2.5, CLASS_NONE, DMG_BLAST);
->>>>>>> 540a36c7c71b5484f932a55ddf38e904171a8085
 	}
 
 	SetThink(&CEnvExplosion::Smoke);

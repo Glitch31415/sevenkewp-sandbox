@@ -60,11 +60,7 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 	// Pull out of the wall a bit
 	if (pTrace->flFraction != 1.0)
 	{
-<<<<<<< HEAD
-		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
-=======
 		m_effectOrigin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * (pev->dmg - 24) * 0.6);
->>>>>>> 540a36c7c71b5484f932a55ddf38e904171a8085
 	}
 	//pev->origin.z = pev->origin.z-1;
 	int iContents = UTIL_PointContents ( pev->origin );
@@ -96,18 +92,12 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 
 	pev->owner = NULL; // can't traceline attack owner if this is set
 
-<<<<<<< HEAD
-	pev->origin.z = pev->origin.z - 1;
-	RadiusDamage ( pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType );
-	pev->origin.z = pev->origin.z + 1;
-=======
 	if (mp_explosionbug.value) {
 		RadiusDamage(m_effectOrigin, pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType);
 	}
 	else {
 		RadiusDamage(pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType);
 	}
->>>>>>> 540a36c7c71b5484f932a55ddf38e904171a8085
 
 	if ( RANDOM_FLOAT( 0 , 1 ) < 0.5 )
 	{
