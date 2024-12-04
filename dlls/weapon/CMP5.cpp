@@ -138,6 +138,7 @@ void CMP5::PrimaryAttack()
 	Vector vecDest = vecSrc + vecDir * 8192;
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
+	float flDamage = gSkillData.sk_plr_9mmAR_bullet * dmg_mult
 	float flMaxFrac = 1.0;
 	int	nTotal = 0;
 	int fHasPunched = 0;
