@@ -80,12 +80,6 @@ jobs:
         cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=OFF
         make
 
-    - name: Build plugins
-      run: |
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=ON
-        make
-
     - name: Build client
       run: |
         cd build
