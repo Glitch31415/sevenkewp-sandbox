@@ -140,8 +140,19 @@ void CMP5::PrimaryAttack()
 	float flDamage;
 	
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
-	Vector vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, VECTOR_CONE_9MMAR, 131072, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
+	Vector vecAiming;
+	
+	if ( fUseAutoAim )
+	{
+		vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
+	}
+	else
+	{
+		vecAiming = gpGlobals->v_forward;
+	}
 	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
+	Vector vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, VECTOR_CONE_9MMAR, 131072, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
+	
 	
 	float dmg_mult = GetDamageModifier();
 
