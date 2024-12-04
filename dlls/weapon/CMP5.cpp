@@ -161,7 +161,6 @@ void CMP5::PrimaryAttack()
 	Vector vecDest = vecSrc + vecDir * 8192;
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
-	float flDamage = gSkillData.sk_plr_9mmAR_bullet * dmg_mult
 	float flMaxFrac = 1.0;
 	int	nTotal = 0;
 	int fHasPunched = 0;
@@ -197,7 +196,12 @@ void CMP5::PrimaryAttack()
 
 	//Vector vecSrc	 = m_pPlayer->GetGunPosition( );
 	//Vector vecDir = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
-
+	  int flags;
+#if defined( CLIENT_WEAPONS )
+	flags = FEV_NOTHOST;
+#else
+	flags = 0;
+#endif
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usMP5, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
 #ifndef CLIENT_DLL
 	lagcomp_begin(m_pPlayer);
