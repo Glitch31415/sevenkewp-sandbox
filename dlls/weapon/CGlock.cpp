@@ -156,6 +156,17 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 		m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 		m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 	}
+		Vector vecSrc = m_pPlayer->GetGunPosition( );
+	Vector vecDir;
+	
+	if ( fUseAutoAim )
+	{
+		vecDir = m_pPlayer->GetAutoaimVector( AUTOAIM_10DEGREES );
+	}
+	else
+	{
+		vecDir = gpGlobals->v_forward;
+	}
 		Vector vecDest = vecSrc + vecDir * 8192;
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
@@ -169,17 +180,7 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 
 	pentIgnore = m_pPlayer->edict();
 
-	Vector vecSrc = m_pPlayer->GetGunPosition( );
-	Vector vecDir;
-	
-	if ( fUseAutoAim )
-	{
-		vecDir = m_pPlayer->GetAutoaimVector( AUTOAIM_10DEGREES );
-	}
-	else
-	{
-		vecDir = gpGlobals->v_forward;
-	}
+
 
 
 
