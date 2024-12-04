@@ -62,10 +62,10 @@ float CGauss::GetFullChargeTime( void )
 	if ( g_pGameRules->IsMultiplayer() )
 #endif
 	{
-		return 2;
+		return 5;
 	}
 
-	return 2;
+	return 5;
 }
 
 #ifdef CLIENT_DLL
@@ -360,11 +360,11 @@ void CGauss::StartFire( void )
 
 	if ( gpGlobals->time - m_pPlayer->m_flStartCharge > GetFullChargeTime() )
 	{
-		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult;
+		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult * 10;
 	}
 	else
 	{
-		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult * 
+		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult * 10 * 
 			(( gpGlobals->time - m_pPlayer->m_flStartCharge) / GetFullChargeTime() );
 	}
 

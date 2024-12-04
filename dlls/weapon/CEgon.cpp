@@ -384,7 +384,7 @@ void CEgon::Fire( const Vector &vecOrigSrc, const Vector &vecDir )
 				if ( gpGlobals->time >= m_flAmmoUseTime )
 				{
 					UseAmmo( 1 );
-					m_flAmmoUseTime = gpGlobals->time + 0.2;
+					m_flAmmoUseTime = gpGlobals->time + 0.5;
 				}
 			}
 			else
@@ -393,7 +393,7 @@ void CEgon::Fire( const Vector &vecOrigSrc, const Vector &vecDir )
 				if ( gpGlobals->time >= m_flAmmoUseTime )
 				{
 					UseAmmo( 1 );
-					m_flAmmoUseTime = gpGlobals->time + 0.1;
+					m_flAmmoUseTime = gpGlobals->time + 0.5;
 				}
 			}
 
