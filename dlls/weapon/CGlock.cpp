@@ -167,6 +167,7 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 	{
 		vecDir = gpGlobals->v_forward;
 	}
+	vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 131072, BULLET_PLAYER_9MM, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 		Vector vecDest = vecSrc + vecDir * 8192;
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
