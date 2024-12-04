@@ -134,7 +134,30 @@ void CMP5::PrimaryAttack()
 	if (!m_pPlayer)
 		return;
 
-	Vector vecSrc = vecOrigSrc;
+	// JoshA: Sanitize this so it's not total garbage on level transition
+	// and we end up ear blasting the player!
+
+	float flDamage;
+	
+	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
+	Vector vecDir = gpGlobals->v_forward;
+	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
+	
+	float dmg_mult = GetDamageModifier();
+
+		flDamage = gSkillData.sk_plr_9mmAR_bullet * dmg_mult;
+
+
+	if (m_fInAttack != 3)
+	{
+		//ALERT ( at_console, "Time:%f Damage:%f\n", gpGlobals->time - m_pPlayer->m_flStartCharge, flDamage );
+
+		// player "shoot" animation
+		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
+	}
+
+	// time until aftershock 'static discharge' sound
+
 	Vector vecDest = vecSrc + vecDir * 8192;
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
@@ -172,9 +195,8 @@ void CMP5::PrimaryAttack()
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-	Vector vecSrc	 = m_pPlayer->GetGunPosition( );
-	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
-	Vector vecDir;
+	//Vector vecSrc	 = m_pPlayer->GetGunPosition( );
+	//Vector vecDir = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usMP5, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
 #ifndef CLIENT_DLL
