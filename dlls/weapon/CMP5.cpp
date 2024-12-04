@@ -162,10 +162,9 @@ void CMP5::PrimaryAttack()
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
-	int	nTotal = 0;
 	int fHasPunched = 0;
 	int fFirstBeam = 1;
-	int	nMaxHits = 10;
+	int	nMaxHits = 3;
 
 	pentIgnore = m_pPlayer->edict();
 	// don't fire underwater
@@ -204,9 +203,10 @@ void CMP5::PrimaryAttack()
 #endif
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usMP5, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
 #ifndef CLIENT_DLL
+	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_9MM);
 	lagcomp_begin(m_pPlayer);
 
-	while (flDamage > 10 && nMaxHits > 0)
+	while (flDamage > 1 && nMaxHits > 0)
 	{
 		nMaxHits--;
 
@@ -226,7 +226,7 @@ void CMP5::PrimaryAttack()
 			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = 0;
 	
-			nTotal += 26;
+
 		}
 		
 		if (pEntity->pev->takedamage)
@@ -234,10 +234,6 @@ void CMP5::PrimaryAttack()
 			ClearMultiDamage();
 
 			// if you hurt yourself clear the headshot bit
-			if (m_pPlayer->pev == pEntity->pev)
-			{
-				tr.iHitgroup = 0;
-			}
 
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
@@ -245,7 +241,7 @@ void CMP5::PrimaryAttack()
 
 		if ( pEntity->ReflectGauss() )
 		{
-			pentIgnore = NULL;
+			//pentIgnore = NULL;
 
 			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
 
@@ -264,7 +260,7 @@ void CMP5::PrimaryAttack()
 				// explode a bit
 				//m_pPlayer->RadiusDamage( tr.vecEndPos, pev, m_pPlayer->pev, flDamage * n, CLASS_NONE, DMG_BLAST );
 
-				nTotal += 34;
+
 				
 				// lose energy
 				if (n == 0) n = 0.1;
@@ -272,7 +268,7 @@ void CMP5::PrimaryAttack()
 			}
 			else
 			{
-				nTotal += 13;
+
 
 				// limit it to one hole punch
 				if (fHasPunched == 2)
@@ -296,27 +292,15 @@ void CMP5::PrimaryAttack()
 							flDamage -= n;
 
 							// ALERT( at_console, "punch %f\n", n );
-							nTotal += 21;
+
 
 							// exit blast damage
 							//m_pPlayer->RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, CLASS_NONE, DMG_BLAST );
-							float damage_radius;
-							
-
-							if ( g_pGameRules->IsMultiplayer() )
-							{
-								damage_radius = flDamage * 1.75;  // Old code == 2.5
-							}
-							else
-							{
-								damage_radius = flDamage * 2.5;
-							}
 
 							//::RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, damage_radius, CLASS_NONE, DMG_BLAST );
 
-							CSoundEnt::InsertSound ( bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3.0 );
 
-							nTotal += 53;
+
 
 							vecSrc = beam_tr.vecEndPos + vecDir;
 						}
@@ -345,7 +329,7 @@ void CMP5::PrimaryAttack()
 	
 	lagcomp_end();
 
-	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_9MM);
+
 #endif
 
 	
