@@ -30,12 +30,6 @@ jobs:
         cmake ..  -A win32 -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=OFF
         cmake --build . --config Release
 
-    - name: Build plugins
-      run: |
-        cd build
-        cmake ..  -A win32 -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=ON
-        cmake --build . --config Release
-
     - name: Build client
       run: |
         cd build
