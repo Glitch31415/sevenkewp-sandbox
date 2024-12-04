@@ -331,7 +331,6 @@ void CMP5::PrimaryAttack()
 			pentIgnore = ENT( pEntity->pev );
 		}
 		nMaxHits--;
-		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f damage, %i maxhits", flDamage, nMaxHits));
 	}
 	
 	lagcomp_end();
