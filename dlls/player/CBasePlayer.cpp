@@ -351,7 +351,10 @@ void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector 
 		case HITGROUP_HEAD:
 			flDamage *= gSkillData.sk_player_head;
 			if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_player_head*pev->max_health))) {
-				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_head*pev->max_health))) + 1; // damage cap
+				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_head*pev->max_health))); // damage cap
+				if (flDamage < 1) {
+					flDamage = 1;
+				}
 			}
 			EMIT_SOUND_DYN(edict(), CHAN_BODY, "player/bhit_helmet-1.wav", 1.0f, ATTN_STATIC, 0, RANDOM_LONG(90, 110));
 			m_headshot = IsAlive(); // don't play effect while dying
@@ -360,27 +363,39 @@ void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector 
 		case HITGROUP_CHEST:
 			flDamage *= gSkillData.sk_player_chest;
 			if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_player_chest*pev->max_health))) {
-				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_chest*pev->max_health))) + 1; // damage cap
+				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_chest*pev->max_health))); // damage cap
+				if (flDamage < 1) {
+					flDamage = 1;
+				}
 			}
 			break;
 		case HITGROUP_STOMACH:
 			flDamage *= gSkillData.sk_player_stomach;
 			if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_player_stomach*pev->max_health))) {
-				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_stomach*pev->max_health))) + 1; // damage cap
+				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_stomach*pev->max_health))); // damage cap
+				if (flDamage < 1) {
+					flDamage = 1;
+				}
 			}
 			break;
 		case HITGROUP_LEFTARM:
 		case HITGROUP_RIGHTARM:
 			flDamage *= gSkillData.sk_player_arm;
 			if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_player_arm*pev->max_health))) {
-				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_arm*pev->max_health))) + 1; // damage cap
+				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_arm*pev->max_health))); // damage cap
+				if (flDamage < 1) {
+					flDamage = 1;
+				}
 			}
 			break;
 		case HITGROUP_LEFTLEG:
 		case HITGROUP_RIGHTLEG:
 			flDamage *= gSkillData.sk_player_leg;
 			if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_player_leg*pev->max_health))) {
-				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_leg*pev->max_health))) + 1; // damage cap
+				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_leg*pev->max_health))); // damage cap
+				if (flDamage < 1) {
+					flDamage = 1;
+				}
 			}
 			break;
 		default:
