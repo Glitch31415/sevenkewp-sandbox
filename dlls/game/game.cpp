@@ -49,6 +49,7 @@ cvar_t	allowmonsters={"mp_allowmonsters","1", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_nextmap={"mp_nextmap","", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_prefer_server_maxspeed={"mp_prefer_server_maxspeed","1", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_objectboost ={"mp_objectboost","0", FCVAR_SERVER, 0, 0 };
+cvar_t	mp_explosionbug ={"mp_explosionbug","0", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_respawndelay ={"mp_respawndelay","3", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_debugmsg ={"mp_debugmsg","0", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_starthealth ={"starthealth","0", FCVAR_SERVER, 0, 0 };
@@ -66,6 +67,7 @@ cvar_t	pluginupdatepath ={"plugin_update_path","valve_pending/", FCVAR_SERVER, 0
 cvar_t	pluginautoupdate ={"plugin_auto_update", "0", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_skill_allow ={"mp_skill_allow", "1", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_default_medkit ={"mp_default_medkit", "0", FCVAR_SERVER, 0, 0 };
+cvar_t	mp_rpg_laser_mode ={"mp_rpg_laser_mode", "1", FCVAR_SERVER, 0, 0 };
 
 cvar_t	soundvariety={"mp_soundvariety","0", FCVAR_SERVER, 0, 0 };
 
@@ -359,6 +361,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER (&mp_nextmap);
 	CVAR_REGISTER (&mp_prefer_server_maxspeed);
 	CVAR_REGISTER (&mp_objectboost);
+	CVAR_REGISTER (&mp_explosionbug);
 	CVAR_REGISTER (&mp_respawndelay);
 	CVAR_REGISTER (&mp_debugmsg);
 	CVAR_REGISTER (&mp_starthealth);
@@ -376,6 +379,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER (&pluginautoupdate);
 	CVAR_REGISTER (&mp_skill_allow);
 	CVAR_REGISTER (&mp_default_medkit);
+	CVAR_REGISTER (&mp_rpg_laser_mode);
 
 	CVAR_REGISTER (&mp_chattime);
 

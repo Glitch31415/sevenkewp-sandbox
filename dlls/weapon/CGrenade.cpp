@@ -55,19 +55,25 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 
 	pev->takedamage = DAMAGE_NO;
 
+	m_effectOrigin = pev->origin;
+
 	// Pull out of the wall a bit
-	if ( pTrace->flFraction != 1.0 )
+	if (pTrace->flFraction != 1.0)
 	{
+<<<<<<< HEAD
 		pev->origin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * 0.6);
+=======
+		m_effectOrigin = pTrace->vecEndPos + (pTrace->vecPlaneNormal * (pev->dmg - 24) * 0.6);
+>>>>>>> 540a36c7c71b5484f932a55ddf38e904171a8085
 	}
 	//pev->origin.z = pev->origin.z-1;
 	int iContents = UTIL_PointContents ( pev->origin );
 	
-	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, pev->origin );
+	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, m_effectOrigin );
 		WRITE_BYTE( TE_EXPLOSION );		// This makes a dynamic light and the explosion sprites/sound
-		WRITE_COORD( pev->origin.x );	// Send to PAS because of the sound
-		WRITE_COORD( pev->origin.y );
-		WRITE_COORD( pev->origin.z );
+		WRITE_COORD(m_effectOrigin.x);	// Send to PAS because of the sound
+		WRITE_COORD(m_effectOrigin.y);
+		WRITE_COORD(m_effectOrigin.z);
 		if (iContents != CONTENTS_WATER)
 		{
 			WRITE_SHORT( g_sModelIndexFireball );
@@ -90,9 +96,18 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 
 	pev->owner = NULL; // can't traceline attack owner if this is set
 
+<<<<<<< HEAD
 	pev->origin.z = pev->origin.z - 1;
 	RadiusDamage ( pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType );
 	pev->origin.z = pev->origin.z + 1;
+=======
+	if (mp_explosionbug.value) {
+		RadiusDamage(m_effectOrigin, pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType);
+	}
+	else {
+		RadiusDamage(pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType);
+	}
+>>>>>>> 540a36c7c71b5484f932a55ddf38e904171a8085
 
 	if ( RANDOM_FLOAT( 0 , 1 ) < 0.5 )
 	{
@@ -121,7 +136,7 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 	{
 		int sparkCount = RANDOM_LONG(0,3);
 		for ( int i = 0; i < sparkCount; i++ )
-			Create( "spark_shower", pev->origin, pTrace->vecPlaneNormal, NULL );
+			Create( "spark_shower", m_effectOrigin, pTrace->vecPlaneNormal, NULL );
 	}
 }
 
@@ -134,11 +149,11 @@ void CGrenade::Smoke( void )
 	}
 	else
 	{
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, pev->origin );
+		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, m_effectOrigin);
 			WRITE_BYTE( TE_SMOKE );
-			WRITE_COORD( pev->origin.x );
-			WRITE_COORD( pev->origin.y );
-			WRITE_COORD( pev->origin.z );
+			WRITE_COORD(m_effectOrigin.x );
+			WRITE_COORD(m_effectOrigin.y );
+			WRITE_COORD(m_effectOrigin.z );
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( (pev->dmg - 50) * 0.80 ); // scale * 10
 			WRITE_BYTE( 12  ); // framerate

@@ -19,6 +19,7 @@ public:
 
 	int m_iMagnitude;// how large is the fireball? how much damage?
 	int m_spriteScale; // what's the exact fireball sprite scale? 
+	Vector m_effectOrigin; // where to play the explosion effects (offset from real origin so sprites look nice)
 };
 
 TYPEDESCRIPTION	CEnvExplosion::m_SaveData[] =
@@ -85,14 +86,20 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 
 	UTIL_TraceLine(vecSpot, vecSpot + Vector(0, 0, -40), ignore_monsters, ENT(pev), &tr);
 
+	m_effectOrigin = pev->origin;
+
 	// Pull out of the wall a bit
 	if (tr.flFraction != 1.0)
 	{
+<<<<<<< HEAD
 		pev->origin = tr.vecEndPos + (tr.vecPlaneNormal * 0.6);
+=======
+		m_effectOrigin = tr.vecEndPos + (tr.vecPlaneNormal * (m_iMagnitude - 24) * 0.6);
+>>>>>>> 540a36c7c71b5484f932a55ddf38e904171a8085
 	}
-	else
-	{
-		pev->origin = pev->origin;
+
+	if (mp_explosionbug.value) {
+		pev->origin = m_effectOrigin;
 	}
 	//pev->origin.z = pev->origin.z-1;
 
@@ -112,11 +119,11 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	// draw fireball
 	if (!(pev->spawnflags & SF_ENVEXPLOSION_NOFIREBALL))
 	{
-		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
+		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, m_effectOrigin);
 		WRITE_BYTE(TE_EXPLOSION);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
+		WRITE_COORD(m_effectOrigin.x);
+		WRITE_COORD(m_effectOrigin.y);
+		WRITE_COORD(m_effectOrigin.z);
 		WRITE_SHORT(g_sModelIndexFireball);
 		WRITE_BYTE((BYTE)m_spriteScale); // scale * 10
 		WRITE_BYTE(15); // framerate
@@ -127,9 +134,9 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	{
 		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
 		WRITE_BYTE(TE_EXPLOSION);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
+		WRITE_COORD(m_effectOrigin.x);
+		WRITE_COORD(m_effectOrigin.y);
+		WRITE_COORD(m_effectOrigin.z);
 		WRITE_SHORT(g_sModelIndexFireball);
 		WRITE_BYTE(0); // no sprite
 		WRITE_BYTE(15); // framerate
@@ -143,9 +150,13 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	if (!(pev->spawnflags & SF_ENVEXPLOSION_NODAMAGE))
 	{
 		entvars_t* ownerpev = pev->owner ? &pev->owner->v : pev;
+<<<<<<< HEAD
 		pev->origin.z = pev->origin.z - 1;
 		::RadiusDamage(pev->origin, pev, ownerpev, m_iMagnitude, m_iMagnitude * 2.5, CLASS_NONE, DMG_BLAST);
 		pev->origin.z = pev->origin.z + 1;
+=======
+		::RadiusDamage(m_effectOrigin, pev, ownerpev, m_iMagnitude, m_iMagnitude * 2.5, CLASS_NONE, DMG_BLAST);
+>>>>>>> 540a36c7c71b5484f932a55ddf38e904171a8085
 	}
 
 	SetThink(&CEnvExplosion::Smoke);
@@ -158,7 +169,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 
 		for (int i = 0; i < sparkCount; i++)
 		{
-			Create("spark_shower", pev->origin, tr.vecPlaneNormal, NULL);
+			Create("spark_shower", m_effectOrigin, tr.vecPlaneNormal, NULL);
 		}
 	}
 }
@@ -167,11 +178,11 @@ void CEnvExplosion::Smoke(void)
 {
 	if (!(pev->spawnflags & SF_ENVEXPLOSION_NOSMOKE))
 	{
-		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, pev->origin);
+		MESSAGE_BEGIN(MSG_PAS, SVC_TEMPENTITY, m_effectOrigin);
 		WRITE_BYTE(TE_SMOKE);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
+		WRITE_COORD(m_effectOrigin.x);
+		WRITE_COORD(m_effectOrigin.y);
+		WRITE_COORD(m_effectOrigin.z);
 		WRITE_SHORT(g_sModelIndexSmoke);
 		WRITE_BYTE((BYTE)m_spriteScale); // scale * 10
 		WRITE_BYTE(12); // framerate
