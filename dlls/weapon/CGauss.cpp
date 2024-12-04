@@ -360,11 +360,11 @@ void CGauss::StartFire( void )
 
 	if ( gpGlobals->time - m_pPlayer->m_flStartCharge > GetFullChargeTime() )
 	{
-		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult * 10;
+		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult;
 	}
 	else
 	{
-		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult * 10 * 
+		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult * 
 			(( gpGlobals->time - m_pPlayer->m_flStartCharge) / GetFullChargeTime() );
 	}
 
@@ -387,7 +387,7 @@ void CGauss::StartFire( void )
 
 		if ( !m_fPrimaryFire )
 		{
-			m_pPlayer->pev->velocity = m_pPlayer->pev->velocity - gpGlobals->v_forward * flDamage / 2;
+			m_pPlayer->pev->velocity = m_pPlayer->pev->velocity - gpGlobals->v_forward * flDamage;
 		}
 
 		if ( !g_pGameRules->IsMultiplayer() )
@@ -439,7 +439,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 	// It's delayed by a fraction of second to make sure it is delayed by 1 frame on the client
 	// It's sent reliably anyway, which could lead to other delays
 
-	PLAYBACK_EVENT_FULL( FEV_NOTHOST | FEV_RELIABLE, m_pPlayer->edict(), m_usGaussFire, 0.01, (float *)&m_pPlayer->pev->origin, (float *)&m_pPlayer->pev->angles, 0.0, 0.0, 0, 0, 0, 1 );
+	PLAYBACK_EVENT_FULL( FEV_NOTHOST | FEV_RELIABLE, m_pPlayer->edict(), m_usGaussFire, 0.001, (float *)&m_pPlayer->pev->origin, (float *)&m_pPlayer->pev->angles, 0.0, 0.0, 0, 0, 0, 1 );
 
 	
 	/*ALERT( at_console, "%f %f %f\n%f %f %f\n", 
