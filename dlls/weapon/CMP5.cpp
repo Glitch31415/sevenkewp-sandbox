@@ -213,8 +213,8 @@ void CMP5::PrimaryAttack()
 		// ALERT( at_console, "." );
 		UTIL_TraceLine(vecSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);
 
-		if (tr.fAllSolid)
-			break;
+		//if (tr.fAllSolid)
+			//break;
 
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 
@@ -275,9 +275,9 @@ void CMP5::PrimaryAttack()
 				nTotal += 13;
 
 				// limit it to one hole punch
-				if (fHasPunched)
+				if (fHasPunched == 2)
 					break;
-				fHasPunched = 1;
+				fHasPunched = fHasPunched + 1;
 
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
 				//if ( !m_fPrimaryFire )
