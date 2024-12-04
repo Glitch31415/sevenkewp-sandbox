@@ -428,7 +428,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 	pentIgnore = m_pPlayer->edict();
 
 #ifdef CLIENT_DLL
-	if ( m_fPrimaryFire == false )
+	//if ( m_fPrimaryFire == false )
 		 g_irunninggausspred = true;
 #endif
 	
@@ -508,7 +508,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 				vecDest = vecSrc + vecDir * 8192;
 
 				// explode a bit
-				m_pPlayer->RadiusDamage( tr.vecEndPos, pev, m_pPlayer->pev, flDamage * n, CLASS_NONE, DMG_BLAST );
+				//m_pPlayer->RadiusDamage( tr.vecEndPos, pev, m_pPlayer->pev, flDamage * n, CLASS_NONE, DMG_BLAST );
 
 				nTotal += 34;
 				
@@ -526,8 +526,8 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 				fHasPunched = 1;
 
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
-				if ( !m_fPrimaryFire )
-				{
+				//if ( !m_fPrimaryFire )
+				//{
 					UTIL_TraceLine( tr.vecEndPos + vecDir * 8, vecDest, dont_ignore_monsters, pentIgnore, &beam_tr);
 					if (!beam_tr.fAllSolid)
 					{
@@ -572,13 +572,13 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 						 //ALERT( at_console, "blocked %f\n", n );
 						flDamage = 0;
 					}
-				}
-				else
-				{
+				//}
+				//else
+				//{
 					//ALERT( at_console, "blocked solid\n" );
 					
-					flDamage = 0;
-				}
+					//flDamage = 0;
+				//}
 
 			}
 		}

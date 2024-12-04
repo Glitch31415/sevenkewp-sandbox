@@ -134,6 +134,17 @@ void CMP5::PrimaryAttack()
 	if (!m_pPlayer)
 		return;
 
+	Vector vecSrc = vecOrigSrc;
+	Vector vecDest = vecSrc + vecDir * 8192;
+	edict_t		*pentIgnore;
+	TraceResult tr, beam_tr;
+	float flMaxFrac = 1.0;
+	int	nTotal = 0;
+	int fHasPunched = 0;
+	int fFirstBeam = 1;
+	int	nMaxHits = 10;
+
+	pentIgnore = m_pPlayer->edict();
 	// don't fire underwater
 	//if (m_pPlayer->pev->waterlevel == 3)
 	//{
@@ -164,35 +175,153 @@ void CMP5::PrimaryAttack()
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 	Vector vecDir;
 
+	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usMP5, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
+#ifndef CLIENT_DLL
 	lagcomp_begin(m_pPlayer);
 
-#ifdef CLIENT_DLL
-	if ( bIsMultiplayer() )
-#else
-	if ( g_pGameRules->IsMultiplayer() )
-#endif
+	while (flDamage > 10 && nMaxHits > 0)
 	{
-		// optimized multiplayer. Widened to make it easier to hit a moving player
-		vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, VECTOR_CONE_9MMAR, 131072, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
-	}
-	else
-	{
-		// single player spread
-		vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, VECTOR_CONE_9MMAR, 131072, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
-	}
+		nMaxHits--;
 
+		// ALERT( at_console, "." );
+		UTIL_TraceLine(vecSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);
+
+		if (tr.fAllSolid)
+			break;
+
+		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
+
+		if (pEntity == NULL)
+			break;
+
+		if ( fFirstBeam )
+		{
+			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+			fFirstBeam = 0;
+	
+			nTotal += 26;
+		}
+		
+		if (pEntity->pev->takedamage)
+		{
+			ClearMultiDamage();
+
+			// if you hurt yourself clear the headshot bit
+			if (m_pPlayer->pev == pEntity->pev)
+			{
+				tr.iHitgroup = 0;
+			}
+
+			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+		}
+
+		if ( pEntity->ReflectGauss() )
+		{
+			pentIgnore = NULL;
+
+			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
+
+			if (n < 0.5) // 60 degrees
+			{
+				// ALERT( at_console, "reflect %f\n", n );
+				// reflect
+				Vector r;
+			
+				r = 2.0 * tr.vecPlaneNormal * n + vecDir;
+				flMaxFrac = flMaxFrac - tr.flFraction;
+				vecDir = r;
+				vecSrc = tr.vecEndPos + vecDir * 8;
+				vecDest = vecSrc + vecDir * 8192;
+
+				// explode a bit
+				//m_pPlayer->RadiusDamage( tr.vecEndPos, pev, m_pPlayer->pev, flDamage * n, CLASS_NONE, DMG_BLAST );
+
+				nTotal += 34;
+				
+				// lose energy
+				if (n == 0) n = 0.1;
+				flDamage = flDamage * (1 - n);
+			}
+			else
+			{
+				nTotal += 13;
+
+				// limit it to one hole punch
+				if (fHasPunched)
+					break;
+				fHasPunched = 1;
+
+				// try punching through wall if secondary attack (primary is incapable of breaking through)
+				//if ( !m_fPrimaryFire )
+				//{
+					UTIL_TraceLine( tr.vecEndPos + vecDir * 8, vecDest, dont_ignore_monsters, pentIgnore, &beam_tr);
+					if (!beam_tr.fAllSolid)
+					{
+						// trace backwards to find exit point
+						UTIL_TraceLine( beam_tr.vecEndPos, tr.vecEndPos, dont_ignore_monsters, pentIgnore, &beam_tr);
+
+						n = (beam_tr.vecEndPos - tr.vecEndPos).Length( );
+
+						if (n < flDamage)
+						{
+							if (n == 0) n = 1;
+							flDamage -= n;
+
+							// ALERT( at_console, "punch %f\n", n );
+							nTotal += 21;
+
+							// exit blast damage
+							//m_pPlayer->RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, CLASS_NONE, DMG_BLAST );
+							float damage_radius;
+							
+
+							if ( g_pGameRules->IsMultiplayer() )
+							{
+								damage_radius = flDamage * 1.75;  // Old code == 2.5
+							}
+							else
+							{
+								damage_radius = flDamage * 2.5;
+							}
+
+							::RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, damage_radius, CLASS_NONE, DMG_BLAST );
+
+							CSoundEnt::InsertSound ( bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3.0 );
+
+							nTotal += 53;
+
+							vecSrc = beam_tr.vecEndPos + vecDir;
+						}
+					}
+					else
+					{
+						 //ALERT( at_console, "blocked %f\n", n );
+						flDamage = 0;
+					}
+				//}
+				//else
+				//{
+					//ALERT( at_console, "blocked solid\n" );
+					
+					//flDamage = 0;
+				//}
+
+			}
+		}
+		else
+		{
+			vecSrc = tr.vecEndPos + vecDir;
+			pentIgnore = ENT( pEntity->pev );
+		}
+	}
+	
 	lagcomp_end();
 
-  int flags;
-#if defined( CLIENT_WEAPONS )
-	flags = FEV_NOTHOST;
-#else
-	flags = 0;
+	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_9MM);
 #endif
 
-	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usMP5, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
-
-	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_9MM);
+	
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition
