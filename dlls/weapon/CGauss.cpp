@@ -179,7 +179,7 @@ void CGauss::PrimaryAttack()
 	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 	m_fPrimaryFire = TRUE;
 
-	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= 2;
+	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= 1;
 
 	StartFire();
 	m_fInAttack = 0;
