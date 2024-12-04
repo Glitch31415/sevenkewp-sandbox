@@ -594,7 +594,8 @@ int CBreakable::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 
 	if (pev->health <= 0)
 	{
-		Killed(pevAttacker, GIB_NORMAL);
+		//Killed(pevAttacker, GIB_NORMAL);
+		Killed(pevAttacker, GIB_NEVER);
 		m_hActivator = Instance(pevAttacker);
 		Die();
 		return 0;

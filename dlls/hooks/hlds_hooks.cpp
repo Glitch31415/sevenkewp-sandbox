@@ -318,7 +318,7 @@ void ClientKill( edict_t *pEntity )
 
 	// have the player kill themself
 	pev->health = 0;
-	pl->Killed( pev, GIB_NEVER );
+	pl->Killed( pev, GIB_ALWAYS );
 
 	EHANDLE oldWeapon = pl->m_pActiveItem;
 	pl->m_pActiveItem = NULL; // don't show a weapon icon in the kill feed

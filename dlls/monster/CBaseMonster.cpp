@@ -4577,7 +4577,8 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		}
 		else
 		{
-			Killed(pevAttacker, GIB_NORMAL);
+			//Killed(pevAttacker, GIB_NORMAL);
+			Killed(pevAttacker, GIB_NEVER);
 		}
 
 		g_pGameRules->DeathNotice(this, pevAttacker, pevInflictor);

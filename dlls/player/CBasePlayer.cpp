@@ -3172,7 +3172,7 @@ void CBasePlayer::PostThink()
 				// (e.g. player sitting at the bottom of a deep tunnel with no way to avoid them)
 				ent->pev->health -= flFallDamage;
 				if (ent->pev->health <= 0) {
-					ent->Killed(pev, GIB_NORMAL);
+					ent->Killed(pev, GIB_NEVER);
 					ent->m_lastDamageType = DMG_FALL;
 					g_pGameRules->DeathNotice(ent, pev, pev);
 				}
