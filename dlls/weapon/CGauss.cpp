@@ -387,7 +387,7 @@ void CGauss::StartFire( void )
 
 		if ( !m_fPrimaryFire )
 		{
-			m_pPlayer->pev->velocity = m_pPlayer->pev->velocity - gpGlobals->v_forward * flDamage * 5;
+			m_pPlayer->pev->velocity = m_pPlayer->pev->velocity - gpGlobals->v_forward * flDamage / 2;
 		}
 
 		if ( !g_pGameRules->IsMultiplayer() )
