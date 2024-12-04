@@ -168,8 +168,8 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 	int	nMaxHits = 2;
 
 	pentIgnore = m_pPlayer->edict();
- // -----
-	Vector vecSrc	 = m_pPlayer->GetGunPosition( );
+
+	Vector vecSrc = m_pPlayer->GetGunPosition( );
 	Vector vecDir;
 	
 	if ( fUseAutoAim )
