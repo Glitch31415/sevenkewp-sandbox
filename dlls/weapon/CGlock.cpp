@@ -159,14 +159,9 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 		Vector vecSrc = m_pPlayer->GetGunPosition( );
 	Vector vecAiming;
 	
-	if ( fUseAutoAim )
-	{
-		vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_10DEGREES );
-	}
-	else
-	{
+
 		vecAiming = gpGlobals->v_forward;
-	}
+
 	Vector vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 131072, BULLET_PLAYER_9MM, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 		Vector vecDest = vecSrc + vecDir * 8192;
 	edict_t		*pentIgnore;
