@@ -1250,10 +1250,20 @@ bool CBaseEntity::RunInventoryRules(CBaseEntity* ent) {
 }
 
 void CBaseEntity::ParametricInterpolation(float flInterval) {
+
+	// A trace is done so that the client doesn't predict a projectile sliding across a wall
+	// (try removing this and firing the crossbow up towards a wall, it will start angling 
+	// upward as it approaches the impact point).
+	TraceResult tr;
+	UTIL_TraceLine(pev->origin, pev->origin + pev->velocity, ignore_monsters, NULL, &tr);
+
+	float deltaTime = flInterval * (1.0f / flInterval) * tr.flFraction;
+	Vector endpos = tr.vecEndPos;
+
 	pev->startpos = pev->origin;
-	pev->endpos = pev->origin + pev->velocity;
+	pev->endpos = endpos;
 	pev->starttime = gpGlobals->time;
-	pev->impacttime = gpGlobals->time + flInterval * (1.0f / flInterval);
+	pev->impacttime = gpGlobals->time + deltaTime;
 
 #if 0
 	// Interpolate past position to current.

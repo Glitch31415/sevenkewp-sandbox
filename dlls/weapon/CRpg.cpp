@@ -255,6 +255,7 @@ void CRpgRocket :: Precache( void )
 void CRpgRocket :: IgniteThink( void  )
 {
 	// FLY movetype but with client interpolation
+	// not using Parametric interp because rocket trails look weird when following a laser
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->gravity = FLT_MIN;
 	pev->friction = 1.0f;
@@ -290,7 +291,6 @@ void CRpgRocket :: FollowThink( void  )
 
 	float bestDot = -1.0f;
 	float bestDist = FLT_MAX;
-	Vector bestDir = vecTarget;
 	
 	// Examine all entities within a reasonable radius
 	while ((pOther = UTIL_FindEntityByClassname( pOther, "laser_spot" )) != NULL)
