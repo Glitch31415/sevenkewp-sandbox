@@ -188,7 +188,7 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 
 	while (flDamage > 1 && nMaxHits > 0)
 	{
-		nMaxHits--;
+
 
 		// ALERT( at_console, "." );
 		UTIL_TraceLine(vecSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);
@@ -305,6 +305,7 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 			vecSrc = tr.vecEndPos + vecDir;
 			pentIgnore = ENT( pEntity->pev );
 		}
+		nMaxHits--;
 	}
 	
 	lagcomp_end();
