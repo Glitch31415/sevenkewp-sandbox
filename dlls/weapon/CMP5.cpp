@@ -144,7 +144,34 @@ void CMP5::PrimaryAttack()
 	
 		vecAiming = gpGlobals->v_forward;
 	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
-	Vector vecDir = vecAiming; //+ m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, VECTOR_CONE_9MMAR, 131072, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
+	ULONG cShots = 1;
+	Vector vecSpread = VECTOR_CONE_9MMAR;
+	int shared_rand = m_pPlayer->random_seed;
+	float x, y, z;
+
+	for ( ULONG iShot = 1; iShot <= cShots; iShot++ )
+	{
+		if ( pevAttacker == NULL )
+		{
+			// get circular gaussian spread
+			do {
+					x = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+					y = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+					z = x*x+y*y;
+			} while (z > 1);
+		}
+		else
+		{
+			//Use player's random seed.
+			// get circular gaussian spread
+			x = UTIL_SharedRandomFloat( shared_rand + iShot, -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 1 + iShot ) , -0.5, 0.5 );
+			y = UTIL_SharedRandomFloat( shared_rand + ( 2 + iShot ), -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 3 + iShot ), -0.5, 0.5 );
+			z = x * x + y * y;
+		}
+			
+	}
+    Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
+	Vector vecDir = vecAiming + spread;
 	
 	float dmg_mult = GetDamageModifier();
 

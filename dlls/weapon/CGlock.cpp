@@ -160,10 +160,36 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 	Vector vecAiming;
 	
 
-		vecAiming = gpGlobals->v_forward;
+	vecAiming = gpGlobals->v_forward;
+	ULONG cShots = 1;
+	Vector vecSpread = Vector( flSpread, flSpread, flSpread );
+	int shared_rand = m_pPlayer->random_seed;
+	float x, y, z;
 
-	Vector vecDir = vecAiming + m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 131072, BULLET_PLAYER_9MM, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
-		Vector vecDest = vecSrc + vecDir * 8192;
+	for ( ULONG iShot = 1; iShot <= cShots; iShot++ )
+	{
+		if ( pevAttacker == NULL )
+		{
+			// get circular gaussian spread
+			do {
+					x = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+					y = RANDOM_FLOAT(-0.5, 0.5) + RANDOM_FLOAT(-0.5, 0.5);
+					z = x*x+y*y;
+			} while (z > 1);
+		}
+		else
+		{
+			//Use player's random seed.
+			// get circular gaussian spread
+			x = UTIL_SharedRandomFloat( shared_rand + iShot, -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 1 + iShot ) , -0.5, 0.5 );
+			y = UTIL_SharedRandomFloat( shared_rand + ( 2 + iShot ), -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 3 + iShot ), -0.5, 0.5 );
+			z = x * x + y * y;
+		}
+			
+	}
+    Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
+	Vector vecDir = vecAiming + spread;
+	Vector vecDest = vecSrc + vecDir * 8192;
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
