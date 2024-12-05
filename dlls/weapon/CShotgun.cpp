@@ -481,7 +481,7 @@ while (flDamage > 1 && loops < 25)
 			if (diffhealth < pEntity->pev->max_health*0.75) {
 				diffhealth = pEntity->pev->max_health*0.75;
 			}
-
+			pEntity->pev->health = prevhealth - flDamage;
 			flDamage = flDamage - diffhealth;
 		}
 		if (flDamage <= 0)
