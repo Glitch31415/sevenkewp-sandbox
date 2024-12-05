@@ -236,9 +236,17 @@ void CMP5::PrimaryAttack()
 
 			// if you hurt yourself clear the headshot bit
 
+			float prevhealth = pEntity->pev->health;
+
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 			
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+
+			float diffhealth = prevhealth - pEntity->pev->health;
+
+			flDamage = flDamage - diffhealth;
+
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("took damage, diffhealth: %f, flDamage: %f", diffhealth, flDamage));
 		}
 
 		if ( pEntity->ReflectGauss() )
@@ -327,6 +335,7 @@ void CMP5::PrimaryAttack()
 			vecSrc = tr.vecEndPos + vecDir;
 			pentIgnore = ENT( pEntity->pev );
 		}
+		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("end of loop, flDamage: %f", flDamage));
 	}
 	
 	lagcomp_end();
