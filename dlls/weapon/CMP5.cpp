@@ -245,7 +245,7 @@ void CMP5::PrimaryAttack()
 
 			flDamage = flDamage - diffhealth;
 
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("took damage, diffhealth: %f", diffhealth));
+			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("took damage, diffhealth: %f", diffhealth));
 		}
 
 		if ( pEntity->ReflectGauss() )
@@ -331,7 +331,7 @@ void CMP5::PrimaryAttack()
 			vecSrc = tr.vecEndPos + vecDir;
 			pentIgnore = ENT( pEntity->pev );
 		}
-		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("end of loop, flDamage: %f", flDamage));
+		//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("end of loop, flDamage: %f", flDamage));
 	}
 	
 	lagcomp_end();

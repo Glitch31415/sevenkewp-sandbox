@@ -213,8 +213,15 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 
 			// if you hurt yourself clear the headshot bit
 
+			float prevhealth = pEntity->pev->health;
+
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+			
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+
+			float diffhealth = prevhealth - pEntity->pev->health;
+
+			flDamage = flDamage - diffhealth;
 		}
 
 		if ( pEntity->ReflectGauss() )
