@@ -161,7 +161,23 @@ void CShotgun::PrimaryAttack()
 	
 		vecAiming = gpGlobals->v_forward;
 	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
-	Vector vecDir = vecAiming + m_pPlayer->FireBulletsPlayer( 9, vecSrc, vecAiming, VECTOR_CONE_1DEGREES*1.5, 131072, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
+	ULONG cShots = 9;
+	Vector vecSpread = VECTOR_CONE_1DEGREES*1.5;
+	int shared_rand = m_pPlayer->random_seed;
+	float x, y, z;
+	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
+		lagcomp_begin(m_pPlayer);
+	for ( ULONG iShot = 1; iShot <= cShots; iShot++ )
+	{
+
+			//Use player's random seed.
+			// get circular gaussian spread
+			x = UTIL_SharedRandomFloat( shared_rand + iShot, -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 1 + iShot ) , -0.5, 0.5 );
+			y = UTIL_SharedRandomFloat( shared_rand + ( 2 + iShot ), -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 3 + iShot ), -0.5, 0.5 );
+			z = x * x + y * y;
+
+			    Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
+	Vector vecDir = vecAiming + spread;
 
 			Vector vecDest = vecSrc + vecDir * 8192;
 	edict_t		*pentIgnore;
@@ -175,8 +191,8 @@ void CShotgun::PrimaryAttack()
 	pentIgnore = m_pPlayer->edict();
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usSingleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
 
-	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
-	lagcomp_begin(m_pPlayer);
+
+
 
 int loops = 0;
 while (flDamage > 1 && loops < 25)
@@ -314,8 +330,11 @@ while (flDamage > 1 && loops < 25)
 		}
 	}
 
-	lagcomp_end();
 
+
+			
+	}
+	lagcomp_end();
 
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -380,8 +399,22 @@ void CShotgun::SecondaryAttack( void )
 	
 		vecAiming = gpGlobals->v_forward;
 	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
-	Vector vecDir = vecAiming + m_pPlayer->FireBulletsPlayer( 18, vecSrc, vecAiming, VECTOR_CONE_1DEGREES*3, 131072, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
+	ULONG cShots = 18;
+	Vector vecSpread = VECTOR_CONE_1DEGREES*3;
+	int shared_rand = m_pPlayer->random_seed;
+	float x, y, z;
+		PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
+	lagcomp_begin(m_pPlayer);
+	for ( ULONG iShot = 1; iShot <= cShots; iShot++ )
+	{
 
+			//Use player's random seed.
+			// get circular gaussian spread
+			x = UTIL_SharedRandomFloat( shared_rand + iShot, -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 1 + iShot ) , -0.5, 0.5 );
+			y = UTIL_SharedRandomFloat( shared_rand + ( 2 + iShot ), -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 3 + iShot ), -0.5, 0.5 );
+			z = x * x + y * y;
+    Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
+	Vector vecDir = vecAiming + spread;
 			Vector vecDest = vecSrc + vecDir * 8192;
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
@@ -395,8 +428,8 @@ void CShotgun::SecondaryAttack( void )
 
 		PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usDoubleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
 
-	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
-	lagcomp_begin(m_pPlayer);
+
+
 
 int loops = 0;
 while (flDamage > 1 && loops < 25)
@@ -531,8 +564,10 @@ while (flDamage > 1 && loops < 25)
 		}
 	}
 
-	lagcomp_end();
-	
+
+			
+	}
+		lagcomp_end();
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition
