@@ -269,7 +269,7 @@ while (flDamage > 1 && loops < 25)
 				diffhealth = pEntity->pev->max_health*0.75;
 			}
 						
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("took damage, diffhealth: %f", diffhealth));
+			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("took damage, diffhealth: %f", diffhealth));
 
 			flDamage = flDamage - diffhealth;
 
