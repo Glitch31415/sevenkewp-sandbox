@@ -874,7 +874,6 @@ void EV_FireGauss( event_args_t *args )
 	int	nTotal = 0;
 	int fHasPunched = 0;
 	int fFirstBeam = 1;
-	int	nMaxHits = 10;
 	physent_t *pEntity;
 	int m_iBeam, m_iGlow, m_iBalls;
 	vec3_t up, right, forward;
@@ -912,9 +911,8 @@ void EV_FireGauss( event_args_t *args )
 
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/gauss2.wav", 0.5 + flDamage * (1.0 / 400.0), ATTN_NORM, 0, 85 + gEngfuncs.pfnRandomLong( 0, 0x1f ) );
 
-	while (flDamage > 10 && nMaxHits > 0)
+	while (flDamage > 1)
 	{
-		nMaxHits--;
 
 		gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction( false, true );
 		

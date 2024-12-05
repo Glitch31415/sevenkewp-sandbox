@@ -172,7 +172,6 @@ void CShotgun::PrimaryAttack()
 	float flDamage = gSkillData.sk_plr_9mm_bullet * dmg_mult;
 	int fHasPunched = 0;
 	int fFirstBeam = 1;
-	int	nMaxHits = 2;
 
 	pentIgnore = m_pPlayer->edict();
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usSingleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
@@ -181,7 +180,7 @@ void CShotgun::PrimaryAttack()
 	lagcomp_begin(m_pPlayer);
 
 
-while (flDamage > 1 && nMaxHits > 0)
+while (flDamage > 1)
 	{
 
 
@@ -300,7 +299,6 @@ while (flDamage > 1 && nMaxHits > 0)
 			vecSrc = tr.vecEndPos + vecDir;
 			pentIgnore = ENT( pEntity->pev );
 		}
-		nMaxHits--;
 	}
 
 	lagcomp_end();
@@ -380,7 +378,6 @@ void CShotgun::SecondaryAttack( void )
 	float flDamage = gSkillData.sk_plr_9mm_bullet * dmg_mult;
 	int fHasPunched = 0;
 	int fFirstBeam = 1;
-	int	nMaxHits = 2;
 
 	pentIgnore = m_pPlayer->edict();
 
@@ -389,7 +386,7 @@ void CShotgun::SecondaryAttack( void )
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
 	lagcomp_begin(m_pPlayer);
 
-while (flDamage > 1 && nMaxHits > 0)
+while (flDamage > 1)
 	{
 
 
@@ -508,7 +505,6 @@ while (flDamage > 1 && nMaxHits > 0)
 			vecSrc = tr.vecEndPos + vecDir;
 			pentIgnore = ENT( pEntity->pev );
 		}
-		nMaxHits--;
 	}
 
 	lagcomp_end();

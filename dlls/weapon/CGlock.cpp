@@ -172,7 +172,6 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 	float flDamage = gSkillData.sk_plr_9mm_bullet * dmg_mult;
 	int fHasPunched = 0;
 	int fFirstBeam = 1;
-	int	nMaxHits = 2;
 
 	pentIgnore = m_pPlayer->edict();
 
@@ -186,7 +185,7 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 
 	lagcomp_begin(m_pPlayer);
 
-	while (flDamage > 1 && nMaxHits > 0)
+	while (flDamage > 1)
 	{
 
 
@@ -305,7 +304,6 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 			vecSrc = tr.vecEndPos + vecDir;
 			pentIgnore = ENT( pEntity->pev );
 		}
-		nMaxHits--;
 	}
 	
 	lagcomp_end();

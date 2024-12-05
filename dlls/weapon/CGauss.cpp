@@ -423,7 +423,6 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 	int	nTotal = 0;
 	int fHasPunched = 0;
 	int fFirstBeam = 1;
-	int	nMaxHits = 10;
 
 	pentIgnore = m_pPlayer->edict();
 
@@ -452,9 +451,8 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 #ifndef CLIENT_DLL
 	lagcomp_begin(m_pPlayer);
 
-	while (flDamage > 10 && nMaxHits > 0)
+	while (flDamage > 1)
 	{
-		nMaxHits--;
 
 		// ALERT( at_console, "." );
 		UTIL_TraceLine(vecSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);

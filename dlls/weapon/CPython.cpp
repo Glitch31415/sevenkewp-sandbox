@@ -208,7 +208,6 @@ void CPython::PrimaryAttack()
 	float flDamage = gSkillData.sk_plr_357_bullet * dmg_mult;
 	int fHasPunched = 0;
 	int fFirstBeam = 1;
-	int	nMaxHits = 5;
 
 	pentIgnore = m_pPlayer->edict();
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_357);
@@ -224,7 +223,7 @@ void CPython::PrimaryAttack()
 
 	lagcomp_begin(m_pPlayer);
 	
-	while (flDamage > 1 && nMaxHits > 0)
+	while (flDamage > 1)
 	{
 
 
@@ -343,7 +342,6 @@ void CPython::PrimaryAttack()
 			vecSrc = tr.vecEndPos + vecDir;
 			pentIgnore = ENT( pEntity->pev );
 		}
-		nMaxHits--;
 	}
 	
 	lagcomp_end();

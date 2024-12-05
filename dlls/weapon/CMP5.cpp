@@ -167,7 +167,6 @@ void CMP5::PrimaryAttack()
 	float flMaxFrac = 1.0;
 	int fHasPunched = 0;
 	int fFirstBeam = 1;
-	int	nMaxHits = 3;
 
 	pentIgnore = m_pPlayer->edict();
 	// don't fire underwater
@@ -208,7 +207,7 @@ void CMP5::PrimaryAttack()
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_9MM);
 	lagcomp_begin(m_pPlayer);
 
-	while (flDamage > 1 && nMaxHits > 0)
+	while (flDamage > 1)
 	{
 
 
@@ -328,7 +327,6 @@ void CMP5::PrimaryAttack()
 			vecSrc = tr.vecEndPos + vecDir;
 			pentIgnore = ENT( pEntity->pev );
 		}
-		nMaxHits--;
 	}
 	
 	lagcomp_end();
