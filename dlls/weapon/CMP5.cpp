@@ -245,7 +245,7 @@ void CMP5::PrimaryAttack()
 
 			flDamage = flDamage - diffhealth;
 
-			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("took damage, diffhealth: %f, flDamage: %f", diffhealth, flDamage));
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("took damage, diffhealth: %f", diffhealth));
 		}
 
 		if ( pEntity->ReflectGauss() )
