@@ -281,6 +281,9 @@ while (flDamage > 1 && loops < 25)
 			if (diffhealth < 0) {
 				diffhealth = pEntity->pev->max_health;
 			}
+			if (diffhealth < pEntity->pev->max_health*0.75) {
+				diffhealth = pEntity->pev->max_health*0.75;
+			}
 
 			flDamage = flDamage - diffhealth;
 		}
@@ -323,8 +326,8 @@ while (flDamage > 1 && loops < 25)
 				//if ( !m_fPrimaryFire )
 				//{
 					UTIL_TraceLine( tr.vecEndPos + vecDir * 8, vecDest, dont_ignore_monsters, pentIgnore, &beam_tr);
-					if (!beam_tr.fAllSolid)
-					{
+					//if (!beam_tr.fAllSolid)
+					//{
 						// trace backwards to find exit point
 						UTIL_TraceLine( beam_tr.vecEndPos, tr.vecEndPos, dont_ignore_monsters, pentIgnore, &beam_tr);
 
@@ -333,7 +336,7 @@ while (flDamage > 1 && loops < 25)
 						if (n < flDamage)
 						{
 							if (n == 0) n = 1;
-							flDamage -= 3*n;
+							flDamage -= 5*n;
 
 							// ALERT( at_console, "punch %f\n", n );
 
@@ -348,12 +351,12 @@ while (flDamage > 1 && loops < 25)
 
 							vecSrc = beam_tr.vecEndPos + vecDir;
 						}
-					}
-					else
-					{
+					//}
+					//else
+					//{
 						 //ALERT( at_console, "blocked %f\n", n );
-						flDamage = 0;
-					}
+						//flDamage = 0;
+					//}
 				//}
 				//else
 				//{
