@@ -339,7 +339,11 @@ def check_map_problems(all_ents, fix_problems):
 	for ent in all_ents:
 		cname = ent.get('classname', '')
 		
+<<<<<<< HEAD
 		# lazy way to bulk replace music files in maps. Write the files you want converted to mp3 here.
+=======
+		# lazy way to bulk replace music files in maps
+>>>>>>> 3ddfaae20a46fd88f57eeec7c1d029d1f52b739d
 		should_music = [
 			#"bm_nightmare/boss_music2.wav",
 		]
@@ -920,9 +924,20 @@ if fix_problems:
 					else:
 						newHeight = 512
 						newWidth = (tex["width"] * (512.0 / tex["height"]) + 0.5)
+<<<<<<< HEAD
 					print("Resizing invalid texture in %s (%s %dx%d -> %dx%d)" % (mdl, tex["name"], tex["width"], tex["height"], newWidth, newHeight))
 					mdlguy_command = [modelguy_path, 'resize', tex["name"], "%d" % newWidth, "%d" % newHeight, mdl, json_path]
 					print(' '.join(mdlguy_command))
+=======
+					
+					# pixel count must be divisble by 8 or else game crashes with "GL_Upload8: s&3"
+					newWidth =  int((newWidth + 4) / 8) * 8
+					newHeight = int((newHeight + 4) / 8) * 8
+					
+					print("Resizing invalid texture in %s (%s %dx%d -> %dx%d)" % (mdl, tex["name"], tex["width"], tex["height"], newWidth, newHeight))
+					mdlguy_command = [modelguy_path, 'resize', tex["name"], "%d" % newWidth, "%d" % newHeight, mdl, json_path]
+					#print(' '.join(mdlguy_command))
+>>>>>>> 3ddfaae20a46fd88f57eeec7c1d029d1f52b739d
 					subprocess.run(mdlguy_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 			
 			for evt in data["events"]:
