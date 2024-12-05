@@ -278,8 +278,8 @@ while (flDamage > 1 && loops < 25)
 		if (flDamage <= 0)
 			break;
 
-		if ( pEntity->ReflectGauss() )
-		{
+		//if ( pEntity->ReflectGauss() )
+		//{
 			//pentIgnore = NULL;
 
 			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
@@ -355,12 +355,12 @@ while (flDamage > 1 && loops < 25)
 				//}
 
 			}
-		}
-		else
-		{
-			vecSrc = tr.vecEndPos + vecDir;
-			pentIgnore = ENT( pEntity->pev );
-		}
+		//}
+		//else
+		//{
+			//vecSrc = tr.vecEndPos + vecDir;
+			//pentIgnore = ENT( pEntity->pev );
+		//}
 		//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("end of loop, flDamage: %f", flDamage));
 	}
 	
