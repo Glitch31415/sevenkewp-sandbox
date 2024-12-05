@@ -421,7 +421,6 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
 	int	nTotal = 0;
-	int fHasPunched = 0;
 	int fFirstBeam = 1;
 
 	pentIgnore = m_pPlayer->edict();
@@ -519,9 +518,6 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 				nTotal += 13;
 
 				// limit it to one hole punch
-				if (fHasPunched)
-					break;
-				fHasPunched = 1;
 
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
 				//if ( !m_fPrimaryFire )

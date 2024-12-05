@@ -165,7 +165,6 @@ void CMP5::PrimaryAttack()
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
-	int fHasPunched = 0;
 	int fFirstBeam = 1;
 
 	pentIgnore = m_pPlayer->edict();
@@ -281,9 +280,6 @@ void CMP5::PrimaryAttack()
 
 
 				// limit it to one hole punch
-				if (fHasPunched == 2)
-					break;
-				fHasPunched = fHasPunched + 1;
 
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
 				//if ( !m_fPrimaryFire )

@@ -170,7 +170,6 @@ void CShotgun::PrimaryAttack()
 	float dmg_mult = GetDamageModifier();
 
 	float flDamage = gSkillData.sk_plr_9mm_bullet * dmg_mult;
-	int fHasPunched = 0;
 	int fFirstBeam = 1;
 
 	pentIgnore = m_pPlayer->edict();
@@ -245,9 +244,7 @@ while (flDamage > 1)
 
 
 				// limit it to one hole punch
-				if (fHasPunched == 1)
-					break;
-				fHasPunched = fHasPunched + 1;
+
 
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
 				//if ( !m_fPrimaryFire )
@@ -376,7 +373,6 @@ void CShotgun::SecondaryAttack( void )
 	float dmg_mult = GetDamageModifier();
 
 	float flDamage = gSkillData.sk_plr_9mm_bullet * dmg_mult;
-	int fHasPunched = 0;
 	int fFirstBeam = 1;
 
 	pentIgnore = m_pPlayer->edict();
@@ -451,9 +447,6 @@ while (flDamage > 1)
 
 
 				// limit it to one hole punch
-				if (fHasPunched == 1)
-					break;
-				fHasPunched = fHasPunched + 1;
 
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
 				//if ( !m_fPrimaryFire )

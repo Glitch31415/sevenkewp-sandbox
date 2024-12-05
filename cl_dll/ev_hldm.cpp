@@ -872,7 +872,6 @@ void EV_FireGauss( event_args_t *args )
 	pmtrace_t tr, beam_tr;
 	float flMaxFrac = 1.0;
 	int	nTotal = 0;
-	int fHasPunched = 0;
 	int fFirstBeam = 1;
 	physent_t *pEntity;
 	int m_iBeam, m_iGlow, m_iBalls;
@@ -1025,15 +1024,10 @@ void EV_FireGauss( event_args_t *args )
 				gEngfuncs.pEfxAPI->R_TempSprite( tr.endpos, vec3_origin, 1.0, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage / 255.0, 6.0, FTENT_FADEOUT );
 
 				// limit it to one hole punch
-				if (fHasPunched)
-				{
-					break;
-				}
-				fHasPunched = 1;
 				
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
-				if ( !m_fPrimaryFire )
-				{
+				//if ( !m_fPrimaryFire )
+				//{
 					vec3_t start;
 
 					VectorMA( tr.endpos, 8.0, forward, start );
@@ -1098,25 +1092,7 @@ void EV_FireGauss( event_args_t *args )
 					}
 
 					gEngfuncs.pEventAPI->EV_PopPMStates();
-				}
-				else
-				{
-					if ( m_fPrimaryFire )
-					{
-						// slug doesn't punch through ever with primary 
-						// fire, so leave a little glowy bit and make some balls
-						gEngfuncs.pEfxAPI->R_TempSprite( tr.endpos, vec3_origin, 0.2, m_iGlow, kRenderGlow, kRenderFxNoDissipation, 200.0 / 255.0, 0.3, FTENT_FADEOUT );
-			
-						{
-							vec3_t fwd;
-							VectorAdd( tr.endpos, tr.plane.normal, fwd );
-							gEngfuncs.pEfxAPI->R_Sprite_Trail( TE_SPRITETRAIL, tr.endpos, fwd, m_iBalls, 8, 0.6, gEngfuncs.pfnRandomFloat( 10, 20 ) / 100.0, 100,
-								255, 200 );
-						}
-					}
-
-					flDamage = 0;
-				}
+				//}
 			}
 		}
 		else

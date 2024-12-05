@@ -206,7 +206,6 @@ void CPython::PrimaryAttack()
 	float dmg_mult = GetDamageModifier();
 
 	float flDamage = gSkillData.sk_plr_357_bullet * dmg_mult;
-	int fHasPunched = 0;
 	int fFirstBeam = 1;
 
 	pentIgnore = m_pPlayer->edict();
@@ -288,9 +287,6 @@ void CPython::PrimaryAttack()
 
 
 				// limit it to one hole punch
-				if (fHasPunched == 3)
-					break;
-				fHasPunched = fHasPunched + 1;
 
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
 				//if ( !m_fPrimaryFire )
