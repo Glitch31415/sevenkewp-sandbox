@@ -314,7 +314,7 @@ while (flDamage > 1 && loops < 25)
 						if (n < flDamage)
 						{
 							if (n == 0) n = 1;
-							flDamage -= n;
+							flDamage -= 3n;
 
 							// ALERT( at_console, "punch %f\n", n );
 
