@@ -204,7 +204,7 @@ void CMP5::PrimaryAttack()
 #else
 	flags = 0;
 #endif
-	//PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usMP5, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
+	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usMP5, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_9MM);
 	lagcomp_begin(m_pPlayer);
 
@@ -238,7 +238,8 @@ void CMP5::PrimaryAttack()
 			// if you hurt yourself clear the headshot bit
 
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+			
+			//ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 		}
 
 		if ( pEntity->ReflectGauss() )
