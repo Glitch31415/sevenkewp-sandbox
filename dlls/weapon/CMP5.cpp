@@ -247,6 +247,8 @@ while (flDamage > 1 && loops < 25)
 
 			flDamage = flDamage - diffhealth;
 
+			pEntity = NULL;
+
 			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("took damage, diffhealth: %f", diffhealth));
 		}
 
