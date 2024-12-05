@@ -472,16 +472,18 @@ while (flDamage > 1 && loops < 25)
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 			
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-
 			float diffhealth = prevhealth - pEntity->pev->health;
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("after %f", pEntity->pev->health));
+			if (pEntity->pev->health <= 0) {
+				pEntity->pev->takedamage = false;
+			}
 			if (diffhealth < 0) {
 				diffhealth = pEntity->pev->max_health;
 			}
 			if (diffhealth < pEntity->pev->max_health*0.75) {
 				diffhealth = pEntity->pev->max_health*0.75;
 			}
-			pEntity->pev->health = prevhealth - flDamage;
+			
 			flDamage = flDamage - diffhealth;
 		}
 		if (flDamage <= 0)
