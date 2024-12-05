@@ -144,7 +144,7 @@ void CMP5::PrimaryAttack()
 	
 		vecAiming = gpGlobals->v_forward;
 	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
-	Vector vecDir = vecAiming + m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, VECTOR_CONE_9MMAR, 131072, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
+	Vector vecDir = vecAiming; //+ m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, VECTOR_CONE_9MMAR, 131072, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 	
 	float dmg_mult = GetDamageModifier();
 
@@ -246,8 +246,6 @@ while (flDamage > 1 && loops < 25)
 			float diffhealth = prevhealth - pEntity->pev->health;
 
 			flDamage = flDamage - diffhealth;
-
-			pEntity = NULL;
 
 			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("took damage, diffhealth: %f", diffhealth));
 		}
