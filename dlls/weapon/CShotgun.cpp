@@ -185,7 +185,7 @@ void CShotgun::PrimaryAttack()
 	float flMaxFrac = 1.0;
 	float dmg_mult = GetDamageModifier();
 
-	float flDamage = gSkillData.sk_plr_9mm_bullet * dmg_mult;
+	float flDamage = gSkillData.sk_plr_buckshot * dmg_mult;
 	int fFirstBeam = 1;
 
 	pentIgnore = m_pPlayer->edict();
@@ -221,6 +221,8 @@ while (flDamage > 1 && loops < 25)
 		
 		if (pEntity->pev->takedamage)
 		{
+			if (pEntity->pev->health <= 0)
+				break;
 			ClearMultiDamage();
 
 			// if you hurt yourself clear the headshot bit
@@ -244,8 +246,8 @@ while (flDamage > 1 && loops < 25)
 		}
 		if (flDamage <= 0)
 			break;
-		if ( pEntity->ReflectGauss() )
-		{
+		//if ( pEntity->ReflectGauss() )
+		//{
 			//pentIgnore = NULL;
 
 			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
@@ -322,12 +324,12 @@ while (flDamage > 1 && loops < 25)
 				//}
 
 			}
-		}
-		else
-		{
-			vecSrc = tr.vecEndPos + vecDir;
-			pentIgnore = ENT( pEntity->pev );
-		}
+		//}
+		//else
+		//{
+			//vecSrc = tr.vecEndPos + vecDir;
+			//pentIgnore = ENT( pEntity->pev );
+		//}
 	}
 
 
@@ -421,7 +423,7 @@ void CShotgun::SecondaryAttack( void )
 	float flMaxFrac = 1.0;
 	float dmg_mult = GetDamageModifier();
 
-	float flDamage = gSkillData.sk_plr_9mm_bullet * dmg_mult;
+	float flDamage = gSkillData.sk_plr_buckshot * dmg_mult;
 	int fFirstBeam = 1;
 
 	pentIgnore = m_pPlayer->edict();
@@ -458,6 +460,8 @@ while (flDamage > 1 && loops < 25)
 		
 		if (pEntity->pev->takedamage)
 		{
+			if (pEntity->pev->health <= 0)
+				break;
 			ClearMultiDamage();
 
 			// if you hurt yourself clear the headshot bit
@@ -479,8 +483,8 @@ while (flDamage > 1 && loops < 25)
 		}
 		if (flDamage <= 0)
 			break;
-		if ( pEntity->ReflectGauss() )
-		{
+		//if ( pEntity->ReflectGauss() )
+		//{
 			//pentIgnore = NULL;
 
 			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
@@ -556,12 +560,12 @@ while (flDamage > 1 && loops < 25)
 				//}
 
 			}
-		}
-		else
-		{
-			vecSrc = tr.vecEndPos + vecDir;
-			pentIgnore = ENT( pEntity->pev );
-		}
+		//}
+		//else
+		//{
+			//vecSrc = tr.vecEndPos + vecDir;
+			//pentIgnore = ENT( pEntity->pev );
+		//}
 	}
 
 

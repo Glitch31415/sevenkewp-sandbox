@@ -250,6 +250,8 @@ while (flDamage > 1 && loops < 25)
 		
 		if (pEntity->pev->takedamage)
 		{
+			if (pEntity->pev->health <= 0)
+				break;
 			ClearMultiDamage();
 
 			// if you hurt yourself clear the headshot bit

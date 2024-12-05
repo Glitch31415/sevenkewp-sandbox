@@ -266,6 +266,8 @@ while (flDamage > 1 && loops < 25)
 		
 		if (pEntity->pev->takedamage)
 		{
+			if (pEntity->pev->health <= 0)
+				break;
 			ClearMultiDamage();
 
 			// if you hurt yourself clear the headshot bit
@@ -289,8 +291,8 @@ while (flDamage > 1 && loops < 25)
 		}
 		if (flDamage <= 0)
 			break;
-		if ( pEntity->ReflectGauss() )
-		{
+		//if ( pEntity->ReflectGauss() )
+		//{
 			//pentIgnore = NULL;
 
 			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
@@ -366,12 +368,12 @@ while (flDamage > 1 && loops < 25)
 				//}
 
 			}
-		}
-		else
-		{
-			vecSrc = tr.vecEndPos + vecDir;
-			pentIgnore = ENT( pEntity->pev );
-		}
+		//}
+		//else
+		//{
+			//vecSrc = tr.vecEndPos + vecDir;
+			//pentIgnore = ENT( pEntity->pev );
+		//}
 	}
 	
 	lagcomp_end();
