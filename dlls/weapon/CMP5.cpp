@@ -239,7 +239,7 @@ void CMP5::PrimaryAttack()
 
 			//pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 			
-			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+			//ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 		}
 
 		if ( pEntity->ReflectGauss() )
