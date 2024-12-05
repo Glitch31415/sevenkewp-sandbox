@@ -479,6 +479,7 @@ while (flDamage > 1 && loops < 25)
 			if (diffhealth < pEntity->pev->max_health*0.75) {
 				diffhealth = pEntity->pev->max_health*0.75;
 			}
+			UTIL_ClientPrintAll(print_chat, diffhealth);
 			flDamage = flDamage - diffhealth;
 		}
 		if (flDamage <= 0)
