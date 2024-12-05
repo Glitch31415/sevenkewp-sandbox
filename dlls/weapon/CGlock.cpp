@@ -184,8 +184,10 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 
 	lagcomp_begin(m_pPlayer);
 
-	while (flDamage > 1)
+int loops = 0;
+while (flDamage > 1 && loops < 25)
 	{
+		loops = loops + 1;
 
 
 		// ALERT( at_console, "." );

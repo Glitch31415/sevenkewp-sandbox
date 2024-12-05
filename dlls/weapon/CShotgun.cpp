@@ -178,9 +178,10 @@ void CShotgun::PrimaryAttack()
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
 	lagcomp_begin(m_pPlayer);
 
-
-while (flDamage > 1)
+int loops = 0;
+while (flDamage > 1 && loops < 25)
 	{
+		loops = loops + 1;
 
 
 		// ALERT( at_console, "." );
@@ -389,8 +390,10 @@ void CShotgun::SecondaryAttack( void )
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
 	lagcomp_begin(m_pPlayer);
 
-while (flDamage > 1)
+int loops = 0;
+while (flDamage > 1 && loops < 25)
 	{
+		loops = loops + 1;
 
 
 		// ALERT( at_console, "." );

@@ -206,8 +206,10 @@ void CMP5::PrimaryAttack()
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_9MM);
 	lagcomp_begin(m_pPlayer);
 
-	while (flDamage > 1)
+int loops = 0;
+while (flDamage > 1 && loops < 25)
 	{
+		loops = loops + 1;
 
 
 		// ALERT( at_console, "." );
