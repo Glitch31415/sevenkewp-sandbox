@@ -196,7 +196,7 @@ void CPython::PrimaryAttack()
 
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 
-	vecAiming = gpGlobals->v_forward;
+	Vector vecAiming = gpGlobals->v_forward;
 	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
 	Vector vecDir = vecAiming + m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, VECTOR_CONE_357, 131072, BULLET_PLAYER_357, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 		Vector vecDest = vecSrc + vecDir * 8192;
