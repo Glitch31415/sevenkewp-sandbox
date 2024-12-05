@@ -261,10 +261,11 @@ while (flDamage > 1 && loops < 25)
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
 			float diffhealth = prevhealth - pEntity->pev->health;
+						
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("took damage, diffhealth: %f", diffhealth));
 
 			flDamage = flDamage - diffhealth;
 
-			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("took damage, diffhealth: %f", diffhealth));
 		}
 
 		if ( pEntity->ReflectGauss() )
