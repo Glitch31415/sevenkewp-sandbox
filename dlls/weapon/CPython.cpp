@@ -278,9 +278,14 @@ while (flDamage > 1 && loops < 25)
 
 			float diffhealth = prevhealth - pEntity->pev->health;
 
+			if (diffhealth < 0) {
+				diffhealth = pEntity->pev->max_health;
+			}
+
 			flDamage = flDamage - diffhealth;
 		}
-
+		if (flDamage <= 0)
+			break;
 		if ( pEntity->ReflectGauss() )
 		{
 			//pentIgnore = NULL;
