@@ -450,14 +450,17 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 #ifndef CLIENT_DLL
 	lagcomp_begin(m_pPlayer);
 
-	while (flDamage > 1)
+	int loops = 0;
+while (flDamage > 1 && loops < 1000)
 	{
+		loops = loops + 1;
+
 
 		// ALERT( at_console, "." );
 		UTIL_TraceLine(vecSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);
 
-		if (tr.fAllSolid)
-			break;
+		//if (tr.fAllSolid)
+			//break;
 
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 
@@ -469,26 +472,44 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = 0;
 	
-			nTotal += 26;
+
 		}
 		
 		if (pEntity->pev->takedamage)
 		{
+			if (pEntity->pev->health <= 0)
+				break;
 			ClearMultiDamage();
 
 			// if you hurt yourself clear the headshot bit
-			if (m_pPlayer->pev == pEntity->pev)
-			{
-				tr.iHitgroup = 0;
-			}
+
+			float prevhealth = pEntity->pev->health;
 
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+			
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+
+			float diffhealth = prevhealth - pEntity->pev->health;
+
+			if (diffhealth < 0) {
+				diffhealth = pEntity->pev->max_health;
+			}
+			if (diffhealth < pEntity->pev->max_health*0.75) {
+				diffhealth = pEntity->pev->max_health*0.75;
+			}
+						
+			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("took damage, diffhealth: %f", diffhealth));
+
+			flDamage = flDamage - diffhealth;
+
 		}
 
-		if ( pEntity->ReflectGauss() )
-		{
-			pentIgnore = NULL;
+		if (flDamage <= 0)
+			break;
+
+		//if ( pEntity->ReflectGauss() )
+		//{
+			//pentIgnore = NULL;
 
 			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
 
@@ -507,7 +528,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 				// explode a bit
 				//m_pPlayer->RadiusDamage( tr.vecEndPos, pev, m_pPlayer->pev, flDamage * n, CLASS_NONE, DMG_BLAST );
 
-				nTotal += 34;
+
 				
 				// lose energy
 				if (n == 0) n = 0.1;
@@ -515,7 +536,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 			}
 			else
 			{
-				nTotal += 13;
+
 
 				// limit it to one hole punch
 
@@ -523,8 +544,8 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 				//if ( !m_fPrimaryFire )
 				//{
 					UTIL_TraceLine( tr.vecEndPos + vecDir * 8, vecDest, dont_ignore_monsters, pentIgnore, &beam_tr);
-					if (!beam_tr.fAllSolid)
-					{
+					//if (!beam_tr.fAllSolid)
+					//{
 						// trace backwards to find exit point
 						UTIL_TraceLine( beam_tr.vecEndPos, tr.vecEndPos, dont_ignore_monsters, pentIgnore, &beam_tr);
 
@@ -532,40 +553,28 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 
 						if (n < flDamage)
 						{
-							if (n == 0) n = 1;
-							flDamage -= n;
+							if (n == 0) n = 0;
+							flDamage -= 0; // laser cutter
 
 							// ALERT( at_console, "punch %f\n", n );
-							nTotal += 21;
+
 
 							// exit blast damage
 							//m_pPlayer->RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, CLASS_NONE, DMG_BLAST );
-							float damage_radius;
-							
 
-							if ( g_pGameRules->IsMultiplayer() )
-							{
-								damage_radius = flDamage * 1.75;  // Old code == 2.5
-							}
-							else
-							{
-								damage_radius = flDamage * 2.5;
-							}
+							//::RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, damage_radius, CLASS_NONE, DMG_BLAST );
 
-							::RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, damage_radius, CLASS_NONE, DMG_BLAST );
 
-							CSoundEnt::InsertSound ( bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3.0 );
 
-							nTotal += 53;
 
 							vecSrc = beam_tr.vecEndPos + vecDir;
 						}
-					}
-					else
-					{
+					//}
+					//else
+					//{
 						 //ALERT( at_console, "blocked %f\n", n );
-						flDamage = 0;
-					}
+						//flDamage = 0;
+					//}
 				//}
 				//else
 				//{
@@ -575,12 +584,13 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 				//}
 
 			}
-		}
-		else
-		{
-			vecSrc = tr.vecEndPos + vecDir;
-			pentIgnore = ENT( pEntity->pev );
-		}
+		//}
+		//else
+		//{
+			//vecSrc = tr.vecEndPos + vecDir;
+			//pentIgnore = ENT( pEntity->pev );
+		//}
+		//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("end of loop, flDamage: %f", flDamage));
 	}
 	
 	lagcomp_end();
