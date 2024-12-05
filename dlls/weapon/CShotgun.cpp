@@ -221,7 +221,6 @@ while (flDamage > 1 && loops < 25)
 		
 		if (pEntity->pev->takedamage)
 		{
-			pEntity->pev->takedamage = false;
 			if (pEntity->pev->health <= 0)
 				break;
 			ClearMultiDamage();
@@ -461,7 +460,6 @@ while (flDamage > 1 && loops < 25)
 		
 		if (pEntity->pev->takedamage)
 		{
-			pEntity->pev->takedamage = false;
 			if (pEntity->pev->health <= 0)
 				break;
 			ClearMultiDamage();
