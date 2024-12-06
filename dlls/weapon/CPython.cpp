@@ -282,6 +282,7 @@ while (flDamage > 1 && loops < 25)
 switch ((&tr)->iHitgroup)
 {
 case 0:
+	UTIL_ClientPrintAll(print_chat, "uh oh generic");
 	break;
 case 1:
 	flcDamage *= gSkillData.sk_monster_head;
@@ -336,6 +337,7 @@ case 7:
 	}
 	break;
 default:
+	UTIL_ClientPrintAll(print_chat, "uh oh default");
 	break;
 }
 
