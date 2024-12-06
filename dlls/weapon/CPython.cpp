@@ -275,6 +275,7 @@ while (flDamage > 1 && loops < 25)
 			float prevhealth = pEntity->pev->health;
 			float prevmaxhealth = pEntity->pev->max_health;
 			float flcDamage = flDamage;
+			float flpDamage = flDamage;
 
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 
@@ -284,6 +285,7 @@ case 0:
 	break;
 case 1:
 	flcDamage *= gSkillData.sk_monster_head;
+	flpDamage *= 0.75;
 	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_head*prevmaxhealth))) {
 		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_head*prevmaxhealth))); // damage cap
 		if (flcDamage < 1) {
@@ -293,6 +295,7 @@ case 1:
 	break;
 case 2:
 	flcDamage *= gSkillData.sk_monster_chest;
+	flpDamage *= gSkillData.sk_monster_chest;
 	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_chest*prevmaxhealth))) {
 		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_chest*prevmaxhealth))); // damage cap
 		if (flcDamage < 1) {
@@ -302,6 +305,7 @@ case 2:
 	break;
 case 3:
 	flcDamage *= gSkillData.sk_monster_stomach;
+	flpDamage *= gSkillData.sk_monster_stomach;
 	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_stomach*prevmaxhealth))) {
 		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_stomach*prevmaxhealth))); // damage cap
 		if (flcDamage < 1) {
@@ -312,6 +316,7 @@ case 3:
 case 4:
 case 5:
 	flcDamage *= gSkillData.sk_monster_arm;
+	flpDamage *= 0.85;
 	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_arm*prevmaxhealth))) {
 		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_arm*prevmaxhealth))); // damage cap
 		if (flcDamage < 1) {
@@ -322,6 +327,7 @@ case 5:
 case 6:
 case 7:
 	flcDamage *= gSkillData.sk_monster_leg;
+	flpDamage *= gSkillData.sk_monster_stomach;
 	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))) {
 		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))); // damage cap
 		if (flcDamage < 1) {
@@ -348,7 +354,7 @@ default:
 				//diffhealth = pEntity->pev->max_health*0.75;
 			//}
 
-			flDamage = flDamage - pEntity->pev->max_health*0.75;
+			flDamage = flDamage - flpDamage;
 		}
 		if (flDamage <= 0)
 			break;
