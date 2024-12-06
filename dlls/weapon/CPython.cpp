@@ -243,6 +243,7 @@ int loops = 0;
 while (flDamage > 1 && loops < 25)
 	{
 		loops = loops + 1;
+		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage begin: %f", flDamage));
 
 
 		// ALERT( at_console, "." );
@@ -370,8 +371,7 @@ default:
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flpDamage: %f", flpDamage));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 1: %f", flDamage));
 		}
-		if (flDamage <= 0)
-			break;
+		else {
 		//if ( pEntity->ReflectGauss() )
 		//{
 			//pentIgnore = NULL;
@@ -451,6 +451,9 @@ default:
 				//}
 
 			}
+		}
+
+
 		//}
 		//else
 		//{
