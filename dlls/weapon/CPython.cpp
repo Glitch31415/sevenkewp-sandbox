@@ -336,6 +336,18 @@ case 7:
 		}
 	}
 	break;
+case 10:
+case 11:
+	//armor
+	flcDamage *= 0.25;
+	flpDamage *= 2;
+	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))) {
+		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))); // damage cap
+		if (flcDamage < 1) {
+			flcDamage = 1;
+		}
+	}
+	break;
 default:
 	UTIL_ClientPrintAll(print_chat, "uh oh default");
 	break;
