@@ -280,9 +280,9 @@ while (flDamage > 1 && loops < 25)
 
 switch (m_LastHitGroup)
 {
-case HITGROUP_GENERIC:
+case 0:
 	break;
-case HITGROUP_HEAD:
+case 1:
 	flcDamage *= gSkillData.sk_monster_head;
 	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_head*prevmaxhealth))) {
 		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_head*prevmaxhealth))); // damage cap
@@ -291,7 +291,7 @@ case HITGROUP_HEAD:
 		}
 	}
 	break;
-case HITGROUP_CHEST:
+case 2:
 	flcDamage *= gSkillData.sk_monster_chest;
 	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_chest*prevmaxhealth))) {
 		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_chest*prevmaxhealth))); // damage cap
@@ -300,7 +300,7 @@ case HITGROUP_CHEST:
 		}
 	}
 	break;
-case HITGROUP_STOMACH:
+case 3:
 	flcDamage *= gSkillData.sk_monster_stomach;
 	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_stomach*prevmaxhealth))) {
 		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_stomach*prevmaxhealth))); // damage cap
@@ -309,8 +309,8 @@ case HITGROUP_STOMACH:
 		}
 	}
 	break;
-case HITGROUP_LEFTARM:
-case HITGROUP_RIGHTARM:
+case 4:
+case 5:
 	flcDamage *= gSkillData.sk_monster_arm;
 	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_arm*prevmaxhealth))) {
 		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_arm*prevmaxhealth))); // damage cap
@@ -319,8 +319,8 @@ case HITGROUP_RIGHTARM:
 		}
 	}
 	break;
-case HITGROUP_LEFTLEG:
-case HITGROUP_RIGHTLEG:
+case 6:
+case 7:
 	flcDamage *= gSkillData.sk_monster_leg;
 	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))) {
 		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))); // damage cap

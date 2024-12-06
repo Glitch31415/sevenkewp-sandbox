@@ -4832,9 +4832,9 @@ void CBaseMonster::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector ve
 		if (!(bitsDamageType & DMG_BLAST)) {
 			switch (ptr->iHitgroup)
 			{
-			case 0:
+			case HITGROUP_GENERIC:
 				break;
-			case 1:
+			case HITGROUP_HEAD:
 				flDamage *= gSkillData.sk_monster_head;
 				if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_monster_head*pev->max_health))) {
 					flDamage = (pev->health - (pev->max_health - (gSkillData.sk_monster_head*pev->max_health))); // damage cap
@@ -4843,7 +4843,7 @@ void CBaseMonster::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector ve
 					}
 				}
 				break;
-			case 2:
+			case HITGROUP_CHEST:
 				flDamage *= gSkillData.sk_monster_chest;
 				if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_monster_chest*pev->max_health))) {
 					flDamage = (pev->health - (pev->max_health - (gSkillData.sk_monster_chest*pev->max_health))); // damage cap
@@ -4852,7 +4852,7 @@ void CBaseMonster::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector ve
 					}
 				}
 				break;
-			case 3:
+			case HITGROUP_STOMACH:
 				flDamage *= gSkillData.sk_monster_stomach;
 				if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_monster_stomach*pev->max_health))) {
 					flDamage = (pev->health - (pev->max_health - (gSkillData.sk_monster_stomach*pev->max_health))); // damage cap
@@ -4861,8 +4861,8 @@ void CBaseMonster::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector ve
 					}
 				}
 				break;
-			case 4:
-			case 5:
+			case HITGROUP_LEFTARM:
+			case HITGROUP_RIGHTARM:
 				flDamage *= gSkillData.sk_monster_arm;
 				if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_monster_arm*pev->max_health))) {
 					flDamage = (pev->health - (pev->max_health - (gSkillData.sk_monster_arm*pev->max_health))); // damage cap
@@ -4871,8 +4871,8 @@ void CBaseMonster::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector ve
 					}
 				}
 				break;
-			case 6:
-			case 7:
+			case HITGROUP_LEFTLEG:
+			case HITGROUP_RIGHTLEG:
 				flDamage *= gSkillData.sk_monster_leg;
 				if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_monster_leg*pev->max_health))) {
 					flDamage = (pev->health - (pev->max_health - (gSkillData.sk_monster_leg*pev->max_health))); // damage cap
