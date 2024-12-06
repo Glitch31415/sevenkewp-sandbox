@@ -437,7 +437,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 	// It's delayed by a fraction of second to make sure it is delayed by 1 frame on the client
 	// It's sent reliably anyway, which could lead to other delays
 
-	PLAYBACK_EVENT_FULL( FEV_NOTHOST | FEV_RELIABLE, m_pPlayer->edict(), m_usGaussFire, 0.001, (float *)&m_pPlayer->pev->origin, (float *)&m_pPlayer->pev->angles, 0.0, 0.0, 0, 0, 0, 1 );
+	PLAYBACK_EVENT_FULL( FEV_NOTHOST | FEV_RELIABLE, m_pPlayer->edict(), m_usGaussFire, 0.01, (float *)&m_pPlayer->pev->origin, (float *)&m_pPlayer->pev->angles, 0.0, 0.0, 0, 0, 0, 1 );
 
 	
 	/*ALERT( at_console, "%f %f %f\n%f %f %f\n", 
@@ -513,8 +513,8 @@ while (flDamage > 1 && loops < 1000)
 
 			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
 
-			if (n < 0.5) // 60 degrees
-			{
+			//if (n < 0.5) // 60 degrees
+			//{
 				// ALERT( at_console, "reflect %f\n", n );
 				// reflect
 				Vector r;
@@ -532,10 +532,10 @@ while (flDamage > 1 && loops < 1000)
 				
 				// lose energy
 				if (n == 0) n = 0.1;
-				flDamage = flDamage * (1 - n);
-			}
-			else
-			{
+				flDamage = flDamage * 1;
+			//}
+			//else
+			//{
 
 
 				// limit it to one hole punch
@@ -551,10 +551,10 @@ while (flDamage > 1 && loops < 1000)
 
 						n = (beam_tr.vecEndPos - tr.vecEndPos).Length( );
 
-						if (n < flDamage)
-						{
-							if (n == 0) n = 0;
-							flDamage -= 0; // laser cutter
+						//if (n < flDamage)
+						//{
+							//if (n == 0) n = 0;
+							//flDamage -= 0;
 
 							// ALERT( at_console, "punch %f\n", n );
 
@@ -568,7 +568,7 @@ while (flDamage > 1 && loops < 1000)
 
 
 							vecSrc = beam_tr.vecEndPos + vecDir;
-						}
+						//}
 					//}
 					//else
 					//{
@@ -583,7 +583,7 @@ while (flDamage > 1 && loops < 1000)
 					//flDamage = 0;
 				//}
 
-			}
+			//}
 		//}
 		//else
 		//{
