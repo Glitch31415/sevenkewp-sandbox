@@ -375,6 +375,8 @@ default:
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flpDamage: %f", flpDamage));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 1: %f", flDamage));
 			sdm = false;
+			vecSrc = tr.vecEndPos + vecDir;
+			pentIgnore = ENT( pEntity->pev );
 		}
 		else {
 		//if ( pEntity->ReflectGauss() )
@@ -404,11 +406,6 @@ default:
 				if (n == 0) n = 0.1;
 				flDamage = flDamage * (1 - n);
 				UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 2: %f", flDamage));
-			}
-			else
-			{
-
-
 			}
 		}
 
