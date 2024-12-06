@@ -221,7 +221,6 @@ void CPython::PrimaryAttack()
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
 	float dmg_mult = GetDamageModifier();
-
 	float flDamage = gSkillData.sk_plr_357_bullet * dmg_mult;
 	int fFirstBeam = 1;
 
@@ -243,6 +242,7 @@ int loops = 0;
 while (flDamage > 1 && loops < 25)
 	{
 		loops = loops + 1;
+		bool sdm = true;
 		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage begin: %f", flDamage));
 
 
@@ -371,6 +371,7 @@ default:
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flcDamage: %f", flcDamage));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flpDamage: %f", flpDamage));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 1: %f", flDamage));
+			sdm = false;
 		}
 		else {
 		//if ( pEntity->ReflectGauss() )
@@ -405,6 +406,10 @@ default:
 			{
 
 
+			}
+		}
+
+
 				// limit it to one hole punch
 
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
@@ -421,7 +426,9 @@ default:
 						//if (n < flDamage)
 						//{
 							if (n == 0) n = 1;
-							flDamage -= 5*n;
+							if (sdm == true) {
+								flDamage -= 5*n;
+							}
 							UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 3: %f", flDamage));
 
 							// ALERT( at_console, "punch %f\n", n );
@@ -450,11 +457,6 @@ default:
 					
 					//flDamage = 0;
 				//}
-
-			}
-		}
-
-
 		//}
 		//else
 		//{
