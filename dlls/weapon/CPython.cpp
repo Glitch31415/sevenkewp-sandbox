@@ -253,7 +253,7 @@ while (flDamage > 1 && loops < 25)
 			//break;
 
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
-		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("edict: %s", pEntity->name));
+		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("edict: %s", pEntity::DisplayName()));
 
 		if (pEntity == NULL)
 			break;
