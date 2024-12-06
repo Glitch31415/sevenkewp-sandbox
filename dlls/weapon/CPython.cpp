@@ -267,6 +267,7 @@ while (flDamage > 1 && loops < 25)
 		
 		if (pEntity->pev->takedamage)
 		{
+			UTIL_ClientPrintAll(print_chat, "hit monster");
 			if (pEntity->pev->health <= 0)
 				break;
 			ClearMultiDamage();
@@ -375,7 +376,7 @@ default:
 		//if ( pEntity->ReflectGauss() )
 		//{
 			//pentIgnore = NULL;
-
+			UTIL_ClientPrintAll(print_chat, "hit not monster");
 			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
 
 			if (n < 0.5) // 60 degrees
@@ -417,8 +418,8 @@ default:
 
 						n = (beam_tr.vecEndPos - tr.vecEndPos).Length( );
 
-						if (n < flDamage)
-						{
+						//if (n < flDamage)
+						//{
 							if (n == 0) n = 1;
 							flDamage -= 5*n;
 							UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 3: %f", flDamage));
@@ -435,7 +436,7 @@ default:
 
 
 							vecSrc = beam_tr.vecEndPos + vecDir;
-						}
+						//}
 					//}
 					//else
 					//{
