@@ -276,6 +276,7 @@ while (flDamage > 1 && loops < 25)
 			float prevmaxhealth = pEntity->pev->max_health;
 			float flcDamage = flDamage;
 			float flpDamage = flDamage;
+			bool dka = false;
 
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 
@@ -338,15 +339,9 @@ case 7:
 	break;
 case 10:
 case 11:
-	//armor
-	flcDamage *= 0.25;
+	//armor, don't know what type, fuck
+	dka = true;
 	flpDamage *= 2;
-	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))) {
-		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))); // damage cap
-		if (flcDamage < 1) {
-			flcDamage = 1;
-		}
-	}
 	break;
 default:
 	UTIL_ClientPrintAll(print_chat, "uh oh default");
@@ -356,10 +351,12 @@ default:
 			
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
-			
-			float diffhealth = prevhealth - flcDamage;
+			if (dka == false) {
+				float diffhealth = prevhealth - flcDamage;
 
-			pEntity->pev->health = diffhealth;
+				pEntity->pev->health = diffhealth;
+			}
+
 
 			//if (diffhealth < 0) {
 				//diffhealth = pEntity->pev->max_health;
