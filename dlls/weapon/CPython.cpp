@@ -341,14 +341,14 @@ default:
 
 			pEntity->pev->health = diffhealth;
 
-			if (diffhealth < 0) {
-				diffhealth = pEntity->pev->max_health;
-			}
-			if (diffhealth < pEntity->pev->max_health*0.75) {
-				diffhealth = pEntity->pev->max_health*0.75;
-			}
+			//if (diffhealth < 0) {
+				//diffhealth = pEntity->pev->max_health;
+			//}
+			//if (diffhealth < pEntity->pev->max_health*0.75) {
+				//diffhealth = pEntity->pev->max_health*0.75;
+			//}
 
-			flDamage = flDamage - diffhealth;
+			flDamage = flDamage - pEntity->pev->max_health*0.75;
 		}
 		if (flDamage <= 0)
 			break;
