@@ -368,7 +368,7 @@ default:
 			flDamage = flDamage - flpDamage;
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flcDamage: %f", flcDamage));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flpDamage: %f", flpDamage));
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage: %f", flDamage));
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 1: %f", flDamage));
 		}
 		if (flDamage <= 0)
 			break;
@@ -398,6 +398,7 @@ default:
 				// lose energy
 				if (n == 0) n = 0.1;
 				flDamage = flDamage * (1 - n);
+				UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 2: %f", flDamage));
 			}
 			else
 			{
@@ -420,6 +421,7 @@ default:
 						{
 							if (n == 0) n = 1;
 							flDamage -= 5*n;
+							UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 3: %f", flDamage));
 
 							// ALERT( at_console, "punch %f\n", n );
 
