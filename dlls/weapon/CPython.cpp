@@ -273,12 +273,73 @@ while (flDamage > 1 && loops < 25)
 			// if you hurt yourself clear the headshot bit
 
 			float prevhealth = pEntity->pev->health;
+			float prevmaxhealth = pEntity->pev->max_health;
+			float flcDamage = flDamage;
 
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+
+switch (m_LastHitGroup)
+{
+case HITGROUP_GENERIC:
+	break;
+case HITGROUP_HEAD:
+	flcDamage *= gSkillData.sk_monster_head;
+	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_head*prevmaxhealth))) {
+		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_head*prevmaxhealth))); // damage cap
+		if (flcDamage < 1) {
+			flcDamage = 1;
+		}
+	}
+	break;
+case HITGROUP_CHEST:
+	flcDamage *= gSkillData.sk_monster_chest;
+	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_chest*prevmaxhealth))) {
+		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_chest*prevmaxhealth))); // damage cap
+		if (flcDamage < 1) {
+			flcDamage = 1;
+		}
+	}
+	break;
+case HITGROUP_STOMACH:
+	flcDamage *= gSkillData.sk_monster_stomach;
+	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_stomach*prevmaxhealth))) {
+		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_stomach*prevmaxhealth))); // damage cap
+		if (flcDamage < 1) {
+			flcDamage = 1;
+		}
+	}
+	break;
+case HITGROUP_LEFTARM:
+case HITGROUP_RIGHTARM:
+	flcDamage *= gSkillData.sk_monster_arm;
+	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_arm*prevmaxhealth))) {
+		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_arm*prevmaxhealth))); // damage cap
+		if (flcDamage < 1) {
+			flcDamage = 1;
+		}
+	}
+	break;
+case HITGROUP_LEFTLEG:
+case HITGROUP_RIGHTLEG:
+	flcDamage *= gSkillData.sk_monster_leg;
+	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))) {
+		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))); // damage cap
+		if (flcDamage < 1) {
+			flcDamage = 1;
+		}
+	}
+	break;
+default:
+	break;
+}
+
 			
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
-			float diffhealth = prevhealth - pEntity->pev->health;
+			
+			float diffhealth = prevhealth - flcDamage;
+
+			pEntity->pev->health = diffhealth;
 
 			if (diffhealth < 0) {
 				diffhealth = pEntity->pev->max_health;
