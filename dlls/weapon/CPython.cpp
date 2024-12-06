@@ -264,7 +264,7 @@ while (flDamage > 1 && loops < 25)
 	
 
 		}
-		
+		float n = 0;
 		if (pEntity->pev->takedamage)
 		{
 			UTIL_ClientPrintAll(print_chat, "hit monster");
@@ -378,7 +378,7 @@ default:
 		//{
 			//pentIgnore = NULL;
 			UTIL_ClientPrintAll(print_chat, "hit not monster");
-			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
+			n = -DotProduct(tr.vecPlaneNormal, vecDir);
 
 			if (n < 0.5) // 60 degrees
 			{
