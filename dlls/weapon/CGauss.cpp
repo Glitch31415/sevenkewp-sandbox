@@ -179,12 +179,12 @@ void CGauss::PrimaryAttack()
 	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 	m_fPrimaryFire = TRUE;
 
-	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= 1;
+	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= 2;
 
 	StartFire();
 	m_fInAttack = 0;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.2;
+	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.01;
 }
 
 void CGauss::SecondaryAttack()
@@ -451,7 +451,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 	lagcomp_begin(m_pPlayer);
 
 	int loops = 0;
-while (flDamage > 1 && loops < 1000)
+while (flDamage > 1 && loops < 100)
 	{
 		loops = loops + 1;
 
