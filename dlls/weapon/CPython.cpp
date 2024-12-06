@@ -277,7 +277,7 @@ while (flDamage > 1 && loops < 25)
 			float prevhealth = pEntity->pev->health;
 			float prevmaxhealth = pEntity->pev->max_health;
 			float flcDamage = flDamage;
-			float flpDamage = flDamage;
+			float flpDamage = prevmaxhealth;
 			bool dka = false;
 
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
@@ -285,7 +285,9 @@ while (flDamage > 1 && loops < 25)
 switch ((&tr)->iHitgroup)
 {
 case 0:
-	UTIL_ClientPrintAll(print_chat, "uh oh generic");
+	//assume glass
+	flcDamage *= 1;
+	flpDamage = prevmaxhealth;
 	break;
 case 1:
 	flcDamage *= gSkillData.sk_monster_head;
