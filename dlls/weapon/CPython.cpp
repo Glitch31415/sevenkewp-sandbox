@@ -278,7 +278,7 @@ while (flDamage > 1 && loops < 25)
 
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 
-switch (&tr->iHitgroup)
+switch ((&tr)->iHitgroup)
 {
 case 0:
 	break;
