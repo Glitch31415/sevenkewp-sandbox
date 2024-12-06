@@ -357,6 +357,7 @@ default:
 			flDamage = flDamage - flpDamage;
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flcDamage: %f", flcDamage));
 			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flpDamage: %f", flpDamage));
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage: %f", flDamage));
 		}
 		if (flDamage <= 0)
 			break;
