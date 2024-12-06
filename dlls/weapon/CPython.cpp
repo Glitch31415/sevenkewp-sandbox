@@ -316,7 +316,7 @@ case 3:
 case 4:
 case 5:
 	flcDamage *= gSkillData.sk_monster_arm;
-	flpDamage *= 0.85;
+	flpDamage *= 0.6;
 	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_arm*prevmaxhealth))) {
 		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_arm*prevmaxhealth))); // damage cap
 		if (flcDamage < 1) {
@@ -355,6 +355,8 @@ default:
 			//}
 
 			flDamage = flDamage - flpDamage;
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flcDamage: %f", flcDamage));
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flpDamage: %f", flpDamage));
 		}
 		if (flDamage <= 0)
 			break;
