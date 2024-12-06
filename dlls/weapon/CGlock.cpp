@@ -204,6 +204,8 @@ int loops = 0;
 while (flDamage > 1 && loops < 25)
 	{
 		loops = loops + 1;
+		bool sdm = true;
+		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage begin: %f", flDamage));
 
 
 		// ALERT( at_console, "." );
@@ -213,6 +215,7 @@ while (flDamage > 1 && loops < 25)
 			//break;
 
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
+		UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("edict: %s", pEntity->DisplayName()));
 
 		if (pEntity == NULL)
 			break;
@@ -224,9 +227,10 @@ while (flDamage > 1 && loops < 25)
 	
 
 		}
-		
+		float n = 0;
 		if (pEntity->pev->takedamage)
 		{
+			UTIL_ClientPrintAll(print_chat, "hit monster");
 			if (pEntity->pev->health <= 0)
 				break;
 			ClearMultiDamage();
@@ -234,30 +238,114 @@ while (flDamage > 1 && loops < 25)
 			// if you hurt yourself clear the headshot bit
 
 			float prevhealth = pEntity->pev->health;
+			float prevmaxhealth = pEntity->pev->max_health;
+			float flcDamage = flDamage;
+			float flpDamage = prevmaxhealth;
+			bool dka = false;
 
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+
+switch ((&tr)->iHitgroup)
+{
+case 0:
+	//assume glass
+	flcDamage *= 1;
+	flpDamage = prevmaxhealth;
+	break;
+case 1:
+	flcDamage *= gSkillData.sk_monster_head;
+	flpDamage = prevmaxhealth * 0.75;
+	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_head*prevmaxhealth))) {
+		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_head*prevmaxhealth))); // damage cap
+		if (flcDamage < 1) {
+			flcDamage = 1;
+		}
+	}
+	break;
+case 2:
+	flcDamage *= gSkillData.sk_monster_chest;
+	flpDamage = prevmaxhealth * gSkillData.sk_monster_chest;
+	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_chest*prevmaxhealth))) {
+		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_chest*prevmaxhealth))); // damage cap
+		if (flcDamage < 1) {
+			flcDamage = 1;
+		}
+	}
+	break;
+case 3:
+	flcDamage *= gSkillData.sk_monster_stomach;
+	flpDamage = prevmaxhealth * gSkillData.sk_monster_stomach;
+	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_stomach*prevmaxhealth))) {
+		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_stomach*prevmaxhealth))); // damage cap
+		if (flcDamage < 1) {
+			flcDamage = 1;
+		}
+	}
+	break;
+case 4:
+case 5:
+	flcDamage *= gSkillData.sk_monster_arm;
+	flpDamage = prevmaxhealth * 0.6;
+	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_arm*prevmaxhealth))) {
+		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_arm*prevmaxhealth))); // damage cap
+		if (flcDamage < 1) {
+			flcDamage = 1;
+		}
+	}
+	break;
+case 6:
+case 7:
+	flcDamage *= gSkillData.sk_monster_leg;
+	flpDamage = prevmaxhealth * gSkillData.sk_monster_stomach;
+	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))) {
+		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))); // damage cap
+		if (flcDamage < 1) {
+			flcDamage = 1;
+		}
+	}
+	break;
+case 10:
+case 11:
+	//armor, don't know what type, fuck
+	dka = true;
+	flpDamage *= 2;
+	break;
+default:
+	UTIL_ClientPrintAll(print_chat, "uh oh default");
+	break;
+}
+
 			
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 
-			float diffhealth = prevhealth - pEntity->pev->health;
+			if (dka == false) {
+				float diffhealth = prevhealth - flcDamage;
 
-			if (diffhealth < 0) {
-				diffhealth = pEntity->pev->max_health;
-			}
-			if (diffhealth < pEntity->pev->max_health*0.75) {
-				diffhealth = pEntity->pev->max_health*0.75;
+				pEntity->pev->health = diffhealth;
 			}
 
-			flDamage = flDamage - diffhealth;
+
+			//if (diffhealth < 0) {
+				//diffhealth = pEntity->pev->max_health;
+			//}
+			//if (diffhealth < pEntity->pev->max_health*0.75) {
+				//diffhealth = pEntity->pev->max_health*0.75;
+			//}
+
+			flDamage = flDamage - flpDamage;
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flcDamage: %f", flcDamage));
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flpDamage: %f", flpDamage));
+			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 1: %f", flDamage));
+			sdm = false;
+			vecSrc = tr.vecEndPos + vecDir;
+			pentIgnore = ENT( pEntity->pev );
 		}
-
-		if (flDamage <= 0)
-			break;
+		else {
 		//if ( pEntity->ReflectGauss() )
 		//{
 			//pentIgnore = NULL;
-
-			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
+			UTIL_ClientPrintAll(print_chat, "hit not monster");
+			n = -DotProduct(tr.vecPlaneNormal, vecDir);
 
 			if (n < 0.5) // 60 degrees
 			{
@@ -279,9 +367,9 @@ while (flDamage > 1 && loops < 25)
 				// lose energy
 				if (n == 0) n = 0.1;
 				flDamage = flDamage * (1 - n);
+				UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 2: %f", flDamage));
 			}
-			else
-			{
+		}
 
 
 				// limit it to one hole punch
@@ -297,10 +385,13 @@ while (flDamage > 1 && loops < 25)
 
 						n = (beam_tr.vecEndPos - tr.vecEndPos).Length( );
 
-						if (n < flDamage)
-						{
+						//if (n < flDamage)
+						//{
 							if (n == 0) n = 1;
-							flDamage -= 5*n;
+							if (sdm == true) {
+								flDamage -= 5*n;
+							}
+							UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 3: %f", flDamage));
 
 							// ALERT( at_console, "punch %f\n", n );
 
@@ -314,7 +405,7 @@ while (flDamage > 1 && loops < 25)
 
 
 							vecSrc = beam_tr.vecEndPos + vecDir;
-						}
+						//}
 					//}
 					//else
 					//{
@@ -328,8 +419,6 @@ while (flDamage > 1 && loops < 25)
 					
 					//flDamage = 0;
 				//}
-
-			}
 		//}
 		//else
 		//{
