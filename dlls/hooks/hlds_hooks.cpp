@@ -64,6 +64,7 @@ extern void CopyToBodyQue(entvars_t* pev);
 extern int giPrecacheGrunt;
 extern int gmsgSayText;
 extern int g_teamplay;
+extern bool g_weather_init_done;
 
 // client index that is receiving AddFullToPack calls
 int g_packClientIdx = 0;
@@ -495,6 +496,7 @@ void ServerDeactivate( void )
 	g_mp3Command = "";
 	g_monstersNerfed = false;
 	g_cfgsExecuted = false;
+	g_weather_init_done = false;
 
 	memset(&g_nerfStats, 0, sizeof(NerfStats));
 	memset(&g_textureStats, 0, sizeof(TextureTypeStats));
@@ -1284,10 +1286,8 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 	// solid entities should always be sent to clients for collision prediction
 	bool solid = ent->v.solid >= SOLID_BBOX && ent->v.modelindex;
 
-	bool forceVisChecks = baseent->ForceVisChecks();
-
-	if (invisible && !forceVisChecks && !solid) {
-		return 0; // exit now unless a vis check was requested for this ent
+	if (invisible && !solid) {
+		return 0; 
 	}
 
 	CBasePlayer* plr = (CBasePlayer*)GET_PRIVATE(host);
@@ -1307,7 +1307,7 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 		return 0;
 	}
 
-	if ((invisible && !solid) || forceVisChecks || (baseent->m_hidePlayers & plrbit)) {
+	if (baseent->m_hidePlayers & plrbit) {
 		return 0;
 	}
 
