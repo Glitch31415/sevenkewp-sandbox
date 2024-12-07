@@ -221,7 +221,7 @@ void CPython::PrimaryAttack()
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
 	float dmg_mult = GetDamageModifier();
-	float flDamage = gSkillData.sk_plr_357_bullet * dmg_mult;
+	float flDamage = gSkillData.sk_plr_357_bullet * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 );
 	int fFirstBeam = 1;
 
 	pentIgnore = m_pPlayer->edict();
@@ -287,26 +287,31 @@ case 0:
 	flpDamage = prevmaxhealth;
 	break;
 case 1:
-	flpDamage = prevmaxhealth * 0.75;
+	//head
+	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 1.1 );
 	break;
 case 2:
-	flpDamage = prevmaxhealth * gSkillData.sk_monster_chest;
+	//chest
+	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 1.5 );
 	break;
 case 3:
-	flpDamage = prevmaxhealth * gSkillData.sk_monster_stomach;
+	//stomach
+	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 1.25 );
 	break;
 case 4:
 case 5:
-	flpDamage = prevmaxhealth * 0.6;
+	//left + right arm
+	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.25, 0.75 );
 	break;
 case 6:
 case 7:
-	flpDamage = prevmaxhealth * gSkillData.sk_monster_stomach;
+	//left + right leg
+	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 1.25 );
 	break;
 case 10:
 case 11:
 	//armor, don't know what type, fuck
-	flpDamage *= 2;
+	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 3.5 );
 	break;
 default:
 	//UTIL_ClientPrintAll(print_chat, "uh oh default");
