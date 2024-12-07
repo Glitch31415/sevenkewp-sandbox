@@ -837,20 +837,20 @@ Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDir
 			{
 			default:
 			case BULLET_PLAYER_9MM:
-				pEntity->TraceAttack(pevAttacker, gSkillData.sk_plr_9mm_bullet * dmg_mult, vecDir, &tr, DMG_BULLET);
+				pEntity->TraceAttack(pevAttacker, gSkillData.sk_plr_9mm_bullet * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_PLAYER_MP5:
-				pEntity->TraceAttack(pevAttacker, gSkillData.sk_plr_9mmAR_bullet * dmg_mult, vecDir, &tr, DMG_BULLET);
+				pEntity->TraceAttack(pevAttacker, gSkillData.sk_plr_9mmAR_bullet * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_PLAYER_BUCKSHOT:
 				// make distance based!
-				pEntity->TraceAttack(pevAttacker, gSkillData.sk_plr_buckshot * dmg_mult, vecDir, &tr, DMG_BULLET);
+				pEntity->TraceAttack(pevAttacker, gSkillData.sk_plr_buckshot * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_PLAYER_357:
-				pEntity->TraceAttack(pevAttacker, gSkillData.sk_plr_357_bullet * dmg_mult, vecDir, &tr, DMG_BULLET);
+				pEntity->TraceAttack(pevAttacker, gSkillData.sk_plr_357_bullet * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_NONE: // FIX 
