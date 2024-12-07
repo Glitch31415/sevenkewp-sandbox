@@ -360,11 +360,11 @@ void CGauss::StartFire( void )
 
 	if ( gpGlobals->time - m_pPlayer->m_flStartCharge > GetFullChargeTime() )
 	{
-		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult;
+		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 );
 	}
 	else
 	{
-		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult * 
+		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 ) * 
 			(( gpGlobals->time - m_pPlayer->m_flStartCharge) / GetFullChargeTime() );
 	}
 
@@ -450,7 +450,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 #ifndef CLIENT_DLL
 	lagcomp_begin(m_pPlayer);
 
-	int loops = 0;
+int loops = 0;
 while (flDamage > 1 && loops < 25)
 	{
 		loops = loops + 1;
@@ -487,11 +487,8 @@ while (flDamage > 1 && loops < 25)
 
 			// if you hurt yourself clear the headshot bit
 
-			float prevhealth = pEntity->pev->health;
 			float prevmaxhealth = pEntity->pev->max_health;
-			float flcDamage = flDamage;
 			float flpDamage = prevmaxhealth;
-			bool dka = false;
 
 			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 
@@ -499,66 +496,34 @@ switch ((&tr)->iHitgroup)
 {
 case 0:
 	//assume glass
-	flcDamage *= 1;
 	flpDamage = prevmaxhealth;
 	break;
 case 1:
-	flcDamage *= gSkillData.sk_monster_head;
-	flpDamage = prevmaxhealth * 0.75;
-	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_head*prevmaxhealth))) {
-		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_head*prevmaxhealth))); // damage cap
-		if (flcDamage < 1) {
-			flcDamage = 1;
-		}
-	}
+	//head
+	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 1.1 );
 	break;
 case 2:
-	flcDamage *= gSkillData.sk_monster_chest;
-	flpDamage = prevmaxhealth * gSkillData.sk_monster_chest;
-	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_chest*prevmaxhealth))) {
-		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_chest*prevmaxhealth))); // damage cap
-		if (flcDamage < 1) {
-			flcDamage = 1;
-		}
-	}
+	//chest
+	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 1.5 );
 	break;
 case 3:
-	flcDamage *= gSkillData.sk_monster_stomach;
-	flpDamage = prevmaxhealth * gSkillData.sk_monster_stomach;
-	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_stomach*prevmaxhealth))) {
-		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_stomach*prevmaxhealth))); // damage cap
-		if (flcDamage < 1) {
-			flcDamage = 1;
-		}
-	}
+	//stomach
+	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 1.25 );
 	break;
 case 4:
 case 5:
-	flcDamage *= gSkillData.sk_monster_arm;
-	flpDamage = prevmaxhealth * 0.6;
-	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_arm*prevmaxhealth))) {
-		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_arm*prevmaxhealth))); // damage cap
-		if (flcDamage < 1) {
-			flcDamage = 1;
-		}
-	}
+	//left + right arm
+	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.25, 0.75 );
 	break;
 case 6:
 case 7:
-	flcDamage *= gSkillData.sk_monster_leg;
-	flpDamage = prevmaxhealth * gSkillData.sk_monster_stomach;
-	if (flcDamage > prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))) {
-		flcDamage = (prevhealth - (prevmaxhealth - (gSkillData.sk_monster_leg*prevmaxhealth))); // damage cap
-		if (flcDamage < 1) {
-			flcDamage = 1;
-		}
-	}
+	//left + right leg
+	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 1.25 );
 	break;
 case 10:
 case 11:
 	//armor, don't know what type, fuck
-	dka = true;
-	flpDamage *= 2;
+	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 3.5 );
 	break;
 default:
 	//UTIL_ClientPrintAll(print_chat, "uh oh default");
@@ -567,12 +532,6 @@ default:
 
 			
 			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-
-			if (dka == false) {
-				float diffhealth = prevhealth - flcDamage;
-
-				pEntity->pev->health = diffhealth;
-			}
 
 
 			//if (diffhealth < 0) {
