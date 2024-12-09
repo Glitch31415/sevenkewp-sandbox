@@ -343,7 +343,7 @@ void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector 
 	if ( pev->takedamage )
 	{
 		m_LastHitGroup = ptr->iHitgroup;
-
+if (!(bitsDamageType & DMG_BLAST)) {
 		switch ( ptr->iHitgroup )
 		{
 		case HITGROUP_GENERIC:
@@ -401,7 +401,11 @@ void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector 
 		default:
 			break;
 		}
-
+}
+		else {
+			// blast damage shouldn't hit a single point like bullets.
+			// consider it to always be a body/generic shot
+		}
 		if (bitsDamageType & DMG_BLOOD) {
 			SpawnBlood(ptr->vecEndPos, BloodColor(), flDamage);// a little surface blood.
 			TraceBleed( flDamage, vecDir, ptr, bitsDamageType );
