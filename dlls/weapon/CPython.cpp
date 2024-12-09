@@ -248,6 +248,7 @@ while (flDamage > 1 && loops < 25)
 
 		// ALERT( at_console, "." );
 		UTIL_TraceLine(vecSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);
+		te_debug_beam(vecSrc, vecDest, 255, RGBA(255, 0, 0));
 
 		//if (tr.fAllSolid)
 			//break;
