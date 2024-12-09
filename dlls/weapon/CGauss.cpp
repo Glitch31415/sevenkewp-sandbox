@@ -489,49 +489,89 @@ while (flDamage > 1 && loops < 25)
 
 			float prevmaxhealth = pEntity->pev->max_health;
 			float flpDamage = prevmaxhealth;
+			float angcheck = sin(UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0, (3.14159265358979323846264338/2)));
 
-			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+
 
 switch ((&tr)->iHitgroup)
 {
 case 0:
 	//assume glass
 	flpDamage = prevmaxhealth;
+	flDamage = flDamage - flpDamage;
+	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 	break;
 case 1:
 	//head
-	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 1.1 );
+	flpDamage = 0.4 * prevmaxhealth * angcheck * 0.5;
+	flDamage = flDamage - flpDamage;
+	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+	flpDamage = 0.4 * prevmaxhealth * angcheck * 0.5;
+	flDamage = flDamage - flpDamage;
 	break;
 case 2:
 	//chest
-	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 1.5 );
+	flpDamage = 0.75 * prevmaxhealth * angcheck * 0.5;
+	flDamage = flDamage - flpDamage;
+	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+	flpDamage = 0.75 * prevmaxhealth * angcheck * 0.5;
+	flDamage = flDamage - flpDamage;
 	break;
 case 3:
 	//stomach
-	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 1.25 );
+	flpDamage = 0.5 * prevmaxhealth * angcheck * 0.5;
+	flDamage = flDamage - flpDamage;
+	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+	flpDamage = 0.5 * prevmaxhealth * angcheck * 0.5;
+	flDamage = flDamage - flpDamage;
 	break;
 case 4:
 case 5:
 	//left + right arm
-	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.25, 0.75 );
+	flpDamage = 0.3 * prevmaxhealth * angcheck * 0.5;
+	flDamage = flDamage - flpDamage;
+	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+	flpDamage = 0.3 * prevmaxhealth * angcheck * 0.5;
+	flDamage = flDamage - flpDamage;
 	break;
 case 6:
 case 7:
 	//left + right leg
-	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 1.25 );
+	flpDamage = 0.6 * prevmaxhealth * angcheck * 0.5;
+	flDamage = flDamage - flpDamage;
+	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+	flpDamage = 0.6 * prevmaxhealth * angcheck * 0.5;
+	flDamage = flDamage - flpDamage;
 	break;
 case 10:
 case 11:
 	//armor, don't know what type, fuck
-	flpDamage = prevmaxhealth * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.5, 3.5 );
+	flpDamage = 75 * angcheck;
+	flDamage = flDamage - flpDamage;
+	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+	flpDamage = prevmaxhealth * angcheck;
+	flDamage = flDamage - flpDamage;
 	break;
 default:
+	flpDamage = 0.5 * prevmaxhealth * angcheck * 0.5;
+	flDamage = flDamage - flpDamage;
+	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+	flpDamage = 0.5 * prevmaxhealth * angcheck * 0.5;
+	flDamage = flDamage - flpDamage;
 	//UTIL_ClientPrintAll(print_chat, "uh oh default");
 	break;
 }
 
 			
-			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+
 
 
 			//if (diffhealth < 0) {
@@ -541,7 +581,7 @@ default:
 				//diffhealth = pEntity->pev->max_health*0.75;
 			//}
 
-			flDamage = flDamage - flpDamage;
+			
 			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flcDamage: %f", flcDamage));
 			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flpDamage: %f", flpDamage));
 			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 1: %f", flDamage));
