@@ -489,7 +489,7 @@ while (flDamage > 1 && loops < 25)
 
 			float prevmaxhealth = pEntity->pev->max_health;
 			float flpDamage = prevmaxhealth;
-			float angcheck = sin(UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0, (3.14159265358979323846264338/2)));
+			float angcheck = sin(UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0, M_PI_2));
 
 
 
