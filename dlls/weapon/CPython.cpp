@@ -197,7 +197,7 @@ void CPython::PrimaryAttack()
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 
 	Vector vecAiming = gpGlobals->v_forward;
-	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("angle %f, %f, %f", m_pPlayer->pev->punchangle.x, m_pPlayer->pev->punchangle.y, m_pPlayer->pev->punchangle.z))
+	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("angle %f, %f, %f", m_pPlayer->pev->punchangle.x, m_pPlayer->pev->punchangle.y, m_pPlayer->pev->punchangle.z));
 	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
 	ULONG cShots = 1;
 	Vector vecSpread = VECTOR_CONE_357;
