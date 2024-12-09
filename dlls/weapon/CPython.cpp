@@ -216,7 +216,7 @@ void CPython::PrimaryAttack()
 	}
     Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
 	Vector vecDir = vecAiming + spread;
-	Vector vecDest = (vecSrc + vecDir) * 8192;
+	Vector vecDest = vecSrc + (vecDir * 8192);
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
