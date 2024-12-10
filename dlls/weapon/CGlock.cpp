@@ -196,11 +196,11 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 
 
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), fUseAutoAim ? m_usFireGlock1 : m_usFireGlock2, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, ( m_iClip == 0 ) ? 1 : 0, 0 );
-	m_pPlayer->pev->punchangle = Vector(-5, 0, 0);
+
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_9MM);
 
 	lagcomp_begin(m_pPlayer);
-
+	m_pPlayer->pev->punchangle = Vector(-5, 0, 0);
 int loops = 0;
 while (flDamage > 1 && loops < 25)
 	{
@@ -225,7 +225,7 @@ while (flDamage > 1 && loops < 25)
 		{
 			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = 0;
-			UTIL_BeamPoints(vecSrc + (gpGlobals->v_up * -7) + (gpGlobals->v_forward * 24) + (gpGlobals->v_right * 6), tr.vecEndPos, MODEL_INDEX("sprites/laserbeam.spr"), 0, 0, 1, 16, 0, RGBA(255, 255, 255, flDamage), 0, NULL, NULL, NULL);
+			UTIL_BeamPoints(vecSrc, tr.vecEndPos, MODEL_INDEX("sprites/laserbeam.spr"), 0, 0, 1, 16, 0, RGBA(255, 255, 255, flDamage), 0, NULL, NULL, NULL);
 
 		}
 		else {

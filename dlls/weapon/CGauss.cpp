@@ -429,7 +429,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 	//if ( m_fPrimaryFire == false )
 		 g_irunninggausspred = true;
 #endif
-	m_pPlayer->pev->punchangle = Vector(-7.5, 0, 0);
+
 	// The main firing event is sent unreliably so it won't be delayed.
 	PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), m_usGaussFire, 0.0, (float *)&m_pPlayer->pev->origin, (float *)&m_pPlayer->pev->angles, flDamage, 0.0, 0, 0, m_fPrimaryFire ? 1 : 0, 0 );
 
@@ -449,7 +449,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 
 #ifndef CLIENT_DLL
 	lagcomp_begin(m_pPlayer);
-
+	m_pPlayer->pev->punchangle = Vector(-7.5, 0, 0);
 int loops = 0;
 while (flDamage > 1 && loops < 25)
 	{
