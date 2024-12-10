@@ -139,7 +139,7 @@ void CMP5::PrimaryAttack()
 
 	float flDamage;
 
-	UTIL_MakeVectors( m_pPlayer->pev->v_angle + (m_pPlayer->pev->punchangle/999) );
+	UTIL_MakeVectors( m_pPlayer->pev->v_angle + Vector(0, 0, 0) );
 	Vector vecAiming;
 	
 		vecAiming = gpGlobals->v_forward;
@@ -221,7 +221,7 @@ void CMP5::PrimaryAttack()
 	flags = 0;
 #endif
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usMP5, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
-	m_pPlayer->pev->punchangle = Vector(-10, 0, 0);
+	m_pPlayer->pev->punchangle = Vector(-5, 0, 0);
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_9MM);
 
 	lagcomp_begin(m_pPlayer);
