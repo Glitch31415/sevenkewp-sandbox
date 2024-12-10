@@ -139,7 +139,7 @@ void CMP5::PrimaryAttack()
 
 	float flDamage;
 	
-	//UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
+	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 	Vector vecAiming;
 	
 		vecAiming = gpGlobals->v_forward;
