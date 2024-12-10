@@ -138,7 +138,7 @@ void CMP5::PrimaryAttack()
 	// and we end up ear blasting the player!
 
 	float flDamage;
-	
+	m_pPlayer->pev->punchangle = m_pPlayer->pev->punchangle/2;
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 	Vector vecAiming;
 	
