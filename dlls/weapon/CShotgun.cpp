@@ -182,7 +182,7 @@ void CShotgun::PrimaryAttack()
 	lagcomp_end();
 
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usSingleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
-
+	m_pPlayer->pev->punchangle = Vector(-7.5, 0, 0);
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -268,7 +268,7 @@ void CShotgun::SecondaryAttack( void )
 	lagcomp_end();
 		
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usDoubleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
-
+	m_pPlayer->pev->punchangle = Vector(-15, 0, 0);
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
