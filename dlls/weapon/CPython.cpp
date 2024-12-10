@@ -216,7 +216,7 @@ void CPython::PrimaryAttack()
 	}
     Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
 	Vector vecDir = (vecAiming + spread).Normalize();
-	Vector vecDest = vecSrc + (vecDir * 8192);
+	Vector vecDest = vecSrc + (vecDir * 512);
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
@@ -247,7 +247,7 @@ while (flDamage > 1 && loops < 25)
 
 
 		// ALERT( at_console, "." );
-		UTIL_TraceLine(vecSrc, vecSrc + (vecDir * 512), dont_ignore_monsters, pentIgnore, &tr);
+		UTIL_TraceLine(vecSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);
 
 
 		//if (tr.fAllSolid)
