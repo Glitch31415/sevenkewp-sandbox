@@ -161,7 +161,7 @@ void CMP5::PrimaryAttack()
 			
 	}
     Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
-	Vector vecDir = vecAiming + spread;
+	Vector vecDir = (vecAiming + spread).Normalize();
 	
 	float dmg_mult = GetDamageModifier();
 
