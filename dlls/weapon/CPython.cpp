@@ -247,7 +247,7 @@ while (flDamage > 1 && loops < 25)
 
 
 		// ALERT( at_console, "." );
-		UTIL_TraceLine(vecSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);
+		UTIL_TraceLine(vecSrc, vecSrc + (vecDir * 512), dont_ignore_monsters, pentIgnore, &tr);
 
 
 		//if (tr.fAllSolid)
