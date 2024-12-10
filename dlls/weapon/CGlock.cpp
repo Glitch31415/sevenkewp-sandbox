@@ -360,7 +360,7 @@ default:
 				flMaxFrac = flMaxFrac - tr.flFraction;
 				vecDir = r;
 				vecSrc = tr.vecEndPos + vecDir * 8;
-				vecDest = vecSrc + vecDir * 8192;
+				vecDest = vecSrc + (vecDir * 8192);
 
 				// explode a bit
 				//m_pPlayer->RadiusDamage( tr.vecEndPos, pev, m_pPlayer->pev, flDamage * n, CLASS_NONE, DMG_BLAST );
