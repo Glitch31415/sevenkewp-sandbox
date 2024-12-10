@@ -263,7 +263,7 @@ while (flDamage > 1 && loops < 25)
 		{
 			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = 0;
-			UTIL_BeamPoints(vecSrc + (gpGlobals->v_up * -2) + (gpGlobals->v_forward * 32) + (gpGlobals->v_right * 2), tr.vecEndPos, MODEL_INDEX("sprites/laserbeam.spr"), 0, 0, 1, 16, 0, RGBA(255, 255, 255, flDamage), 0, NULL, NULL, NULL);
+			UTIL_BeamPoints(vecSrc + (gpGlobals->v_up * -1) + (gpGlobals->v_forward * 32) + (gpGlobals->v_right * 2), tr.vecEndPos, MODEL_INDEX("sprites/laserbeam.spr"), 0, 0, 1, 16, 0, RGBA(255, 255, 255, flDamage), 0, NULL, NULL, NULL);
 
 		}
 		else {
