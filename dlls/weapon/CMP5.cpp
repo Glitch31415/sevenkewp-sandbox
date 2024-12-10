@@ -245,12 +245,12 @@ while (flDamage > 1 && loops < 25)
 
 		if (pEntity == NULL)
 			break;
-
+		UTIL_BeamPoints(vecSrc, tr.endpos, MODEL_INDEX("sprites/laserbeam.spr"), 0, 0, 1, 16, 0, RGBA(255, 255, 255, flDamage), 0, NULL, NULL, NULL);
 		if ( fFirstBeam )
 		{
 			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = 0;
-			//te_debug_beam(vecSrc, vecDest, 255, RGBA(255, 0, 0));
+			
 
 		}
 		float n = 0;
