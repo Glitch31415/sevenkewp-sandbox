@@ -216,7 +216,7 @@ void CPython::PrimaryAttack()
 	}
     Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
 	Vector vecDir = (vecAiming + spread).Normalize();
-	Vector vecDest = vecSrc + (vecDir * 8192);
+	Vector vecDest = vecSrc + (vecDir * 512);
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
@@ -235,7 +235,8 @@ void CPython::PrimaryAttack()
 #endif
 
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usFirePython, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
-	//m_pPlayer->pev->punchangle = m_pPlayer->pev->punchangle + Vector(-10, 0, 0);
+	UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("angle %f", m_pPlayer->pev->punchangle.x));
+	m_pPlayer->pev->punchangle = m_pPlayer->pev->punchangle + Vector(-10, 0, 0);
 	lagcomp_begin(m_pPlayer);
 	
 int loops = 0;
