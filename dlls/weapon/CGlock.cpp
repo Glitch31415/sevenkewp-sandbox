@@ -157,6 +157,7 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 		m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 	}
 		Vector vecSrc = m_pPlayer->GetGunPosition( );
+	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 	Vector vecAiming;
 	
 
@@ -179,7 +180,7 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 	}
     Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
 	Vector vecDir = (vecAiming + spread).Normalize();
-	Vector vecDest = vecSrc + vecDir * 8192;
+	Vector vecDest = vecSrc + (vecDir * 8192);
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;

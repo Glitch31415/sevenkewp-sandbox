@@ -416,7 +416,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 
 	Vector vecSrc = vecOrigSrc;
-	Vector vecDest = vecSrc + vecDir * 8192;
+	Vector vecDest = vecSrc + (vecDir * 8192);
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
@@ -429,7 +429,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 	//if ( m_fPrimaryFire == false )
 		 g_irunninggausspred = true;
 #endif
-	
+	m_pPlayer->pev->punchangle = Vector(-7.5, 0, 0);
 	// The main firing event is sent unreliably so it won't be delayed.
 	PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), m_usGaussFire, 0.0, (float *)&m_pPlayer->pev->origin, (float *)&m_pPlayer->pev->angles, flDamage, 0.0, 0, 0, m_fPrimaryFire ? 1 : 0, 0 );
 

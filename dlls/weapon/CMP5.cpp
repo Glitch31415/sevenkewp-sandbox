@@ -139,7 +139,7 @@ void CMP5::PrimaryAttack()
 
 	float flDamage;
 	
-	//UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
+	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 	Vector vecAiming;
 	
 		vecAiming = gpGlobals->v_forward;
@@ -162,6 +162,7 @@ void CMP5::PrimaryAttack()
 	}
     Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
 	Vector vecDir = (vecAiming + spread).Normalize();
+	Vector vecDest = vecSrc + (vecDir * 8192);
 	
 	float dmg_mult = GetDamageModifier();
 
@@ -178,7 +179,7 @@ void CMP5::PrimaryAttack()
 
 	// time until aftershock 'static discharge' sound
 
-	Vector vecDest = vecSrc + vecDir * 8192;
+
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;

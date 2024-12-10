@@ -157,12 +157,15 @@ void CShotgun::PrimaryAttack()
 
 
 	m_pPlayer->pev->effects = (int)(m_pPlayer->pev->effects) | EF_MUZZLEFLASH;
+	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 
 	Vector vecSrc	 = m_pPlayer->GetGunPosition( );
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
 	Vector vecDir;
-
+	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usSingleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
+	m_pPlayer->pev->punchangle = Vector(-7.5, 0, 0);
+	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
 	lagcomp_begin(m_pPlayer);
 
 #ifdef CLIENT_DLL
@@ -181,9 +184,7 @@ void CShotgun::PrimaryAttack()
 
 	lagcomp_end();
 
-	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usSingleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
-	m_pPlayer->pev->punchangle = Vector(-7.5, 0, 0);
-	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
+
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition
@@ -247,7 +248,9 @@ void CShotgun::SecondaryAttack( void )
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
 	Vector vecDir;
-	
+	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usDoubleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
+	m_pPlayer->pev->punchangle = Vector(-15, 0, 0);
+	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
 	lagcomp_begin(m_pPlayer);
 
 #ifdef CLIENT_DLL
@@ -267,9 +270,7 @@ void CShotgun::SecondaryAttack( void )
 
 	lagcomp_end();
 		
-	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usDoubleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
-	m_pPlayer->pev->punchangle = Vector(-15, 0, 0);
-	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
+
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition
