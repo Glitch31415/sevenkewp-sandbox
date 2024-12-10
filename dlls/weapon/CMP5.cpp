@@ -143,7 +143,7 @@ void CMP5::PrimaryAttack()
 	Vector vecAiming;
 	
 		vecAiming = gpGlobals->v_forward;
-	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
+	Vector vecSrc = m_pPlayer->pev->origin; // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
 	ULONG cShots = 1;
 	Vector vecSpread = VECTOR_CONE_9MMAR;
 	int shared_rand = m_pPlayer->random_seed;
