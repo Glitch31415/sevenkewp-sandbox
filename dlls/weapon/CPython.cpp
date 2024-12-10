@@ -216,7 +216,7 @@ void CPython::PrimaryAttack()
 	}
     Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
 	Vector vecDir = (vecAiming + spread).Normalize();
-	Vector vecDest = vecSrc + (vecDir * 8192);
+	Vector vecDest = vecSrc + (vecDir * 512);
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
@@ -263,6 +263,7 @@ while (flDamage > 1 && loops < 25)
 		{
 			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = 0;
+			te_debug_beam(vecSrc, vecDest, 255, RGBA(255, 0, 0));
 	
 
 		}
