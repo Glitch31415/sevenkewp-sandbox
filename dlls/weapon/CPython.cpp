@@ -197,7 +197,7 @@ void CPython::PrimaryAttack()
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 
 	Vector vecAiming = gpGlobals->v_forward;
-	Vector vecSrc = m_pPlayer->pev->origin; // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
+	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
 	ULONG cShots = 1;
 	Vector vecSpread = VECTOR_CONE_357;
 	int shared_rand = m_pPlayer->random_seed;
