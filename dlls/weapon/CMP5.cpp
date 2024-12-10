@@ -162,7 +162,7 @@ void CMP5::PrimaryAttack()
 	}
     Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
 	Vector vecDir = (vecAiming + spread).Normalize();
-	Vector vecDest = vecSrc + (vecDir * 2048);
+	Vector vecDest = vecSrc + (vecDir * 8192);
 	
 	float dmg_mult = GetDamageModifier();
 
@@ -250,7 +250,7 @@ while (flDamage > 1 && loops < 25)
 		{
 			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = 0;
-			te_debug_beam(vecSrc, vecDest, 255, RGBA(255, 0, 0));
+			//te_debug_beam(vecSrc, vecDest, 255, RGBA(255, 0, 0));
 
 		}
 		float n = 0;
