@@ -235,7 +235,7 @@ void CPython::PrimaryAttack()
 #endif
 
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usFirePython, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
-
+	m_pPlayer->V_PunchAxis(0, -25.0);
 	lagcomp_begin(m_pPlayer);
 	
 int loops = 0;
@@ -263,7 +263,6 @@ while (flDamage > 1 && loops < 25)
 		{
 			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = 0;
-			te_debug_beam(vecSrc, vecDest, 255, RGBA(255, 0, 0));
 	
 
 		}
