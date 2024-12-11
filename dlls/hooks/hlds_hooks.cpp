@@ -656,36 +656,36 @@ void PrecacheTextureSounds() {
 		PRECACHE_SOUND_ENT(NULL, "player/pl_metal1.wav");		// walk on metal
 		PRECACHE_SOUND_ENT(NULL, "player/pl_metal2.wav");
 		PRECACHE_SOUND_ENT(NULL, "player/pl_metal3.wav");
-		PRECACHE_SOUND_ENT(NULL, "player/pl_metal4.wav");
+		//PRECACHE_SOUND_ENT(NULL, "player/pl_metal4.wav");
 	}
 
 	if (g_textureStats.tex_dirt) {
 		PRECACHE_SOUND_ENT(NULL, "player/pl_dirt1.wav");		// walk on dirt
 		PRECACHE_SOUND_ENT(NULL, "player/pl_dirt2.wav");
 		PRECACHE_SOUND_ENT(NULL, "player/pl_dirt3.wav");
-		PRECACHE_SOUND_ENT(NULL, "player/pl_dirt4.wav");
+		//PRECACHE_SOUND_ENT(NULL, "player/pl_dirt4.wav");
 	}
 
 	if (g_textureStats.tex_duct) {
 		PRECACHE_SOUND_ENT(NULL, "player/pl_duct1.wav");		// walk in duct
 		PRECACHE_SOUND_ENT(NULL, "player/pl_duct2.wav");
 		PRECACHE_SOUND_ENT(NULL, "player/pl_duct3.wav");
-		PRECACHE_SOUND_ENT(NULL, "player/pl_duct4.wav");
+		//PRECACHE_SOUND_ENT(NULL, "player/pl_duct4.wav");
 	}
 
 	if (g_textureStats.tex_grate) {
 		PRECACHE_SOUND_ENT(NULL, "player/pl_grate1.wav");		// walk on grate
 		PRECACHE_SOUND_ENT(NULL, "player/pl_grate2.wav");
 		PRECACHE_SOUND_ENT(NULL, "player/pl_grate3.wav");
-		PRECACHE_SOUND_ENT(NULL, "player/pl_grate4.wav");
+		//PRECACHE_SOUND_ENT(NULL, "player/pl_grate4.wav");
 	}
 
 	if (g_textureStats.tex_tile) {
 		PRECACHE_SOUND_ENT(NULL, "player/pl_tile1.wav");		// walk on tile
 		PRECACHE_SOUND_ENT(NULL, "player/pl_tile2.wav");
 		PRECACHE_SOUND_ENT(NULL, "player/pl_tile3.wav");
-		PRECACHE_SOUND_ENT(NULL, "player/pl_tile4.wav");
-		PRECACHE_SOUND_ENT(NULL, "player/pl_tile5.wav");
+		//PRECACHE_SOUND_ENT(NULL, "player/pl_tile4.wav");
+		//PRECACHE_SOUND_ENT(NULL, "player/pl_tile5.wav");
 	}
 
 	if (g_textureStats.tex_wood) {
@@ -709,7 +709,7 @@ void PrecacheTextureSounds() {
 		PRECACHE_SOUND_ENT(NULL, "player/pl_slosh1.wav");		// walk in shallow water
 		PRECACHE_SOUND_ENT(NULL, "player/pl_slosh2.wav");
 		PRECACHE_SOUND_ENT(NULL, "player/pl_slosh3.wav");
-		PRECACHE_SOUND_ENT(NULL, "player/pl_slosh4.wav");
+		//PRECACHE_SOUND_ENT(NULL, "player/pl_slosh4.wav");
 
 		PRECACHE_SOUND_ENT(NULL, "player/pl_swim1.wav");		// breathe bubbles
 		PRECACHE_SOUND_ENT(NULL, "player/pl_swim2.wav");

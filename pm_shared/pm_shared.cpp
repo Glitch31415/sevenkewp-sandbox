@@ -372,7 +372,7 @@ void PM_PlayStepSound( int step, float fvol )
 		case 1:	stepSound ="player/pl_metal3.wav";	break;
 		// left foot
 		case 2:	stepSound ="player/pl_metal2.wav";	break;
-		case 3:	stepSound ="player/pl_metal4.wav";	break;
+		case 3:	stepSound ="player/pl_metal3.wav";	break;
 		}
 		break;
 	case STEP_DIRT:
@@ -383,7 +383,7 @@ void PM_PlayStepSound( int step, float fvol )
 		case 1:	stepSound ="player/pl_dirt3.wav";	break;
 		// left foot
 		case 2:	stepSound ="player/pl_dirt2.wav";	break;
-		case 3:	stepSound ="player/pl_dirt4.wav";	break;
+		case 3:	stepSound ="player/pl_dirt3.wav";	break;
 		}
 		break;
 	case STEP_VENT:
@@ -394,7 +394,7 @@ void PM_PlayStepSound( int step, float fvol )
 		case 1:	stepSound ="player/pl_duct3.wav";	break;
 		// left foot
 		case 2:	stepSound ="player/pl_duct2.wav";	break;
-		case 3:	stepSound ="player/pl_duct4.wav";	break;
+		case 3:	stepSound ="player/pl_duct3.wav";	break;
 		}
 		break;
 	case STEP_GRATE:
@@ -405,7 +405,7 @@ void PM_PlayStepSound( int step, float fvol )
 		case 1:	stepSound ="player/pl_grate3.wav";	break;
 		// left foot
 		case 2:	stepSound ="player/pl_grate2.wav";	break;
-		case 3:	stepSound ="player/pl_grate4.wav";	break;
+		case 3:	stepSound ="player/pl_grate3.wav";	break;
 		}
 		break;
 	case STEP_TILE:
@@ -418,8 +418,8 @@ void PM_PlayStepSound( int step, float fvol )
 		case 1:	stepSound ="player/pl_tile3.wav";	break;
 		// left foot
 		case 2:	stepSound ="player/pl_tile2.wav";	break;
-		case 3:	stepSound ="player/pl_tile4.wav";	break;
-		case 4: stepSound ="player/pl_tile5.wav";	break;
+		case 3:	stepSound ="player/pl_tile3.wav";	break;
+		case 4: stepSound ="player/pl_tile1.wav";	break;
 		}
 		break;
 	case STEP_SLOSH:
@@ -430,7 +430,7 @@ void PM_PlayStepSound( int step, float fvol )
 		case 1:	stepSound ="player/pl_slosh3.wav";	break;
 		// left foot
 		case 2:	stepSound ="player/pl_slosh2.wav";	break;
-		case 3:	stepSound ="player/pl_slosh4.wav";	break;
+		case 3:	stepSound ="player/pl_slosh3.wav";	break;
 		}
 		break;
 	case STEP_WADE:
@@ -467,7 +467,7 @@ void PM_PlayStepSound( int step, float fvol )
 		case 1:	stepSound ="player/pl_ladder3.wav";	break;
 		// left foot
 		case 2:	stepSound ="player/pl_ladder2.wav";	break;
-		case 3:	stepSound ="player/pl_ladder4.wav";	break;
+		case 3:	stepSound ="player/pl_ladder3.wav";	break;
 		}
 		break;
 	}

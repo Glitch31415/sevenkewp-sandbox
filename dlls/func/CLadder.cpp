@@ -52,7 +52,7 @@ void CLadder::Precache(void)
 	PRECACHE_SOUND("player/pl_ladder1.wav");
 	PRECACHE_SOUND("player/pl_ladder2.wav");
 	PRECACHE_SOUND("player/pl_ladder3.wav");
-	PRECACHE_SOUND("player/pl_ladder4.wav");
+	//PRECACHE_SOUND("player/pl_ladder4.wav");
 }
 
 
