@@ -539,34 +539,56 @@ void ServerDeactivate( void )
 void PrecacheWeapons() {
 	UTIL_PrecacheOther("item_suit");
 	UTIL_PrecacheOther("item_battery");
-	UTIL_PrecacheOther("weapon_crowbar");
-	UTIL_PrecacheOther("weapon_9mmhandgun");
-	UTIL_PrecacheOther("ammo_9mmclip");
-	UTIL_PrecacheOther("weapon_shotgun");
-	UTIL_PrecacheOther("ammo_buckshot");
-	UTIL_PrecacheOther("weapon_9mmAR");
-	UTIL_PrecacheOther("ammo_9mmAR");
-	UTIL_PrecacheOther("ammo_ARgrenades");
-	UTIL_PrecacheOther("weapon_handgrenade");
-	UTIL_PrecacheOther("weapon_tripmine");
-	UTIL_PrecacheOther("weapon_357");
-	UTIL_PrecacheOther("ammo_357");
-	UTIL_PrecacheOther("weapon_crossbow");
-	UTIL_PrecacheOther("ammo_crossbow");
-	UTIL_PrecacheOther("weapon_egon");
-	UTIL_PrecacheOther("weapon_gauss");
-	UTIL_PrecacheOther("ammo_gaussclip");
-	UTIL_PrecacheOther("weapon_rpg");
-	UTIL_PrecacheOther("ammo_rpgclip");
-	UTIL_PrecacheOther("weapon_satchel");
-	UTIL_PrecacheOther("weapon_snark");
-	UTIL_PrecacheOther("weapon_hornetgun");
-	UTIL_PrecacheOther("weapon_grapple");
-	UTIL_PrecacheOther("weapon_pipewrench");
-	UTIL_PrecacheOther("weapon_displacer");
-	UTIL_PrecacheOther("weapon_shockrifle");
-	UTIL_PrecacheOther("weapon_sporelauncher");
-	UTIL_PrecacheOther("weapon_medkit");
+		UTIL_PrecacheOther("weapon_shotgun");
+		UTIL_PrecacheOther("ammo_buckshot");
+
+		UTIL_PrecacheOther("weapon_crowbar");
+
+		UTIL_PrecacheOther("weapon_9mmhandgun");
+		UTIL_PrecacheOther("ammo_9mmclip");
+
+		UTIL_PrecacheOther("weapon_9mmAR");
+		UTIL_PrecacheOther("ammo_9mmAR");
+		UTIL_PrecacheOther("ammo_ARgrenades");
+
+		UTIL_PrecacheOther("weapon_357");
+		UTIL_PrecacheOther("ammo_357");
+
+		UTIL_PrecacheOther("weapon_gauss");
+		UTIL_PrecacheOther("ammo_gaussclip");
+
+		UTIL_PrecacheOther("weapon_rpg");
+		UTIL_PrecacheOther("ammo_rpgclip");
+
+		UTIL_PrecacheOther("weapon_crossbow");
+		UTIL_PrecacheOther("ammo_crossbow");
+
+		UTIL_PrecacheOther("weapon_egon");
+		UTIL_PrecacheOther("ammo_gaussclip");
+
+		UTIL_PrecacheOther("weapon_tripmine");
+
+		UTIL_PrecacheOther("weapon_satchel");
+
+		UTIL_PrecacheOther("weapon_handgrenade");
+
+		UTIL_PrecacheOther("weapon_snark");
+
+		UTIL_PrecacheOther("weapon_hornetgun");
+
+		UTIL_PrecacheOther("weapon_grapple");
+
+		UTIL_PrecacheOther("weapon_pipewrench");
+
+		UTIL_PrecacheOther("weapon_displacer");
+
+		UTIL_PrecacheOther("weapon_shockrifle");
+
+		UTIL_PrecacheOther("weapon_sporelauncher");
+
+		UTIL_PrecacheOther("weapon_medkit");
+
+		UTIL_PrecacheOther("weapon_inventory");
 	UTIL_PrecacheOther("item_longjump");
 
 	UTIL_PrecacheOther("monster_snark");
@@ -618,78 +640,8 @@ UTIL_PrecacheOther("monster_babygarg");
 UTIL_PrecacheOther("monster_gman");
 //UTIL_PrecacheOther("monster_stukabat");
 //UTIL_PrecacheOther("monster_kingpin");
-	if (g_mapWeapons.find("weapon_shotgun") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_shotgun");
-		UTIL_PrecacheOther("ammo_buckshot");
-	}
-	if (g_mapWeapons.find("weapon_crowbar") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_crowbar");
-	}
-	if (g_mapWeapons.find("weapon_9mmhandgun") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_9mmhandgun");
-		UTIL_PrecacheOther("ammo_9mmclip");
-	}
-	if (g_mapWeapons.find("weapon_9mmAR") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_9mmAR");
-		UTIL_PrecacheOther("ammo_9mmAR");
-		UTIL_PrecacheOther("ammo_ARgrenades");
-	}
-	if (g_mapWeapons.find("weapon_357") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_357");
-		UTIL_PrecacheOther("ammo_357");
-	}
-	if (g_mapWeapons.find("weapon_gauss") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_gauss");
-		UTIL_PrecacheOther("ammo_gaussclip");
-	}
-	if (g_mapWeapons.find("weapon_rpg") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_rpg");
-		UTIL_PrecacheOther("ammo_rpgclip");
-	}
-	if (g_mapWeapons.find("weapon_crossbow") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_crossbow");
-		UTIL_PrecacheOther("ammo_crossbow");
-	}
-	if (g_mapWeapons.find("weapon_egon") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_egon");
-		UTIL_PrecacheOther("ammo_gaussclip");
-	}
-	if (g_mapWeapons.find("weapon_tripmine") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_tripmine");
-	}
-	if (g_mapWeapons.find("weapon_satchel") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_satchel");
-	}
-	if (g_mapWeapons.find("weapon_handgrenade") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_handgrenade");
-	}
-	if (g_mapWeapons.find("weapon_snark") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_snark");
-	}
-	if (g_mapWeapons.find("weapon_hornetgun") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_hornetgun");
-	}
-	if (g_mapWeapons.find("weapon_grapple") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_grapple");
-	}
-	if (g_mapWeapons.find("weapon_pipewrench") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_pipewrench");
-	}
-	if (g_mapWeapons.find("weapon_displacer") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_displacer");
-	}
-	if (g_mapWeapons.find("weapon_shockrifle") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_shockrifle");
-	}
-	if (g_mapWeapons.find("weapon_sporelauncher") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_sporelauncher");
-	}
-	if (g_mapWeapons.find("weapon_medkit") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_medkit");
-	}
-	if (g_mapWeapons.find("weapon_inventory") != g_mapWeapons.end()) {
-		UTIL_PrecacheOther("weapon_inventory");
-	}
+
+
 }
 
 void PrecacheTextureSounds() {
