@@ -331,11 +331,11 @@ case 7:
 case 10:
 case 11:
 	//armor, don't know what type, fuck
-	flpDamage = 75 * angcheck;
+	flpDamage = 50 * angcheck;
 	flDamage = flDamage - flpDamage;
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = prevmaxhealth * angcheck;
+	flpDamage = 0.5 * prevmaxhealth * angcheck;
 	flDamage = flDamage - flpDamage;
 	break;
 default:
