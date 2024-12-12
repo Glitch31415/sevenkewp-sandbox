@@ -8,5 +8,5 @@ cd ..
 rm -rf build
 mkdir build
 cd build
-cmake -DBUILD_SERVER=ON -DINCREASED_SERVER_LIMITS=OFF ..
-cmake --build . --config Release
+cmake -DBUILD_SERVER=ON -DINCREASED_SERVER_LIMITS=ON -j 20 ..
+cmake --build . --config Release -j 20
