@@ -4,7 +4,11 @@ option(BUILD_SERVER "Disable this if you don't want to build the server library"
 option(BUILD_CLIENT "Enable this if you want to build the client library" OFF)
 option(BUILD_PLUGINS "Build everything in the plugins/ folder")
 option(UPDATE_PLUGINS "Discard local changes and update everything in the plugins/ folder")
+<<<<<<< HEAD
 option(REHLDS_BUILD "Build a server library for use with ReHLDS (server crashes instantly if this is set incorrectly)")
+=======
+option(INCREASED_SERVER_LIMITS "Build a server library with increased limits (server crashes instantly if this does not match rehlds)")
+>>>>>>> 00d71cc24759aa0e4b7e506965e441c691e27ba6
 option(SETUP_IDE "Install binaries to the game folder")
 
 set(SERVER_WORK_DIR "C:/Games/hlds/steamapps/common/Half-Life" CACHE STRING "Path to your server root folder")
