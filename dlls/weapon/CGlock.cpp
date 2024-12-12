@@ -377,8 +377,13 @@ default:
 						//if (n < flDamage)
 						//{
 							if (n == 0) n = 1;
-							if (sdm == true && pEntity->pev->rendermode == kRenderNormal) { // not a damage-able entity, and not transparent
-								flDamage -= 6*n;
+							if (sdm == true) { // if not a damage-able entity
+								if (pEntity->pev->rendermode == kRenderNormal) { // if not transparent
+									flDamage -= 6*n;
+								}
+								else {
+									flDamage -= n;
+								}
 							}
 							//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 3: %f", flDamage));
 
