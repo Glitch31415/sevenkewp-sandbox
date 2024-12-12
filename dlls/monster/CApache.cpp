@@ -977,7 +977,7 @@ int CApache :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 		//Maybe somebody healed us somehow (trigger_hurt with negative damage?), clear this.
 		ClearConditions(bits_COND_LIGHT_DAMAGE);
 	}
-	return CBaseEntity::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
 
 
