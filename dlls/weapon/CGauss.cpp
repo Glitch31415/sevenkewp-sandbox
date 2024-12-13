@@ -351,17 +351,13 @@ void CGauss::StartFire( void )
 	m_pPlayer->m_flStartCharge = V_min(m_pPlayer->m_flStartCharge, gpGlobals->time);
 
 	float flDamage = 20;
-	float secondaryBaseDamage = 200;
+	float secondaryBaseDamage = 1000;
 	
-<<<<<<< HEAD
-	UTIL_MakeVectors( m_pPlayer->pev->v_angle );
-=======
 #ifndef CLIENT_DLL
 	secondaryBaseDamage = gSkillData.sk_plr_secondarygauss;
 #endif
 
-	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
->>>>>>> f87da112b29379b53d1abd380ef67aff1347ac33
+	UTIL_MakeVectors( m_pPlayer->pev->v_angle );
 	Vector vecAiming = gpGlobals->v_forward;
 	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
 	
@@ -369,19 +365,11 @@ void CGauss::StartFire( void )
 
 	if ( gpGlobals->time - m_pPlayer->m_flStartCharge > GetFullChargeTime() )
 	{
-<<<<<<< HEAD
-		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 );
+		flDamage = secondaryBaseDamage * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 );
 	}
 	else
 	{
-		flDamage = gSkillData.sk_plr_secondarygauss * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 ) * 
-=======
-		flDamage = secondaryBaseDamage * dmg_mult;
-	}
-	else
-	{
-		flDamage = secondaryBaseDamage * dmg_mult *
->>>>>>> f87da112b29379b53d1abd380ef67aff1347ac33
+		flDamage = secondaryBaseDamage * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 ) * 
 			(( gpGlobals->time - m_pPlayer->m_flStartCharge) / GetFullChargeTime() );
 	}
 
