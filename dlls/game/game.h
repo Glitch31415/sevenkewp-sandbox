@@ -76,6 +76,9 @@ EXPORT extern cvar_t	pluginautoupdate; // attempt to update plugins after every 
 EXPORT extern cvar_t	mp_skill_allow; // 0 = no, 1 = yes
 EXPORT extern cvar_t	mp_default_medkit; // provide a medkit by default unless nomedkit is in the cfg
 EXPORT extern cvar_t	mp_rpg_laser_mode; // 0 = HL, 1 = realistic, 2 = rockets follow owner's laser
+EXPORT extern cvar_t	mp_series_intermission; // 0 = allow game_end, 1 = skip game_end, 2 = skip waiting period and show a message for series level changes
+EXPORT extern cvar_t	mp_score_mode; // 0 = get points for damage, 1 = point multiplier reduced after death + no suicide penalty
+EXPORT extern cvar_t	mp_damage_points; // score points given per point of damage dealt
 
 // Enables classic func_pushable physics (which is horribly broken, but fun)
 // The higher your FPS, the faster you can boost pushables. You also get boosted.
@@ -96,6 +99,9 @@ EXPORT extern cvar_t	mp_prefer_server_maxspeed;
 // limits monster sound variety to save precache slots.
 // 0 disables. 1+ = max sounds per action (death/pain/idle/etc.)
 EXPORT extern cvar_t	soundvariety;
+
+// disables idle talking for some npcs to save precache slots (otis/fgrunt/bodyguard/rgrunt/strooper)
+EXPORT extern cvar_t	mp_npcidletalk;
 
 EXPORT extern cvar_t	mp_npckill;
 EXPORT extern cvar_t	killnpc; // legacy setting. When set to 0, makes scientists and barneys invulnerable
@@ -177,5 +183,14 @@ EXPORT void AddPrecacheWeapon(std::string wepName);
 
 EXPORT extern CVoiceGameMgr g_VoiceGameMgr;
 EXPORT extern CMultiplayGameMgrHelper g_GameMgrHelper;
+
+struct player_score_t {
+	float frags;
+	float multiplier;
+	int deaths;
+};
+
+// maps a steam ID to their score, for preserving scores across level changes and disconnects
+EXPORT extern std::unordered_map<uint64_t, player_score_t> g_playerScores;
 
 #endif		// GAME_H

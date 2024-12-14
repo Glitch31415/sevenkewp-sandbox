@@ -68,8 +68,12 @@ cvar_t	pluginautoupdate ={"plugin_auto_update", "0", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_skill_allow ={"mp_skill_allow", "1", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_default_medkit ={"mp_default_medkit", "0", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_rpg_laser_mode ={"mp_rpg_laser_mode", "1", FCVAR_SERVER, 0, 0 };
+cvar_t	mp_series_intermission ={"mp_series_intermission", "2", FCVAR_SERVER, 0, 0 };
+cvar_t	mp_score_mode ={"mp_score_mode", "0", FCVAR_SERVER, 0, 0 };
+cvar_t	mp_damage_points ={"mp_damage_points", "0.01", FCVAR_SERVER, 0, 0 };
 
 cvar_t	soundvariety={"mp_soundvariety","0", FCVAR_SERVER, 0, 0 };
+cvar_t	mp_npcidletalk={"mp_npcidletalk","1", FCVAR_SERVER, 0, 0 };
 
 cvar_t	mp_npckill = { "mp_npckill", "1", FCVAR_SERVER, 0, 0 };
 cvar_t	killnpc = { "killnpc", "1", FCVAR_SERVER, 0, 0 };
@@ -107,6 +111,8 @@ std::unordered_map<std::string, std::string> g_soundReplacementsMap;
 std::unordered_map<std::string, std::string> g_soundReplacements;
 
 std::unordered_set<std::string> g_mapWeapons;
+
+std::unordered_map<uint64_t, player_score_t> g_playerScores;
 
 std::unordered_map<std::string, const char*> g_itemNameRemap = {
 	{"weapon_9mmar", "weapon_9mmAR"},
@@ -283,6 +289,20 @@ void freespace_command() {
 	ALERT(at_console, "Free space at %s is %.2f GB\n", path.c_str(), (float)gb);
 }
 
+void list_precached_sounds() {
+	std::vector<std::string> allSounds;
+
+	for (std::string item : g_precachedSounds) {
+		allSounds.push_back(item);
+	}
+
+	sort(allSounds.begin(), allSounds.end());
+
+	for (std::string item : allSounds) {
+		g_engfuncs.pfnServerPrint(UTIL_VarArgs("    %s\n", item.c_str()));
+	}
+}
+
 void test_command() {
 	int id = GetUserMsgInfo("VoiceMask", NULL);
 
@@ -316,6 +336,7 @@ void GameDLLInit( void )
 	g_engfuncs.pfnAddServerCommand("updateplugin", update_plugin);
 	g_engfuncs.pfnAddServerCommand("updateplugins", update_plugins);
 	g_engfuncs.pfnAddServerCommand("freespace", freespace_command);
+	g_engfuncs.pfnAddServerCommand("listsounds", list_precached_sounds);
 	
 	// Register cvars here:
 	g_psv_gravity = CVAR_GET_POINTER( "sv_gravity" );
@@ -380,6 +401,10 @@ void GameDLLInit( void )
 	CVAR_REGISTER (&mp_skill_allow);
 	CVAR_REGISTER (&mp_default_medkit);
 	CVAR_REGISTER (&mp_rpg_laser_mode);
+	CVAR_REGISTER (&mp_npcidletalk);
+	CVAR_REGISTER (&mp_series_intermission);
+	CVAR_REGISTER (&mp_score_mode);
+	CVAR_REGISTER (&mp_damage_points);
 
 	CVAR_REGISTER (&mp_chattime);
 
