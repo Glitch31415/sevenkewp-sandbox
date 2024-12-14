@@ -146,10 +146,8 @@ void CHalfLifeMultiplay :: Think ( void )
 		else if ( time > MAX_INTERMISSION_TIME )
 			CVAR_SET_STRING( "mp_chattime", UTIL_dtos1( MAX_INTERMISSION_TIME ) );
 
-		m_flIntermissionEndTime = g_flIntermissionStartTime + mp_chattime.value;
-
 		// check to see if we should change levels now
-		if ( m_flIntermissionEndTime < gpGlobals->time ) {
+		if (m_flIntermissionEndTime < gpGlobals->time ) {
 			ChangeLevel();
 		}
 
@@ -439,7 +437,14 @@ void CHalfLifeMultiplay :: ClientDisconnected( edict_t *pClient )
 			else
 				UTIL_LogPlayerEvent(pClient, "disconnected\n");
 
+			player_score_t score;
+			score.frags = pPlayer->pev->frags;
+			score.deaths = pPlayer->m_iDeaths;
+			score.multiplier = pPlayer->m_scoreMultiplier;
+			g_playerScores[pPlayer->GetSteamID64()] = score;
+			
 			pPlayer->pev->frags = 0;
+			pPlayer->m_iDeaths = 0;
 
 			pPlayer->RemoveAllItems( TRUE );// destroy all of the players weapons and items
 			pPlayer->DropAllInventoryItems();
@@ -568,9 +573,6 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 {
 	pVictim->m_deathMessageSent = true;
 
-	pVictim->m_iDeaths += 1;
-
-
 	FireTargets( "game_playerdie", pVictim, pVictim, USE_TOGGLE, 0 );
 	CBasePlayer *peKiller = NULL;
 	CBaseEntity *ktmp = CBaseEntity::Instance( pKiller );
@@ -578,8 +580,14 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 		peKiller = (CBasePlayer*)ktmp;
 
 	if ( pVictim->pev == pKiller )  
+<<<<<<< HEAD
 	{  // killed self
 		// pKiller->frags -= 1;
+=======
+	{  // killed self, only penalize if PvP is enabled (npcs don't care that you stole their point)
+		if (mp_score_mode.value == 0 || friendlyfire.value == 1)
+			pKiller->frags -= 1;
+>>>>>>> 2e4a6429b054f3a22c85a593d591600fa664ee56
 	}
 	else if ( ktmp && ktmp->IsPlayer() )
 	{
@@ -590,7 +598,12 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 	}
 	else
 	{  // killed by the world
+<<<<<<< HEAD
 		// pKiller->frags -= 1;
+=======
+		if (mp_score_mode.value == 0 || friendlyfire.value == 1)
+			pKiller->frags -= 1;
+>>>>>>> 2e4a6429b054f3a22c85a593d591600fa664ee56
 	}
 
 	// update the scores
@@ -1317,9 +1330,6 @@ void CHalfLifeMultiplay :: GoToIntermission( void )
 		}
 	}
 
-	MESSAGE_BEGIN(MSG_ALL, SVC_INTERMISSION);
-	MESSAGE_END();
-
 	// bounds check
 	int time = (int)CVAR_GET_FLOAT( "mp_chattime" );
 	if ( time < 1 )
@@ -1331,6 +1341,44 @@ void CHalfLifeMultiplay :: GoToIntermission( void )
 	g_flIntermissionStartTime = gpGlobals->time;
 
 	g_fGameOver = TRUE;
+
+	if (mp_series_intermission.value > 0) {
+		const char* nextmapname = CVAR_GET_STRING("mp_nextmap");
+		mapcycle_item_t* currentMap = g_pGameRules->GetMapCyleMap(STRING(gpGlobals->mapname));
+		mapcycle_item_t* nextMap = g_pGameRules->GetMapCyleMap(nextmapname);
+		bool nextMapSameSeries = currentMap && nextMap && currentMap->seriesNum == nextMap->seriesNum;
+
+		if (nextMapSameSeries) {
+			// the next map is part of the same series, so the "map" isn't really over yet.
+			// Not all map series use trigger_changelevel to instantly change maps. Some use game_end 
+			// and assume you set up the cycle correctly.
+
+			if (mp_series_intermission.value == 1) {
+				// end instantly, as if this were a trigger_changelevel
+				m_flIntermissionEndTime = gpGlobals->time;
+			}
+			else {
+				// end almost instantly, but long enough to send these last couple of messages.
+				// Using the unreliable channel means these messages won't always be received
+				// but it's faster than using reliable channel, which might also not show
+				// if its backed up with lots of data.
+				MESSAGE_BEGIN(MSG_BROADCAST, SVC_INTERMISSION);
+				MESSAGE_END();
+
+				MESSAGE_BEGIN(MSG_BROADCAST, gmsgSayText);
+				WRITE_BYTE(0); // not a player
+				WRITE_STRING(UTIL_VarArgs("Loading %s...", nextmapname));
+				MESSAGE_END();
+
+				m_flIntermissionEndTime = gpGlobals->time + 0.05f;
+			}
+
+			return;
+		}
+	}
+
+	MESSAGE_BEGIN(MSG_ALL, SVC_INTERMISSION);
+	MESSAGE_END();
 }
 
 
@@ -1486,17 +1534,20 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 	if ( pFileList && length )
 	{
 		int seriesIdx = 0;
+		int seriesNum = 0;
 
 		while (pFileList)
 		{
 			if (seriesIdx != 0 && !COM_TokenWaiting(pFileList)) {
 				seriesIdx = 0; // end of line
+				seriesNum++;
 			}
 
 			pFileList = COM_Parse(pFileList);
 
 			if (strlen(com_token) <= 0) {
 				seriesIdx = 0;
+				seriesNum++;
 				continue;
 			}
 
@@ -1513,6 +1564,7 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 			strcpy_safe(item->mapname, szMap, 32);
 			item->mapname[31] = 0;
 			item->seriesIdx = seriesIdx++;
+			item->seriesNum = seriesNum;
 			item->next = cycle->items;
 			cycle->items = item;
 		}
@@ -1797,6 +1849,7 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 	}
 
 	g_fGameOver = TRUE;
+	m_flIntermissionEndTime = 0;
 
 	ALERT( at_console, "CHANGE LEVEL: %s\n", next_map);
 	

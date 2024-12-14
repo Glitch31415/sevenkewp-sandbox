@@ -377,6 +377,12 @@ void ClientPutInServer( edict_t *pEntity )
 		//UTIL_StopGlobalMp3(pEntity);
 	}
 
+	// httpstop allows restarting the map with a different set of resources without breaking fastdl
+	// (for sound shuffling or a plugin that precaches player models)
+	MESSAGE_BEGIN(MSG_ONE, SVC_STUFFTEXT, NULL, pEntity);
+	WRITE_STRING("httpstop\n");
+	MESSAGE_END();
+
 	pPlayer->m_initSoundTime = gpGlobals->time + 1.0f;
 
 	pPlayer->pev->iuser1 = 0;	// disable any spec modes
@@ -386,6 +392,19 @@ void ClientPutInServer( edict_t *pEntity )
 	pPlayer->pev->effects |= EF_NOINTERP;
 
 	pPlayer->QueryClientType();
+
+	auto previousScore = g_playerScores.find(pPlayer->GetSteamID64());
+	if (previousScore != g_playerScores.end()) {
+		player_score_t score = previousScore->second;
+		pPlayer->pev->frags = score.frags;
+		pPlayer->m_iDeaths = score.deaths;
+		pPlayer->m_scoreMultiplier = score.multiplier;
+	}
+	else {
+		pPlayer->pev->frags = 0;
+		pPlayer->m_iDeaths = 0;
+		pPlayer->m_scoreMultiplier = 1.0f;
+	}
 
 	CALL_HOOKS_VOID(pfnClientPutInServer, pPlayer);
 
@@ -480,6 +499,7 @@ void ServerDeactivate( void )
 			(int)plr->pev->frags, plr->m_iDeaths);
 	}
 
+	g_lastMapName = STRING(gpGlobals->mapname);
 
 	g_serveractive = 0;
 	g_edictsinit = 0;
@@ -655,13 +675,11 @@ UTIL_PrecacheOther("monster_gman");
 
 void PrecacheTextureSounds() {
 	if (g_textureStats.tex_concrete) {
-		PRECACHE_SOUND_ENT(NULL, "player/pl_step1.wav");		// walk on concrete
-		PRECACHE_SOUND_ENT(NULL, "player/pl_step2.wav");
-		PRECACHE_SOUND_ENT(NULL, "player/pl_step3.wav");
-		PRECACHE_SOUND_ENT(NULL, "player/pl_step4.wav");
+		PRECACHE_FOOTSTEP_SOUNDS(g_stepSoundsConcrete)
 	}
 
 	if (g_textureStats.tex_metal) {
+<<<<<<< HEAD
 		PRECACHE_SOUND_ENT(NULL, "player/pl_metal1.wav");		// walk on metal
 		PRECACHE_SOUND_ENT(NULL, "player/pl_metal2.wav");
 		PRECACHE_SOUND_ENT(NULL, "player/pl_metal3.wav");
@@ -695,6 +713,28 @@ void PrecacheTextureSounds() {
 		PRECACHE_SOUND_ENT(NULL, "player/pl_tile3.wav");
 		//PRECACHE_SOUND_ENT(NULL, "player/pl_tile4.wav");
 		//PRECACHE_SOUND_ENT(NULL, "player/pl_tile5.wav");
+=======
+		PRECACHE_FOOTSTEP_SOUNDS(g_stepSoundsMetal)
+	}
+
+	if (g_textureStats.tex_dirt) {
+		PRECACHE_FOOTSTEP_SOUNDS(g_stepSoundsDirt)
+	}
+
+	if (g_textureStats.tex_duct) {
+		PRECACHE_FOOTSTEP_SOUNDS(g_stepSoundsDuct)
+	}
+
+	if (g_textureStats.tex_grate) {
+		PRECACHE_FOOTSTEP_SOUNDS(g_stepSoundsGrate)
+	}
+
+	if (g_textureStats.tex_tile) {
+		PRECACHE_FOOTSTEP_SOUNDS(g_stepSoundsTile)
+
+		if (g_footstepVariety >= 2)
+			PRECACHE_SOUND_ENT(NULL, "player/pl_tile5.wav");
+>>>>>>> 2e4a6429b054f3a22c85a593d591600fa664ee56
 	}
 
 	if (g_textureStats.tex_wood) {
@@ -715,17 +755,17 @@ void PrecacheTextureSounds() {
 	}
 
 	if (g_textureStats.tex_water) {
+<<<<<<< HEAD
 		PRECACHE_SOUND_ENT(NULL, "player/pl_slosh1.wav");		// walk in shallow water
 		PRECACHE_SOUND_ENT(NULL, "player/pl_slosh2.wav");
 		PRECACHE_SOUND_ENT(NULL, "player/pl_slosh3.wav");
 		//PRECACHE_SOUND_ENT(NULL, "player/pl_slosh4.wav");
+=======
+		PRECACHE_FOOTSTEP_SOUNDS(g_stepSoundsSlosh)
+		PRECACHE_FOOTSTEP_SOUNDS(g_swimSounds)
+>>>>>>> 2e4a6429b054f3a22c85a593d591600fa664ee56
 
-		PRECACHE_SOUND_ENT(NULL, "player/pl_swim1.wav");		// breathe bubbles
-		PRECACHE_SOUND_ENT(NULL, "player/pl_swim2.wav");
-		PRECACHE_SOUND_ENT(NULL, "player/pl_swim3.wav");
-		PRECACHE_SOUND_ENT(NULL, "player/pl_swim4.wav");
-
-		// Note: wade sounds are used by the engine for state transtitions
+		// Note: ALL wade sounds are used by the engine for state transtitions
 		PRECACHE_SOUND_ENT(NULL, "player/pl_wade1.wav");		// wade in water
 		PRECACHE_SOUND_ENT(NULL, "player/pl_wade2.wav");
 		PRECACHE_SOUND_ENT(NULL, "player/pl_wade3.wav");
@@ -784,6 +824,7 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 
 	const char* current_map = STRING(gpGlobals->mapname);
 	mapcycle_item_t* cycleMap = g_pGameRules->GetMapCyleMap(current_map);
+	mapcycle_item_t* lastCycleMap = g_pGameRules->GetMapCyleMap(g_lastMapName.c_str());
 
 	if (cycleMap) {
 		CVAR_SET_STRING("mp_nextmap", cycleMap->next->mapname);
@@ -797,6 +838,11 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 			ALERT(at_console, "Map cycle empty. Clearning mp_nextmap.\n");
 			CVAR_SET_STRING("mp_nextmap", "");
 		}
+	}
+
+	// clear saved scores if switching to map that isn't part of the same series
+	if (!cycleMap || !lastCycleMap || cycleMap->seriesNum != lastCycleMap->seriesNum) {
+		g_playerScores.clear();
 	}
 
 	PrintEntindexStats();
@@ -1005,7 +1051,7 @@ void ClientPrecache( void )
 	//PRECACHE_SOUND_ENT(NULL, "player/pl_pain6.wav");
 	//PRECACHE_SOUND_ENT(NULL, "player/pl_pain7.wav");
 
-	PRECACHE_MODEL("models/player.mdl");
+	PRECACHE_MODEL_ENT(NULL, "models/player.mdl");
 	
 #ifdef CLIENT_DLL
 	// geiger sounds (used by client only, played automatically when near radioactive trigger_hurt)
@@ -1443,20 +1489,20 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 
 	client_info_t client = plr->GetClientInfo();
 	if (e >= client.max_edicts) {
-		//ALERT(at_console, "Can't send edict %d '%s' (index too high)\n", e, STRING(ent->v.classname));
+		ALERT(at_aiconsole, "Can't send edict %d '%s' (index too high)\n", e, STRING(ent->v.classname));
 		g_numEdictOverflows[g_packClientIdx]++;
 		plr->SendLegacyClientWarning();
 		return 0;
 	}
 	if (ENTINDEX(ent->v.aiment) >= client.max_edicts) {
-		//ALERT(at_console, "Can't send attachment %d '%s' (index too high)\n", ENTINDEX(ent->v.aiment), STRING(ent->v.aiment->v.classname));
+		ALERT(at_aiconsole, "Can't send attachment %d '%s' (index too high)\n", ENTINDEX(ent->v.aiment), STRING(ent->v.aiment->v.classname));
 		g_numEdictOverflows[g_packClientIdx]++;
 		plr->SendLegacyClientWarning();
 		return 0;
 	}
 	if (g_numPacketEntities[g_packClientIdx] >= client.max_packet_entities) {
-		//ALERT(at_console, "Can't send edict %d '%s' (exceeded %d MAX_PACKET_ENTITIES)\n",
-		//	e, STRING(ent->v.classname), client.max_packet_entities);
+		ALERT(at_aiconsole, "Can't send edict %d '%s' (exceeded %d MAX_PACKET_ENTITIES)\n",
+			e, STRING(ent->v.classname), client.max_packet_entities);
 		g_numEdictOverflows[g_packClientIdx]++;
 		plr->SendLegacyClientWarning();
 		return 0;
