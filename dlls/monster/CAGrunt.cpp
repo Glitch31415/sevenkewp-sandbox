@@ -445,13 +445,7 @@ void CAGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 	case AGRUNT_AE_LEFT_FOOT:
 		// left foot
-<<<<<<< HEAD
-		case 0:	EMIT_SOUND_DYN ( ENT(pev), CHAN_BODY, "player/pl_ladder2.wav", 1, ATTN_NORM, 0, 70 );	break;
-		case 1:	EMIT_SOUND_DYN ( ENT(pev), CHAN_BODY, "player/pl_ladder3.wav", 1, ATTN_NORM, 0, 70 );	break;
-		}
-=======
 		EMIT_SOUND_DYN(ENT(pev), CHAN_BODY, g_stepSoundsLadder[2 + RANDOM_LONG(0,g_footstepVariety-1)], 1, ATTN_NORM, 0, 70);
->>>>>>> 2e4a6429b054f3a22c85a593d591600fa664ee56
 		break;
 	case AGRUNT_AE_RIGHT_FOOT:
 		// right foot
@@ -572,16 +566,8 @@ void CAGrunt :: Precache()
 	PRECACHE_SOUND_ARRAY(pPainSounds);
 	PRECACHE_SOUND_ARRAY(pAttackSounds);
 	PRECACHE_SOUND_ARRAY(pAlertSounds);
-<<<<<<< HEAD
-
-	PRECACHE_SOUND("player/pl_ladder1.wav");
-	PRECACHE_SOUND("player/pl_ladder2.wav");
-	PRECACHE_SOUND("player/pl_ladder3.wav");
-	//PRECACHE_SOUND("player/pl_ladder4.wav");
-=======
 	
 	PRECACHE_FOOTSTEP_SOUNDS(g_stepSoundsLadder)
->>>>>>> 2e4a6429b054f3a22c85a593d591600fa664ee56
 
 	PRECACHE_SOUND( "hassault/hw_shoot1.wav" );
 

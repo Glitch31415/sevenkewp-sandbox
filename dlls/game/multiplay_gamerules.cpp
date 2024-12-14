@@ -580,14 +580,9 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 		peKiller = (CBasePlayer*)ktmp;
 
 	if ( pVictim->pev == pKiller )  
-<<<<<<< HEAD
-	{  // killed self
-		// pKiller->frags -= 1;
-=======
 	{  // killed self, only penalize if PvP is enabled (npcs don't care that you stole their point)
 		if (mp_score_mode.value == 0 || friendlyfire.value == 1)
-			pKiller->frags -= 1;
->>>>>>> 2e4a6429b054f3a22c85a593d591600fa664ee56
+			//pKiller->frags -= 1;
 	}
 	else if ( ktmp && ktmp->IsPlayer() )
 	{
@@ -598,12 +593,8 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 	}
 	else
 	{  // killed by the world
-<<<<<<< HEAD
-		// pKiller->frags -= 1;
-=======
 		if (mp_score_mode.value == 0 || friendlyfire.value == 1)
-			pKiller->frags -= 1;
->>>>>>> 2e4a6429b054f3a22c85a593d591600fa664ee56
+			//pKiller->frags -= 1;
 	}
 
 	// update the scores

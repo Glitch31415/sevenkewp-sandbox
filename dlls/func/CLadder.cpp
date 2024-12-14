@@ -49,14 +49,7 @@ void CLadder::Precache(void)
 
 	SetUse(&CLadder::Toggle);
 
-<<<<<<< HEAD
-	PRECACHE_SOUND("player/pl_ladder1.wav");
-	PRECACHE_SOUND("player/pl_ladder2.wav");
-	PRECACHE_SOUND("player/pl_ladder3.wav");
-	//PRECACHE_SOUND("player/pl_ladder4.wav");
-=======
 	PRECACHE_FOOTSTEP_SOUNDS(g_stepSoundsLadder)
->>>>>>> 2e4a6429b054f3a22c85a593d591600fa664ee56
 }
 
 
