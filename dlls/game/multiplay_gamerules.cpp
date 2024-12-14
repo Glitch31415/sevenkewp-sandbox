@@ -579,22 +579,12 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 	if ( ktmp && (ktmp->Classify() == CLASS_PLAYER) )
 		peKiller = (CBasePlayer*)ktmp;
 
-	if ( pVictim->pev == pKiller )  
-	{  // killed self, only penalize if PvP is enabled (npcs don't care that you stole their point)
-		if (mp_score_mode.value == 0 || friendlyfire.value == 1)
-			//pKiller->frags -= 1;
-	}
 	else if ( ktmp && ktmp->IsPlayer() )
 	{
 		// if a player dies in a deathmatch game and the killer is a client, award the killer some points
 		// pKiller->frags += IPointsForKill( peKiller, pVictim );
 		
 		FireTargets( "game_playerkill", ktmp, ktmp, USE_TOGGLE, 0 );
-	}
-	else
-	{  // killed by the world
-		if (mp_score_mode.value == 0 || friendlyfire.value == 1)
-			//pKiller->frags -= 1;
 	}
 
 	// update the scores
