@@ -237,7 +237,7 @@ void CPython::PrimaryAttack()
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usFirePython, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
 
 	lagcomp_begin(m_pPlayer);
-	m_pPlayer->pev->punchangle = Vector(-10, 0, 0);
+	m_pPlayer->pev->punchangle = Vector(-10, gEngfuncs.pfnRandomLong ( -2, 2 ), 0);
 int loops = 0;
 while (flDamage > 1 && loops < 25)
 	{
