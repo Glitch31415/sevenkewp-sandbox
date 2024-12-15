@@ -4679,26 +4679,6 @@ int CBaseMonster::DeadTakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker
 	return 1;
 }
 
-<<<<<<< HEAD
-void CBaseMonster::GiveScorePoints(entvars_t* pevAttacker, float damageDealt) {
-	CBaseEntity* baseEnt = CBaseEntity::Instance(pevAttacker);
-	CBaseMonster* attackMon = baseEnt ? baseEnt->MyMonsterPointer() : NULL;
-	
-	// give points proportional to how much damage will be dealt, ignoring overkill damage
-	if (attackMon && (pevAttacker->flags & FL_CLIENT) && pev->health > 0) {
-		const float MONSTER_POINTS_PER_HP = 0.01f; // how many points to give per hitpoint of damage dealt
-		// float damageAmt = damageDealt > 0 ? V_min(damageDealt, pev->health) : V_min(damageDealt, pev->max_health - pev->health);
-		// bool isFriendly = attackMon->IRelationship(this) == R_AL;
-		pevAttacker->frags += damageDealt * 1 * MONSTER_POINTS_PER_HP;
-		if (std::isnan(pevAttacker->frags) || pevAttacker->frags > 30000) {
-			pevAttacker->frags = 30000;
-		}
-		LogPlayerDamage(pevAttacker, damageDealt);
-	}
-}
-
-=======
->>>>>>> 5c95a137eb017bfa05e566e5f874a2e0a742ad13
 float CBaseMonster::DamageForce(float damage)
 {
 	float force = damage * ((32 * 32 * 72.0) / (pev->size.x * pev->size.y * pev->size.z)) * 5;
