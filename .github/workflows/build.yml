@@ -7,33 +7,34 @@ jobs:
     runs-on: windows-2022
   
     steps: 
-    - name: Checkout SevenKewp
+    - name: Checkout main repository
       uses: actions/checkout@v4
       with:
         submodules: 'false'
 
-    - name: Checkout rehlds
-      uses: actions/checkout@v4
-      with:
-        repository: wootguy/rehlds
-        path: ./rehlds
-
-    - name: Checkout plugins
-      uses: actions/checkout@v4
-      with:
-        repository: wootguy/SevenKewp_plugins
-        path: ./plugins/SevenKewp_plugins
+    - name: Checkout repositories
+      uses: ./.github/checkout_repos
 
     - name: Build server
       run: |
-        mkdir build && cd build
-        cmake ..  -A win32 -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=OFF
+        mkdir build
+        cd build
+        cmake ..  -A Win32 -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=OFF
         cmake --build . --config Release
 
+<<<<<<< HEAD
+=======
+    - name: Build plugins
+      run: |
+        cd build
+        cmake ..  -A Win32 -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=ON
+        cmake --build . --config Release
+
+>>>>>>> a89d3d3c287b675e5a54df2e93e7445e6b1e3592
     - name: Build client
       run: |
         cd build
-        cmake ..  -A win32 -DBUILD_CLIENT=ON -DBUILD_SERVER=OFF -DBUILD_PLUGINS=OFF
+        cmake ..  -A Win32 -DBUILD_CLIENT=ON -DBUILD_SERVER=OFF -DBUILD_PLUGINS=OFF
         cmake --build . --config Release
 
     - name: Upload artifact
@@ -46,39 +47,39 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - name: Checkout SevenKewp
+    - name: Checkout main repository
       uses: actions/checkout@v4
       with:
         submodules: 'false'
 
-    - name: Checkout rehlds
-      uses: actions/checkout@v4
-      with:
-        repository: wootguy/rehlds
-        path: ./rehlds
-
-    - name: Checkout plugins
-      uses: actions/checkout@v4
-      with:
-        repository: wootguy/SevenKewp_plugins
-        path: ./plugins/SevenKewp_plugins
+    - name: Checkout repositories
+      uses: ./.github/checkout_repos
     
     - name: Download and install dependencies
       run: |
         sudo apt install gcc-multilib g++-multilib libc6-dev-i386
-        mkdir build
 
     - name: Build server
       run: |
+        mkdir build
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=OFF
-        make
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=OFF
+        cmake --build .
 
+<<<<<<< HEAD
+=======
+    - name: Build plugins
+      run: |
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=ON
+        cmake --build .
+
+>>>>>>> a89d3d3c287b675e5a54df2e93e7445e6b1e3592
     - name: Build client
       run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=RELEASE -DBUILD_CLIENT=ON -DBUILD_SERVER=OFF -DBUILD_PLUGINS=OFF
-        make
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_CLIENT=ON -DBUILD_SERVER=OFF -DBUILD_PLUGINS=OFF
+        cmake --build .
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
