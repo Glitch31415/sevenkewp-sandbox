@@ -191,6 +191,9 @@ EXPORT extern MULTIDAMAGE gMultiDamage;
 #define VECTOR_CONE_05DEGREES   Vector( 0.00436, 0.00436, 0.00436 )
 #define VECTOR_CONE_1DEGREES	Vector( 0.0086825, 0.0086825, 0.0086825 )
 
+//for plugins to build
+#define VECTOR_CONE_6DEGREES Vector( 0.00057883, 0.00057883, 0.00057883 )
+
 #ifdef CLIENT_DLL
 bool bIsMultiplayer ( void );
 void LoadVModel ( const char *szViewModel, CBasePlayer *m_pPlayer );
