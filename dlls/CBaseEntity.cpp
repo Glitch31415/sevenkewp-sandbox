@@ -1299,6 +1299,10 @@ void CBaseEntity::GiveScorePoints(entvars_t* pevAttacker, float damageDealt) {
 		if (std::isnan(pevAttacker->frags) || pevAttacker->frags > 30000) {
 			pevAttacker->frags = 30000;
 		}
-		LogPlayerDamage(pevAttacker, damageDealt);
+		CBaseMonster* selfMon = MyMonsterPointer();
+		if (selfMon) {
+			selfMon->LogPlayerDamage(pevAttacker, damageDealt);
+		}
+		
 	}
 }
