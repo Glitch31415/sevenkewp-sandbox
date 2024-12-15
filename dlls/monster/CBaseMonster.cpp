@@ -4679,6 +4679,7 @@ int CBaseMonster::DeadTakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker
 	return 1;
 }
 
+<<<<<<< HEAD
 void CBaseMonster::GiveScorePoints(entvars_t* pevAttacker, float damageDealt) {
 	CBaseEntity* baseEnt = CBaseEntity::Instance(pevAttacker);
 	CBaseMonster* attackMon = baseEnt ? baseEnt->MyMonsterPointer() : NULL;
@@ -4696,6 +4697,8 @@ void CBaseMonster::GiveScorePoints(entvars_t* pevAttacker, float damageDealt) {
 	}
 }
 
+=======
+>>>>>>> 5c95a137eb017bfa05e566e5f874a2e0a742ad13
 float CBaseMonster::DamageForce(float damage)
 {
 	float force = damage * ((32 * 32 * 72.0) / (pev->size.x * pev->size.y * pev->size.z)) * 5;
