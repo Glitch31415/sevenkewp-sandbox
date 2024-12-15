@@ -454,7 +454,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 
 #ifndef CLIENT_DLL
 	lagcomp_begin(m_pPlayer);
-	m_pPlayer->pev->punchangle = Vector(-7.5, g_engfuncs.pfnRandomLong ( -1.5, 1.5 ), 0);
+	m_pPlayer->pev->punchangle = Vector(-7.5, 0, 0);
 int loops = 0;
 while (flDamage > 1 && loops < 25)
 	{
