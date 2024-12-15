@@ -81,6 +81,9 @@ void EV_TrainPitchAdjust( struct event_args_s *args );
 #define VECTOR_CONE_05DEGREES   Vector( 0.00436, 0.00436, 0.00436 )
 #define VECTOR_CONE_1DEGREES	Vector( 0.0086825, 0.0086825, 0.0086825 )
 
+//for plugins to build
+#define VECTOR_CONE_6DEGREES Vector( 0.00057883, 0.00057883, 0.00057883 )
+
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
 // original traceline endpoints used by the attacker, iBulletType is the type of bullet that hit the texture.
