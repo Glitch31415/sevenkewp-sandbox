@@ -200,7 +200,7 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_9MM);
 
 	lagcomp_begin(m_pPlayer);
-	m_pPlayer->pev->punchangle = Vector(-5, gEngfuncs.pfnRandomLong ( -1, 1 ), 0);
+	m_pPlayer->pev->punchangle = Vector(-5, g_engfuncs.pfnRandomLong ( -1, 1 ), 0);
 int loops = 0;
 while (flDamage > 1 && loops < 25)
 	{
