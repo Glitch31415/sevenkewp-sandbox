@@ -620,7 +620,7 @@ UTIL_PrecacheOther("monster_cockroach");
 UTIL_PrecacheOther("monster_flyer_flock");
 UTIL_PrecacheOther("monster_headcrab");
 UTIL_PrecacheOther("monster_leech");
-//UTIL_PrecacheOther("monster_penguin");
+UTIL_PrecacheOther("monster_penguin");
 UTIL_PrecacheOther("monster_alien_controller");
 UTIL_PrecacheOther("monster_alien_slave");
 UTIL_PrecacheOther("monster_barney");
@@ -640,7 +640,7 @@ UTIL_PrecacheOther("monster_alien_grunt");
 UTIL_PrecacheOther("monster_alien_voltigore");
 UTIL_PrecacheOther("monster_bigmomma");
 UTIL_PrecacheOther("monster_gargantua");
-//UTIL_PrecacheOther("monster_geneworm");
+UTIL_PrecacheOther("monster_geneworm");
 UTIL_PrecacheOther("monster_gonome");
 UTIL_PrecacheOther("monster_ichthyosaur");
 UTIL_PrecacheOther("monster_nihilanth");
@@ -658,8 +658,8 @@ UTIL_PrecacheOther("monster_turret");
 UTIL_PrecacheOther("monster_sentry");
 UTIL_PrecacheOther("monster_babygarg");
 UTIL_PrecacheOther("monster_gman");
-//UTIL_PrecacheOther("monster_stukabat");
-//UTIL_PrecacheOther("monster_kingpin");
+UTIL_PrecacheOther("monster_stukabat");
+UTIL_PrecacheOther("monster_kingpin");
 
 
 }
