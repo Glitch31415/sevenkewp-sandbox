@@ -1289,7 +1289,15 @@ Vector CBaseEntity::GetLookDirection() {
 void CBaseEntity::GiveScorePoints(entvars_t* pevAttacker, float damageDealt) {
 	CBaseEntity* baseEnt = CBaseEntity::Instance(pevAttacker);
 	CBaseMonster* attackMon = baseEnt ? baseEnt->MyMonsterPointer() : NULL;
+<<<<<<< HEAD
 	
+=======
+
+	if (pevAttacker == pev) {
+		return;
+	}
+
+>>>>>>> 3ef13aa74373bfe302595cd932e1d2ffd2e70e45
 	// give points proportional to how much damage will be dealt, ignoring overkill damage
 	if (attackMon && (pevAttacker->flags & FL_CLIENT) && pev->health > 0) {
 		const float MONSTER_POINTS_PER_HP = 0.01f; // how many points to give per hitpoint of damage dealt
