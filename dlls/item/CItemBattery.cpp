@@ -5,7 +5,7 @@
 #include "CItem.h"
 #include "gamerules.h"
 
-#define MAX_NORMAL_BATTERY	500
+#define MAX_NORMAL_BATTERY	999
 
 class CItemBattery : public CItem
 {
@@ -58,7 +58,7 @@ class CItemBattery : public CItem
 
 		float healthcap = m_healthcap > 0 ? m_healthcap : maxArmor;
 
-		if ((pPlayer->pev->armorvalue < 500) &&
+		if ((pPlayer->pev->armorvalue < 999) &&
 			(pPlayer->pev->weapons & (1 << WEAPON_SUIT)))
 		{
 			int pct;
