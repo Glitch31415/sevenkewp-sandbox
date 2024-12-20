@@ -132,14 +132,7 @@ void CSqueakGrenade :: Spawn( void )
 	pev->gravity		= 0.5;
 	pev->friction		= 0.5;
 
-<<<<<<< HEAD
-	float dmg_mult = GetDamageModifier();
-
-
-	pev->dmg = gSkillData.sk_snark_dmg_pop * dmg_mult;
-=======
 	pev->dmg = GetDamage(gSkillData.sk_snark_dmg_pop);
->>>>>>> 97161ae0e52622be33ddc6c1dfd73afe1a82b353
 
 	m_flDie = gpGlobals->time + SQUEEK_DETONATE_DELAY;
 

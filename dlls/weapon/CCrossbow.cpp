@@ -108,12 +108,6 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 		// UNDONE: this needs to call TraceAttack instead
 		ClearMultiDamage( );
 
-<<<<<<< HEAD
-		float dmg_mult = GetDamageModifier();
-
-
-=======
->>>>>>> 97161ae0e52622be33ddc6c1dfd73afe1a82b353
 		if ( pOther->IsPlayer() )
 		{
 			pOther->TraceAttack(pevOwner, GetDamage(gSkillData.sk_plr_xbow_bolt_client), pev->velocity.Normalize(), &tr, DMG_NEVERGIB );

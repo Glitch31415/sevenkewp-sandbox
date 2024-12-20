@@ -836,36 +836,20 @@ Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDir
 			{
 			default:
 			case BULLET_PLAYER_9MM:
-<<<<<<< HEAD
-				pEntity->TraceAttack(pevAttacker, gSkillData.sk_plr_9mm_bullet * dmg_mult * UTIL_SharedRandomFloat( shared_rand, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
+				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_9mm_bullet)* UTIL_SharedRandomFloat( shared_rand, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_PLAYER_MP5:
-				pEntity->TraceAttack(pevAttacker, gSkillData.sk_plr_9mmAR_bullet * dmg_mult * UTIL_SharedRandomFloat( shared_rand, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
-=======
-				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_9mm_bullet), vecDir, &tr, DMG_BULLET);
-				break;
-
-			case BULLET_PLAYER_MP5:
-				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_9mmAR_bullet), vecDir, &tr, DMG_BULLET);
->>>>>>> 97161ae0e52622be33ddc6c1dfd73afe1a82b353
+				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_9mmAR_bullet)* UTIL_SharedRandomFloat( shared_rand, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_PLAYER_BUCKSHOT:
 				// make distance based!
-<<<<<<< HEAD
-				pEntity->TraceAttack(pevAttacker, gSkillData.sk_plr_buckshot * dmg_mult * UTIL_SharedRandomFloat( shared_rand, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
+				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_buckshot)* UTIL_SharedRandomFloat( shared_rand, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_PLAYER_357:
-				pEntity->TraceAttack(pevAttacker, gSkillData.sk_plr_357_bullet * dmg_mult * UTIL_SharedRandomFloat( shared_rand, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
-=======
-				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_buckshot), vecDir, &tr, DMG_BULLET);
-				break;
-
-			case BULLET_PLAYER_357:
-				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_357_bullet), vecDir, &tr, DMG_BULLET);
->>>>>>> 97161ae0e52622be33ddc6c1dfd73afe1a82b353
+				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_357_bullet)* UTIL_SharedRandomFloat( shared_rand, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_NONE: // FIX 
