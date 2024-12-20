@@ -417,8 +417,7 @@ CGrenade *CGrenade::ShootContact( entvars_t *pevOwner, Vector vecStart, Vector v
 	// Explode on contact
 	pGrenade->SetTouch( &CGrenade::ExplodeTouch );
 
-	float dmg_mult = pGrenade->GetDamageModifier();
-	pGrenade->pev->dmg = gSkillData.sk_plr_9mmAR_grenade * dmg_mult;
+	pGrenade->pev->dmg = pGrenade->GetDamage(gSkillData.sk_plr_9mmAR_grenade);
 
 	return pGrenade;
 }
@@ -457,8 +456,7 @@ CGrenade * CGrenade:: ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector v
 	pGrenade->pev->gravity = 0.5;
 	pGrenade->pev->friction = 0.8;
 
-	float dmg_mult = pGrenade->GetDamageModifier();
-	pGrenade->pev->dmg = 100 * dmg_mult;
+	pGrenade->pev->dmg = pGrenade->GetDamage(100);
 
 	SET_MODEL(ENT(pGrenade->pev), model ? model : pGrenade->GetModel());
 
@@ -484,8 +482,7 @@ CGrenade * CGrenade :: ShootSatchelCharge( entvars_t *pevOwner, Vector vecStart,
 	pGrenade->pev->angles = g_vecZero;
 	pGrenade->pev->owner = ENT(pevOwner);
 
-	float dmg_mult = pGrenade->GetDamageModifier();
-	pGrenade->pev->dmg = 200 * dmg_mult;
+	pGrenade->pev->dmg = pGrenade->GetDamage(200);
 	
 	// Detonate in "time" seconds
 	pGrenade->SetThink( &CGrenade::SUB_DoNothing );

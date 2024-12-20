@@ -117,17 +117,20 @@ void CHornet :: Spawn( void )
 	if ( !pSoundEnt )
 		pSoundEnt = edict();
 
+<<<<<<< HEAD
 	float dmg_mult = GetDamageModifier();
 
 
+=======
+>>>>>>> 97161ae0e52622be33ddc6c1dfd73afe1a82b353
 	if ( !FNullEnt(pev->owner) && (pev->owner->v.flags & FL_CLIENT) )
 	{
-		pev->dmg = gSkillData.sk_plr_hornet * dmg_mult;
+		pev->dmg = GetDamage(gSkillData.sk_plr_hornet);
 	}
 	else
 	{
 		// no real owner, or owner isn't a client. 
-		pev->dmg = gSkillData.sk_hornet_dmg * dmg_mult;
+		pev->dmg = GetDamage(gSkillData.sk_hornet_dmg);
 	}
 	
 	m_lastPos = pev->origin;

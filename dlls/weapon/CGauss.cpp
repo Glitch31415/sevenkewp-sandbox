@@ -360,16 +360,22 @@ void CGauss::StartFire( void )
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle );
 	Vector vecAiming = gpGlobals->v_forward;
 	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
-	
-	float dmg_mult = GetDamageModifier();
 
 	if ( gpGlobals->time - m_pPlayer->m_flStartCharge > GetFullChargeTime() )
 	{
+<<<<<<< HEAD
 		flDamage = secondaryBaseDamage * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 );
 	}
 	else
 	{
 		flDamage = secondaryBaseDamage * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 ) * 
+=======
+		flDamage = GetDamage(secondaryBaseDamage);
+	}
+	else
+	{
+		flDamage = GetDamage(secondaryBaseDamage) *
+>>>>>>> 97161ae0e52622be33ddc6c1dfd73afe1a82b353
 			(( gpGlobals->time - m_pPlayer->m_flStartCharge) / GetFullChargeTime() );
 	}
 
@@ -379,7 +385,7 @@ void CGauss::StartFire( void )
 #ifdef CLIENT_DLL
 		flDamage = 20;
 #else 
-		flDamage = gSkillData.sk_plr_gauss * dmg_mult;
+		flDamage = GetDamage(gSkillData.sk_plr_gauss);
 #endif
 	}
 
