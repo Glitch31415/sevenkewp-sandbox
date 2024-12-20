@@ -363,19 +363,11 @@ void CGauss::StartFire( void )
 
 	if ( gpGlobals->time - m_pPlayer->m_flStartCharge > GetFullChargeTime() )
 	{
-<<<<<<< HEAD
 		flDamage = GetDamage(secondaryBaseDamage)* UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 );
 	}
 	else
 	{
 		flDamage = GetDamage(secondaryBaseDamage)* UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 ) *
-=======
-		flDamage = GetDamage(secondaryBaseDamage);
-	}
-	else
-	{
-		flDamage = GetDamage(secondaryBaseDamage) *
->>>>>>> dd92571cea8a85e63e88ee25314958d71290182e
 			(( gpGlobals->time - m_pPlayer->m_flStartCharge) / GetFullChargeTime() );
 	}
 
