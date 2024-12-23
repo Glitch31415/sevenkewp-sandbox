@@ -3582,7 +3582,8 @@ void CBasePlayer::Spawn( void )
 
 	DropAllInventoryItems(false, true);
 	ApplyEffects();
-<<<<<<< HEAD
+		// don't play suit sounds for items given when spawning
+	SetSuitUpdate(NULL, FALSE, 0);
 			GiveNamedItem( "ammo_9mmclip" );
 		GiveNamedItem( "weapon_shotgun" );
 		GiveNamedItem( "ammo_buckshot" );
@@ -3610,11 +3611,8 @@ void CBasePlayer::Spawn( void )
 		GiveNamedItem( "weapon_sporelauncher" );
 		GiveNamedItem( "weapon_medkit" );
 
-=======
 
-	// don't play suit sounds for items given when spawning
-	SetSuitUpdate(NULL, FALSE, 0);
->>>>>>> b59d02e6ec39651a329b692894c23a34097a751c
+
 }
 
 void CBasePlayer :: Precache( void )
