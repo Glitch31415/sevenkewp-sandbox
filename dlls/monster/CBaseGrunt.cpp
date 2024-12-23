@@ -120,6 +120,12 @@ void CBaseGrunt::Killed(entvars_t* pevAttacker, int iGib)
 			medic->HealMe(NULL);
 	}
 
+	if (minigunSpinState)
+		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "hassault/hw_spindown.wav", 1.0, ATTN_NORM, 0, 90);
+	if (HasEquipment(MEQUIP_MINIGUN))
+		EMIT_SOUND_DYN(ENT(pev), CHAN_ITEM, "common/null.wav", 1.0, ATTN_NORM, 0, 100);
+	minigunSpinState = 0;
+
 	RemoveRpgLaser();
 
 	SetUse(NULL);
@@ -170,6 +176,16 @@ void CBaseGrunt :: JustSpoke( void )
 
 void CBaseGrunt :: PrescheduleThink ( void )
 {
+	if (HasEquipment(MEQUIP_MINIGUN)) {
+		if (minigunSpinState == 2) {
+			EMIT_SOUND_DYN(edict(), CHAN_ITEM, "hassault/hw_spin.wav", 0.8f, ATTN_STATIC, SND_CHANGE_PITCH, 100);
+		}
+		if (pev->sequence == minigunShootSeq && gpGlobals->time >= nextMinigunShoot) {
+			pev->nextthink = nextMinigunShoot = gpGlobals->time + 0.07f;
+			Shoot(false);
+		}
+	}
+
 	if ( InSquad() && m_hEnemy != NULL )
 	{
 		if ( HasConditions ( bits_COND_SEE_ENEMY ) )
@@ -1111,6 +1127,10 @@ void CBaseGrunt::BaseSpawn()
 	InitModel();
 	SetSize(VEC_HUMAN_HULL_MIN, VEC_HUMAN_HULL_MAX);
 
+	if (HasEquipment(MEQUIP_MINIGUN)) {
+		m_flinchChance = 33;
+	}
+
 	MonsterInit();
 
 	InitAiFlags();
@@ -1245,12 +1265,29 @@ void CBaseGrunt :: StartTask ( Task_t *pTask )
 			m_IdealActivity = ACT_GLIDE;
 		}
 		break;
+<<<<<<< HEAD
 	case TASK_WAIT_FACE_ENEMY:
 	{
 		// need to override this to get the dynamic aiming time to work
 		m_flWaitFinished = gpGlobals->time + reactiontim;
 		break;
 	}
+=======
+	case TASK_GRUNT_MINIGUN_SPINUP:
+		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "hassault/hw_spinup.wav", 1.0, ATTN_NORM, 0, 90);
+		
+		m_IdealActivity = m_Activity = ACT_THREAT_DISPLAY;
+
+		// doing this because SetActivity is playing idle animations sometimes
+		pev->sequence = LookupActivity(ACT_THREAT_DISPLAY);
+		pev->frame = 0;
+		m_rpgAimTime = gpGlobals->time;
+		ResetSequenceInfo();
+
+		minigunSpinState = 1;
+		break;
+
+>>>>>>> 6942229e86649840ff0f5e06fb2d57288bc19088
 	default: 
 		CTalkSquadMonster :: StartTask( pTask );
 		break;
@@ -1299,6 +1336,15 @@ void CBaseGrunt :: RunTask ( Task_t *pTask )
 		}
 
 		break;
+	case TASK_GRUNT_MINIGUN_SPINUP:
+		if (pev->frame > 180) {
+			minigunSpinState = 2;
+			TaskComplete();
+		}
+		MakeIdealYaw(m_vecEnemyLKP);
+		ChangeYaw(pev->yaw_speed);
+		PointAtEnemy();
+		break;
 	default:
 		{
 			CTalkSquadMonster :: RunTask( pTask );
@@ -1313,6 +1359,7 @@ const char* CBaseGrunt::GetTaskName(int taskIdx) {
 	case TASK_GRUNT_SPEAK_SENTENCE: return "TASK_GRUNT_SPEAK_SENTENCE";
 	case TASK_GRUNT_CHECK_FIRE: return "TASK_GRUNT_CHECK_FIRE";
 	case TASK_GRUNT_AIM_RPG: return "TASK_GRUNT_AIM_RPG";
+	case TASK_GRUNT_MINIGUN_SPINUP: return "TASK_GRUNT_MINIGUN_SPINUP";
 	default:
 		return CTalkSquadMonster::GetTaskName(taskIdx);
 	}
@@ -2016,7 +2063,7 @@ Task_t	tlMinigunSpinup[] =
 	{ TASK_STOP_MOVING,			(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_PLAY_SEQUENCE,		(float)ACT_THREAT_DISPLAY	},
+	{ TASK_GRUNT_MINIGUN_SPINUP,(float)0	},
 };
 
 Schedule_t	slMinigunSpinup[] =
@@ -2024,11 +2071,7 @@ Schedule_t	slMinigunSpinup[] =
 	{
 		tlMinigunSpinup,
 		ARRAYSIZE(tlMinigunSpinup),
-		bits_COND_ENEMY_DEAD |
-		bits_COND_HEAVY_DAMAGE |
-		bits_COND_ENEMY_OCCLUDED |
-		bits_COND_GRUNT_NOFIRE,
-
+		bits_COND_HEAVY_DAMAGE,
 		0,
 		"GRUNT_MINIGUN_SPINUP"
 	},
@@ -2355,19 +2398,18 @@ Schedule_t* CBaseGrunt::GetMonsterStateSchedule(void) {
 
 		if (HasConditions(bits_COND_HEAVY_DAMAGE))
 		{
-			// flinch for heavy damage but not too often
-			if (RANDOM_LONG(0, 2) == 0) {
-				return GetScheduleOfType(SCHED_SMALL_FLINCH);
+			// flinch for heavy damage and reset minigun spinup if not already spinning
+			if (minigunSpinState == 1) {
+				minigunSpinState = 0;
+				EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "hassault/hw_spindown.wav", 1.0, ATTN_NORM, 0, 90);
 			}
-			else {
-				ClearConditions(bits_COND_HEAVY_DAMAGE);
-				return CTalkSquadMonster::GetSchedule();
-			}
+			return GetScheduleOfType(SCHED_SMALL_FLINCH);
 		}
 		else if (HasConditions(bits_COND_LIGHT_DAMAGE))
 		{
-			ClearConditions(bits_COND_LIGHT_DAMAGE);
 			// never flinch or retreat from light damage
+			ClearConditions(bits_COND_LIGHT_DAMAGE);
+			
 			return CTalkSquadMonster::GetSchedule();
 		}
 	}

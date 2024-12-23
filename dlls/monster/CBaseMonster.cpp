@@ -2192,6 +2192,13 @@ void CBaseMonster::MonsterInit(void)
 	m_flDistTooFar = 131072.0;
 	m_flDistLook = 4096.0;
 
+	if (m_flinchChance == 0) {
+		m_flinchChance = 100;
+	}
+	else if (m_flinchChance < 0) {
+		m_flinchChance = 0;
+	}
+
 	m_lastInterpOrigin = pev->origin;
 
 	// set eye position
@@ -4624,8 +4631,9 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 
 			// HL sets this to 20, but monsters are getting stunlocked often in co-op
 			int flinchAmount = (m_IdealMonsterState == MONSTERSTATE_COMBAT) ? 50 : 20;
-
-			if (flDamage >= flinchAmount)
+			bool flinchChance = RANDOM_LONG(0, 99) < m_flinchChance;
+				
+			if (flDamage >= flinchAmount && flinchChance)
 			{
 				SetConditions(bits_COND_HEAVY_DAMAGE);
 			}
