@@ -2189,15 +2189,8 @@ void CBaseMonster::MonsterInit(void)
 
 	m_hEnemy = NULL;
 
-<<<<<<< HEAD
 	m_flDistTooFar = 131072.0;
 	m_flDistLook = 4096.0;
-=======
-	if (m_flDistLook == 0) {
-		m_flDistTooFar = 1024.0;
-		m_flDistLook = 2048.0;
-	}
->>>>>>> 4a2cf2abf2c5f09fa58ae194238e5beff5af05ac
 
 	m_lastInterpOrigin = pev->origin;
 
