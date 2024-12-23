@@ -3582,6 +3582,7 @@ void CBasePlayer::Spawn( void )
 
 	DropAllInventoryItems(false, true);
 	ApplyEffects();
+<<<<<<< HEAD
 			GiveNamedItem( "ammo_9mmclip" );
 		GiveNamedItem( "weapon_shotgun" );
 		GiveNamedItem( "ammo_buckshot" );
@@ -3609,6 +3610,11 @@ void CBasePlayer::Spawn( void )
 		GiveNamedItem( "weapon_sporelauncher" );
 		GiveNamedItem( "weapon_medkit" );
 
+=======
+
+	// don't play suit sounds for items given when spawning
+	SetSuitUpdate(NULL, FALSE, 0);
+>>>>>>> b59d02e6ec39651a329b692894c23a34097a751c
 }
 
 void CBasePlayer :: Precache( void )
@@ -4689,6 +4695,10 @@ void CBasePlayer :: UpdateClientData( void )
 			{
 				m_flFlashLightTime = FLASH_DRAIN_TIME + gpGlobals->time;
 				m_iFlashBattery--;
+
+				if (m_iFlashBattery < 8) {
+					SetSuitUpdate("!HEV_0P", FALSE, SUIT_NEXT_IN_1MIN);
+				}
 				
 				if (!m_iFlashBattery)
 					FlashlightTurnOff();
