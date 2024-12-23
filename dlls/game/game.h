@@ -82,6 +82,7 @@ EXPORT extern cvar_t	mp_damage_points; // score points given per point of damage
 EXPORT extern cvar_t	mp_antiblock; // enables player swapping with +use
 EXPORT extern cvar_t	mp_antiblock_cooldown; // how long a player needs to wait before swapping again after a "rude" swap
 EXPORT extern cvar_t	mp_min_score_mult; // minimum score multiplier for death penalties
+EXPORT extern cvar_t	mp_hevsuit_voice; // enable/disable the hev suit voice
 
 // Enables classic func_pushable physics (which is horribly broken, but fun)
 // The higher your FPS, the faster you can boost pushables. You also get boosted.
@@ -195,5 +196,6 @@ struct player_score_t {
 
 // maps a steam ID to their score, for preserving scores across level changes and disconnects
 EXPORT extern std::unordered_map<uint64_t, player_score_t> g_playerScores;
+EXPORT extern std::unordered_map<uint64_t, player_score_t> g_oldPlayerScores; // state on level load, used in case of map restarts
 
 #endif		// GAME_H

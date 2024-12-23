@@ -1032,6 +1032,8 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 	char szAnim[64];
 
 	speed = pev->velocity.Length2D();
+	bool upperBodyActing = (m_Activity == ACT_RANGE_ATTACK1 || m_Activity == ACT_RELOAD
+		|| m_Activity == ACT_USE || m_Activity == ACT_ARM);
 
 	if (pev->flags & FL_FROZEN)
 	{
@@ -1084,7 +1086,7 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 	{
 		if (pev->waterlevel > 1)
 		{
-			if (speed == 0)
+			if (speed < 128 && !(pev->flags & FL_DUCKING))
 				m_IdealActivity = ACT_HOVER;
 			else
 				m_IdealActivity = ACT_SWIM;
@@ -1114,7 +1116,7 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 			return;
 
 		bool isFloating = m_IdealActivity == ACT_SWIM || m_IdealActivity == ACT_HOVER;
-		if (isFloating && m_Activity == ACT_RANGE_ATTACK1 && !m_fSequenceFinished) {
+		if (isFloating && upperBodyActing && !m_fSequenceFinished) {
 			pev->gaitsequence = LookupActivity(ACT_HOVER);
 			return;
 		}
@@ -1217,8 +1219,6 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 	}
 	case ACT_WALK:
 	{
-		bool upperBodyActing = (m_Activity == ACT_RANGE_ATTACK1 || m_Activity == ACT_RELOAD 
-			|| m_Activity == ACT_USE || m_Activity == ACT_ARM);
 		if (!upperBodyActing || m_fSequenceFinished)
 		{
 			if (FBitSet(pev->flags, FL_DUCKING))	// crouching
@@ -1477,13 +1477,17 @@ void CBasePlayer::WaterMove()
 
 	if (pev->watertype == CONTENTS_LAVA)		// do damage
 	{
-		if (pev->dmgtime < gpGlobals->time)
+		if (pev->dmgtime < gpGlobals->time) {
 			TakeDamage(VARS(eoNullEntity), VARS(eoNullEntity), 10 * pev->waterlevel, DMG_BURN);
+			pev->dmgtime = gpGlobals->time + 1.0f;
+		}
 	}
 	else if (pev->watertype == CONTENTS_SLIME)		// do damage
 	{
-		pev->dmgtime = gpGlobals->time + 1;
-		TakeDamage(VARS(eoNullEntity), VARS(eoNullEntity), 4 * pev->waterlevel, DMG_ACID);
+		if (pev->dmgtime < gpGlobals->time) {
+			TakeDamage(VARS(eoNullEntity), VARS(eoNullEntity), 4 * pev->waterlevel, DMG_ACID);
+			pev->dmgtime = gpGlobals->time + 1.0f;
+		}
 	}
 	
 	if (!FBitSet(pev->flags, FL_INWATER))
@@ -1540,11 +1544,11 @@ void CBasePlayer::PlayerDeathThink(void)
 			std::string pointsMessage;
 			if (mp_score_mode.value == 1) {
 				// deaths are penalized. Show current score multiplier
-				bool sameAsLast = m_iDeaths > 1 && GetScoreMultiplier() == GetScoreMultiplier(m_iDeaths - 1);
+				bool sameAsLast = m_iDeaths > 1 && fabs(GetScoreMultiplier() - GetScoreMultiplier(m_iDeaths - 1)) < 0.001f;
 
 				if (sameAsLast) {
 					pointsMessage = UTIL_VarArgs("\n\nScore multiplier: %d%%",
-						(int)roundf(m_scoreMultiplier * 100.0f), m_iDeaths == 1 ? "" : "s");
+						(int)roundf(m_scoreMultiplier * 100.0f));
 				}
 				else {
 					pointsMessage = UTIL_VarArgs("\n\nNew score multiplier: %d%% (%d death%s)",
@@ -1787,7 +1791,7 @@ void CBasePlayer::LeaveObserver(bool respawn)
 
 	// fixes scoreboard
 	m_fInitHUD = true;
-	m_fGameHUDInitialized = false;
+	//m_fGameHUDInitialized = false;
 
 	if (respawn)
 		Spawn();
@@ -2437,6 +2441,12 @@ void CBasePlayer::PreThink(void)
 	else
 		m_iHideHUD |= HIDEHUD_FLASHLIGHT;
 
+	// tell client they have a suit if they don't but have weapons
+	// otherwise they can't switch weapons
+	if (pev->weapons && !(pev->weapons & (1 << WEAPON_SUIT))) {
+		m_fakeSuit = true;
+		m_iHideHUD = HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH;
+	}
 
 	// JOHN: checks if new client data (for HUD and view control) needs to be sent to the client
 	UpdateClientData();
@@ -2446,13 +2456,12 @@ void CBasePlayer::PreThink(void)
 	CheckSuitUpdate();
 
 	// hide weapon hud if player has no weapons
-	if (pev->weapons == (1 << WEAPON_SUIT)) {
+	if (!(pev->weapons & (1 << WEAPON_SUIT))) {
 		m_iHideHUD |= HIDEHUD_WEAPONS;
 	}
 	else {
 		m_iHideHUD &= ~HIDEHUD_WEAPONS;
 	}
-	
 
 	// Observer Button Handling
 	if ( IsObserver() )
@@ -2899,7 +2908,7 @@ void CBasePlayer::CheckSuitUpdate()
 	// if in range of radiation source, ping geiger counter
 	UpdateGeigerCounter();
 
-	if ( g_pGameRules->IsMultiplayer() )
+	if (!mp_hevsuit_voice.value)
 	{
 		// don't bother updating HEV voice in multiplayer.
 		return;
@@ -2958,7 +2967,7 @@ void CBasePlayer::SetSuitUpdate(const char *name, int fgroup, int iNoRepeatTime)
 	if ( !(pev->weapons & (1<<WEAPON_SUIT)) )
 		return;
 
-	if ( g_pGameRules->IsMultiplayer() )
+	if (!mp_hevsuit_voice.value)
 	{
 		// due to static channel design, etc. We don't play HEV sounds in multiplayer right now.
 		return;
@@ -4431,8 +4440,10 @@ void CBasePlayer::ItemPostFrame()
 		return;
 	}
 
-	if (!m_pActiveItem)
+	if (!m_pActiveItem) {
+		m_szAnimExtention[0] = 0; // use no-weapons animation set
 		return;
+	}
 
 	CBasePlayerItem* activeItem = (CBasePlayerItem*)m_pActiveItem.GetEntity();
 	activeItem->ItemPostFrame( );
@@ -4526,11 +4537,24 @@ void CBasePlayer :: UpdateClientData( void )
 			m_fGameHUDInitialized = TRUE;
 			
 			m_iObserverLastMode = OBS_ROAMING;
+
+			if (g_pGameRules->IsMultiplayer()) {
+				FireTargets("game_playerjoin", this, this, USE_TOGGLE, 0);
+			}
 		}
 
 		FireTargets( "game_playerspawn", this, this, USE_TOGGLE, 0 );
 
 		InitStatusBar();
+
+		if (m_fLongJump) {
+			MESSAGE_BEGIN(MSG_ONE, gmsgItemPickup, NULL, pev);
+			WRITE_STRING("item_longjump");
+			MESSAGE_END();
+
+			if (pev->weapons & (1 << WEAPON_SUIT))
+				EMIT_SOUND_SUIT(edict(), "!HEV_A1");
+		}
 	}
 
 	if ( m_iHideHUD != m_iClientHideHUD )
@@ -5859,7 +5883,7 @@ void CBasePlayer::UpdateScore() {
 void CBasePlayer::UpdateTeamInfo(int color, int msg_mode, edict_t* dst) {
 	MESSAGE_BEGIN(msg_mode, gmsgScoreInfo, 0, dst);
 	WRITE_BYTE(entindex());	// client number
-	WRITE_SHORT(pev->frags);
+	WRITE_SHORT(clampf(pev->frags, INT16_MIN, INT16_MAX));
 	WRITE_SHORT(m_iDeaths);
 	WRITE_SHORT(0);
 	WRITE_SHORT(color == -1 ? GetNameColor() : color);
