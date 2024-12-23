@@ -1265,14 +1265,12 @@ void CBaseGrunt :: StartTask ( Task_t *pTask )
 			m_IdealActivity = ACT_GLIDE;
 		}
 		break;
-<<<<<<< HEAD
 	case TASK_WAIT_FACE_ENEMY:
 	{
 		// need to override this to get the dynamic aiming time to work
 		m_flWaitFinished = gpGlobals->time + reactiontim;
 		break;
 	}
-=======
 	case TASK_GRUNT_MINIGUN_SPINUP:
 		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "hassault/hw_spinup.wav", 1.0, ATTN_NORM, 0, 90);
 		
@@ -1287,7 +1285,6 @@ void CBaseGrunt :: StartTask ( Task_t *pTask )
 		minigunSpinState = 1;
 		break;
 
->>>>>>> 6942229e86649840ff0f5e06fb2d57288bc19088
 	default: 
 		CTalkSquadMonster :: StartTask( pTask );
 		break;
