@@ -721,7 +721,11 @@ void CBaseGrunt::ShootMinigun(Vector& vecShootOrigin, Vector& vecShootDir) {
 
 void CBaseGrunt::ShootSniper(Vector& vecShootOrigin, Vector& vecShootDir) {
 	//TODO: why is this 556? is 762 too damaging?
+<<<<<<< HEAD
 	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_025DEGREES, 131072, BULLET_MONSTER_762);
+=======
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 8192, BULLET_MONSTER_762);
+>>>>>>> 057228f1b0c777a2873202cce7607d6b69173472
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/sniper_fire.wav", 1, 0.2);
 }
 
@@ -1124,7 +1128,13 @@ void CBaseGrunt::InitAiFlags() {
 	canCallMedic = false;
 	suppressOccludedTarget = false;
 	maxSuppressTime = 3.0f;
+<<<<<<< HEAD
 	maxShootDist = 131072.0;
+=======
+
+	if (!maxShootDist)
+		maxShootDist = 2048;
+>>>>>>> 057228f1b0c777a2873202cce7607d6b69173472
 }
 
 void CBaseGrunt::BasePrecache() {
