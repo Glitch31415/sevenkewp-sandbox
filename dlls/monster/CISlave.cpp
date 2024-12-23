@@ -540,7 +540,7 @@ void CISlave :: StartTask ( Task_t *pTask )
 {
 	ClearBeams( );
 
-	CTalkSquadMonster :: StartTask ( pTask );
+	CTalkSquadMonster:: StartTask ( pTask );
 }
 
 void CISlave::RunTask(Task_t* pTask)
@@ -549,7 +549,7 @@ void CISlave::RunTask(Task_t* pTask)
 	{
 	case TASK_MOVE_TO_TARGET_RANGE:
 	{
-		CBaseMonster::RunTask(pTask);
+		CTalkSquadMonster::RunTask(pTask);
 
 		// always run when following someone because the walk speed is painfully slow
 		m_movementActivity = ACT_RUN;
@@ -557,7 +557,7 @@ void CISlave::RunTask(Task_t* pTask)
 	}
 	default:
 	{
-		CBaseMonster::RunTask(pTask);
+		CTalkSquadMonster::RunTask(pTask);
 	}
 	}
 }
@@ -585,7 +585,7 @@ void CISlave :: Spawn()
 
 	MonsterInit();
 
-	if (CBaseMonster::IRelationship(Classify(), CLASS_PLAYER) == R_AL) {
+	if (CBaseEntity::IRelationship(Classify(), CLASS_PLAYER) == R_AL) {
 		m_beamColor = Vector(96, 180, 255);
 	}
 	else {

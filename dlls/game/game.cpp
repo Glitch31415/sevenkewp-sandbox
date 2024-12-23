@@ -74,6 +74,7 @@ cvar_t	mp_damage_points ={"mp_damage_points", "0.01", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_antiblock ={"mp_antiblock", "1", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_antiblock_cooldown ={"mp_antiblock_cooldown", "3", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_min_score_mult ={"mp_min_score_mult", "20", FCVAR_SERVER, 0, 0 };
+cvar_t	mp_hevsuit_voice ={"mp_hevsuit_voice", "0", FCVAR_SERVER, 0, 0 };
 
 cvar_t	soundvariety={"mp_soundvariety","0", FCVAR_SERVER, 0, 0 };
 cvar_t	mp_npcidletalk={"mp_npcidletalk","1", FCVAR_SERVER, 0, 0 };
@@ -116,6 +117,7 @@ std::unordered_map<std::string, std::string> g_soundReplacements;
 std::unordered_set<std::string> g_mapWeapons;
 
 std::unordered_map<uint64_t, player_score_t> g_playerScores;
+std::unordered_map<uint64_t, player_score_t> g_oldPlayerScores;
 
 std::unordered_map<std::string, const char*> g_itemNameRemap = {
 	{"weapon_9mmar", "weapon_9mmAR"},
@@ -411,6 +413,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER (&mp_antiblock);
 	CVAR_REGISTER (&mp_antiblock_cooldown);
 	CVAR_REGISTER (&mp_min_score_mult);
+	CVAR_REGISTER (&mp_hevsuit_voice);
 
 	CVAR_REGISTER (&mp_chattime);
 

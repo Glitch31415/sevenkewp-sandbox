@@ -189,9 +189,28 @@ Schedule_t	slSummonAttack[] =
 	},
 };
 
+// uninterruptable melee attack
+Task_t	tlSlamAttack[] =
+{
+	{ TASK_STOP_MOVING,			0				},
+	{ TASK_MELEE_ATTACK1,		(float)0		},
+};
+
+Schedule_t	slSlamAttack[] =
+{
+	{
+		tlSlamAttack,
+		ARRAYSIZE(tlSlamAttack),
+		0,
+		0,
+		"TOR_SLAM_ATTACK"
+	},
+};
+
 DEFINE_CUSTOM_SCHEDULES(CTor)
 {
-	slSummonAttack
+	slSummonAttack,
+	slSlamAttack
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES(CTor, CBaseMonster)
@@ -303,8 +322,12 @@ Schedule_t* CTor::GetSchedule(void)
 }
 
 Schedule_t* CTor::GetScheduleOfType(int Type) {
-	if (Type == SCHED_MELEE_ATTACK2) {
+	switch (Type) {
+	case SCHED_MELEE_ATTACK1:
+		return &slSlamAttack[0];
+	case SCHED_MELEE_ATTACK2:
 		AttackSound();
+		break;
 	}
 
 	return CBaseMonster::GetScheduleOfType(Type);
@@ -519,7 +542,7 @@ void CTor::Spawn()
 
 	MonsterInit();
 
-	if (CBaseMonster::IRelationship(Classify(), CLASS_PLAYER) == R_AL) {
+	if (CBaseEntity::IRelationship(Classify(), CLASS_PLAYER) == R_AL) {
 		beamColor1 = Vector(16, 255, 255);
 		beamColor2 = Vector(128, 255, 255);
 	}
