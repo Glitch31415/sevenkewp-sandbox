@@ -22,6 +22,7 @@
 #define GUN_SHOTGUN					1
 #define GUN_NONE					2
 #define GUN_ROCKETLAUNCHER			3
+#define GUN_SNIPERRIFLE				4
 
 class CHGrunt : public CBaseGrunt
 {
@@ -98,7 +99,12 @@ const char* CDeadHGrunt::m_szPoses[] = { "deadstomach", "deadside", "deadsitting
 void CHGrunt::Spawn() {
 	m_skinFrames = 2;
 	BaseSpawn();
+<<<<<<< HEAD
 	if (FBitSet(pev->weapons, HGRUNT_SHOTGUN))
+=======
+
+	if (m_iEquipment & MEQUIP_SHOTGUN)
+>>>>>>> a7b86a0c58a9dbf9a7d4b1cb6dff2aef25989e23
 	{
 		SetBodygroup(GUN_GROUP, GUN_SHOTGUN);
 		m_cClipSize = 8;
@@ -106,6 +112,14 @@ void CHGrunt::Spawn() {
 	else if (FBitSet(pev->weapons, HGRUNT_ROCKETLAUNCHER))
 	{
 		SetBodygroup(GUN_GROUP, GUN_ROCKETLAUNCHER);
+		m_cClipSize = 1;
+		m_flDistTooFar = 4096.0;
+		m_flDistLook = 4096.0;
+		maxShootDist = 4096;
+	}
+	else if (m_iEquipment & MEQUIP_SNIPER)
+	{
+		SetBodygroup(GUN_GROUP, GUN_SNIPERRIFLE);
 		m_cClipSize = 1;
 		m_flDistTooFar = 4096.0;
 		m_flDistLook = 4096.0;
@@ -122,7 +136,7 @@ void CHGrunt::Spawn() {
 	else
 		pev->skin = m_skinBase + 1;	// dark skin
 
-	if (FBitSet(pev->weapons, HGRUNT_SHOTGUN))
+	if (m_iEquipment & MEQUIP_SHOTGUN)
 	{
 		SetBodygroup(HEAD_GROUP, HEAD_SHOTGUN);
 	}
@@ -177,6 +191,9 @@ void CHGrunt::Precache()
 	}
 	if (FBitSet(pev->weapons, HGRUNT_ROCKETLAUNCHER)) {
 		m_iEquipment |= MEQUIP_RPG;
+	}
+	if (FBitSet(pev->weapons, HGRUNT_SNIPERRIFLE)) {
+		m_iEquipment |= MEQUIP_SNIPER;
 	}
 
 	BasePrecache();

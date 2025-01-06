@@ -3844,7 +3844,7 @@ CBaseEntity* CBaseMonster::DropItem(const char* pszItemName, const Vector& vecPo
 		return NULL;
 	}
 
-	CBaseEntity* pItem = CBaseEntity::Create(pszItemName, vecPos, vecAng, edict());
+	CBaseEntity* pItem = CBaseEntity::Create(pszItemName, vecPos, vecAng, true, edict());
 
 	if (pItem)
 	{

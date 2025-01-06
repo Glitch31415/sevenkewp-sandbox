@@ -794,7 +794,7 @@ void CBasePlayer::PackDeadPlayerItems( void )
 			static std::unordered_map<std::string, std::string> keys = { {"is_player_ally", "1"} };
 			Vector angles(0, pev->angles.y, 0);
 			CBaseEntity* pRoach = CBaseEntity::Create("monster_shockroach",
-				pev->origin + gpGlobals->v_forward * 10, angles, edict(), keys);
+				pev->origin + gpGlobals->v_forward * 10, angles, true, edict(), keys);
 			pRoach->pev->velocity = pev->velocity * 1.2;
 		
 		}
@@ -803,7 +803,7 @@ void CBasePlayer::PackDeadPlayerItems( void )
 	}
 
 // create a box to pack the stuff into.
-	CWeaponBox *pWeaponBox = (CWeaponBox *)CBaseEntity::Create( "weaponbox", pev->origin, pev->angles, edict() );
+	CWeaponBox *pWeaponBox = (CWeaponBox *)CBaseEntity::Create( "weaponbox", pev->origin, pev->angles, true, edict() );
 
 	pWeaponBox->pev->angles.x = 0;// don't let weaponbox tilt.
 	pWeaponBox->pev->angles.z = 0;
@@ -1305,7 +1305,7 @@ void CBasePlayer::TabulateWeapons(void) {
 			CBasePlayerItem* pPlayerItem = (CBasePlayerItem*)m_rgpPlayerItems[i].GetEntity();
 
 			while (pPlayerItem) {
-				pev->weapons |= (1 << pPlayerItem->m_iId);
+				pev->weapons |= g_weaponSlotMasks[pPlayerItem->m_iId];
 				pPlayerItem = (CBasePlayerItem*)pPlayerItem->m_pNext.GetEntity();
 			}
 		}
@@ -4339,6 +4339,8 @@ int CBasePlayer::AddPlayerItem( CBasePlayerItem *pItem )
 			SwitchWeapon( pItem );
 		}
 
+		ResolveWeaponSlotConflict(pItem->m_iId);
+
 		return TRUE;
 	}
 	else if (gEvilImpulse101)
@@ -4531,10 +4533,18 @@ void CBasePlayer::SendAmmoUpdate(void)
 			ASSERT( m_rgAmmo[i] >= 0 );
 			ASSERT( m_rgAmmo[i] < 255 );
 
+			uint8_t ammoVal = m_rgAmmo[i];
+
+			// can't update max ammo counter without a client update
+			// this will at least show the client that ammo is being spent
+			if (m_rgAmmo[i] > 255) {
+				ammoVal = 250 + (m_rgAmmo[i] % 6);
+			}
+
 			// send "Ammo" update message
 			MESSAGE_BEGIN( MSG_ONE, gmsgAmmoX, NULL, pev );
 				WRITE_BYTE( i );
-				WRITE_BYTE( V_max( V_min( m_rgAmmo[i], 254 ), 0 ) );  // clamp the value to one byte
+				WRITE_BYTE(ammoVal);
 			MESSAGE_END();
 		}
 	}
@@ -4755,31 +4765,37 @@ void CBasePlayer :: UpdateClientData( void )
 
 		for (i = 0; i < MAX_WEAPONS; i++)
 		{
-			ItemInfo& II = CBasePlayerItem::ItemInfoArray[i];
+			ItemInfo* II = &CBasePlayerItem::ItemInfoArray[i];
 
-			if ( !II.iId )
+			int conflictId = GetCurrentIdForConflictedSlot(i);
+			if (conflictId != -1 && conflictId != i) {
+				// all weapon infos that share a slot must point to currently held weapon in the shared slot
+				// or else the client won't render the menu correctly
+				II = &CBasePlayerItem::ItemInfoArray[conflictId];
+			}
+
+			if ( !II->iId )
 				continue;
 
 			const char *pszName;
-			if (!II.pszName)
+			if (!II->pszName)
 				pszName = "Empty";
 			else
-				pszName = II.pszName;
+				pszName = II->pszName;
 
-			MESSAGE_BEGIN( MSG_ONE, gmsgWeaponList, NULL, pev );  
-				WRITE_STRING(pszName);			// string	weapon name
-				WRITE_BYTE(GetAmmoIndex(II.pszAmmo1));	// byte		Ammo Type
-				WRITE_BYTE(II.iMaxAmmo1);				// byte     Max Ammo 1
-				WRITE_BYTE(GetAmmoIndex(II.pszAmmo2));	// byte		Ammo2 Type
-				WRITE_BYTE(II.iMaxAmmo2);				// byte     Max Ammo 2
-				WRITE_BYTE(II.iSlot);					// byte		bucket
-				WRITE_BYTE(II.iPosition);				// byte		bucket pos
-				WRITE_BYTE(II.iId);						// byte		id (bit index into pev->weapons)
-				WRITE_BYTE(II.iFlags);					// byte		Flags
+			MESSAGE_BEGIN(MSG_ONE, gmsgWeaponList, NULL, pev);
+			WRITE_STRING(II->pszName);			// string	weapon name
+			WRITE_BYTE(GetAmmoIndex(II->pszAmmo1));	// byte		Ammo Type
+			WRITE_BYTE(II->iMaxAmmo1);				// byte     Max Ammo 1
+			WRITE_BYTE(GetAmmoIndex(II->pszAmmo2));	// byte		Ammo2 Type
+			WRITE_BYTE(II->iMaxAmmo2);				// byte     Max Ammo 2
+			WRITE_BYTE(II->iSlot);					// byte		bucket
+			WRITE_BYTE(II->iPosition);				// byte		bucket pos
+			WRITE_BYTE(i);							// byte		id (bit index into pev->weapons)
+			WRITE_BYTE(II->iFlags);					// byte		Flags
 			MESSAGE_END();
 		}
 	}
-
 
 	SendAmmoUpdate();
 
@@ -5238,7 +5254,7 @@ void CBasePlayer::CleanupWeaponboxes(void)
 // DropPlayerItem - drop the named item, or if no name,
 // the active item. 
 //=========================================================
-void CBasePlayer::DropPlayerItem ( char *pszItemName )
+void CBasePlayer::DropPlayerItem ( const char *pszItemName )
 {
 	if ( !g_pGameRules->IsMultiplayer() )
 	{
@@ -5267,10 +5283,13 @@ void CBasePlayer::DropPlayerItem ( char *pszItemName )
 
 		while ( pWeapon )
 		{
+			ItemInfo info;
+			pWeapon->GetItemInfo(&info);
+
 			if ( pszItemName )
 			{
-				// try to match by name. 
-				if ( !strcmp( pszItemName, STRING( pWeapon->pev->classname ) ) )
+				// try to match by classname or name. 
+				if ( !strcmp( pszItemName, STRING( pWeapon->pev->classname ) ) || !strcmp(pszItemName, info.pszName))
 				{
 					// match! 
 					break;
@@ -5316,13 +5335,13 @@ void CBasePlayer::DropPlayerItem ( char *pszItemName )
 					static std::unordered_map<std::string, std::string> keys = { {"is_player_ally", "1"} };
 					Vector angles(0, pev->angles.y, 0);
 					CBaseEntity* pRoach = CBaseEntity::Create("monster_shockroach",
-						pev->origin + gpGlobals->v_forward * 10, angles, edict(), keys);
+						pev->origin + gpGlobals->v_forward * 10, angles, true, edict(), keys);
 					pRoach->pev->velocity = gpGlobals->v_forward * 400;
 				}
 				return;
 			}
 
-			CWeaponBox *pWeaponBox = (CWeaponBox *)CBaseEntity::Create( "weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict() );
+			CWeaponBox *pWeaponBox = (CWeaponBox *)CBaseEntity::Create( "weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, true, edict() );
 			pWeaponBox->pev->angles.x = 0;
 			pWeaponBox->pev->angles.z = 0;
 			pWeaponBox->pev->avelocity = Vector(0, 256, 256);
@@ -5425,7 +5444,7 @@ void CBasePlayer::DropAmmo(bool secondary) {
 	string_t model = 0;
 	int body = 0;
 	int sequence = 0;
-	CBaseEntity* ammoEnt = (CBaseEntity*)CBaseEntity::Create(ammoEntName, pev->origin, pev->angles, edict());
+	CBaseEntity* ammoEnt = (CBaseEntity*)CBaseEntity::Create(ammoEntName, pev->origin, pev->angles, true, edict());
 	if (!ammoEnt) {
 		ALERT(at_console, "Invalid ent in DropAmmo: %s\n", ammoEntName);
 		return;
@@ -5435,7 +5454,7 @@ void CBasePlayer::DropAmmo(bool secondary) {
 	body = ammoEnt->pev->body;
 	sequence = ammoEnt->pev->sequence;
 
-	CWeaponBox* pWeaponBox = (CWeaponBox*)CBaseEntity::Create("weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, edict());
+	CWeaponBox* pWeaponBox = (CWeaponBox*)CBaseEntity::Create("weaponbox", pev->origin + gpGlobals->v_forward * 10, pev->angles, true, edict());
 	pWeaponBox->pev->angles.x = 0;
 	pWeaponBox->pev->angles.z = 0;
 	pWeaponBox->pev->avelocity = Vector(0, 256, 256);
@@ -6429,4 +6448,62 @@ void CBasePlayer::LoadScore() {
 		m_iDeaths = 0;
 		m_scoreMultiplier = 1.0f;
 	}
+}
+
+void CBasePlayer::ResolveWeaponSlotConflict(int wepId) {
+	int mask = g_weaponSlotMasks[wepId];
+
+	if (count_bits_set(mask) <= 1) {
+		return; // impossible for there to be a conflict
+	}
+
+	ItemInfo& II = CBasePlayerItem::ItemInfoArray[wepId];
+
+	for (int i = 0; i < MAX_WEAPONS; i++) {
+		int bit = (1 << i);
+		if (mask & bit) {
+			if ((pev->weapons & bit) && i != wepId) {
+				// player is already holding a weapon that fills this slot.
+				// Drop this held weapon because the player won't be able to choose which
+				// weapon they want from that slot.
+				ItemInfo& dropInfo = CBasePlayerItem::ItemInfoArray[i];
+				DropPlayerItem(dropInfo.pszName);
+			}
+
+			// redirect all item info to the weapon with the given ID
+			MESSAGE_BEGIN(MSG_ONE, gmsgWeaponList, NULL, pev);
+			WRITE_STRING(II.pszName);			// string	weapon name
+			WRITE_BYTE(GetAmmoIndex(II.pszAmmo1));	// byte		Ammo Type
+			WRITE_BYTE(II.iMaxAmmo1);				// byte     Max Ammo 1
+			WRITE_BYTE(GetAmmoIndex(II.pszAmmo2));	// byte		Ammo2 Type
+			WRITE_BYTE(II.iMaxAmmo2);				// byte     Max Ammo 2
+			WRITE_BYTE(II.iSlot);					// byte		bucket
+			WRITE_BYTE(II.iPosition);				// byte		bucket pos
+			WRITE_BYTE(i);							// byte		id (bit index into pev->weapons)
+			WRITE_BYTE(II.iFlags);					// byte		Flags
+			MESSAGE_END();
+			ALERT(at_console, "acktually, ID %d is now for %s\n", i, II.pszName);
+		}
+	}
+}
+
+int CBasePlayer::GetCurrentIdForConflictedSlot(int wepId) {
+	int mask = g_weaponSlotMasks[wepId];
+
+	ItemInfo& II = CBasePlayerItem::ItemInfoArray[wepId];
+
+	if (count_bits_set(mask) <= 1) {
+		return wepId; // impossible for there to be a conflict
+	}
+
+	for (int i = 0; i < MAX_WEAPONS; i++) {
+		int bit = (1 << i);
+		if (mask & bit) {
+			if ((pev->weapons & bit) && i != wepId) {
+				return i;
+			}
+		}
+	}
+
+	return -1;
 }

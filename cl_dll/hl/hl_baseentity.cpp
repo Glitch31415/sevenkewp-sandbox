@@ -61,7 +61,7 @@ int CBaseEntity :: IsDormant( void ) { return 0; }
 BOOL CBaseEntity :: IsInWorld( void ) { return TRUE; }
 int CBaseEntity::ShouldToggle( USE_TYPE useType, BOOL currentState ) { return 0; }
 int	CBaseEntity :: DamageDecal( int bitsDamageType ) { return -1; }
-CBaseEntity * CBaseEntity::Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, edict_t *pentOwner, std::unordered_map<std::string, std::string> keys) { return NULL; }
+CBaseEntity * CBaseEntity::Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, bool spawn, edict_t *pentOwner, std::unordered_map<std::string, std::string> keys) { return NULL; }
 void CBaseEntity::SUB_Remove( void ) { }
 void CBaseEntity::UpdateOnRemove( void ) { }
 void CBaseEntity::SetClassify( int ) { }
@@ -324,7 +324,7 @@ Vector CBasePlayer :: AutoaimDeflection( Vector &vecSrc, float flDist, float flD
 void CBasePlayer :: ResetAutoaim( ) { }
 void CBasePlayer :: SetCustomDecalFrames( int nFrames ) { }
 int CBasePlayer :: GetCustomDecalFrames( void ) { return -1; }
-void CBasePlayer::DropPlayerItem ( char *pszItemName ) { }
+void CBasePlayer::DropPlayerItem ( const char *pszItemName ) { }
 BOOL CBasePlayer::HasPlayerItem( CBasePlayerItem *pCheckItem ) { return FALSE; }
 BOOL CBasePlayer :: SwitchWeapon( CBasePlayerItem *pWeapon )  { return FALSE; }
 Vector CBasePlayer :: GetGunPosition( void ) { return g_vecZero; }
