@@ -61,6 +61,7 @@ void PM_Init(struct playermove_s* ppmove);
 char PM_FindTextureType(char* name);
 extern Vector VecBModelOrigin(entvars_t* pevBModel);
 extern void CopyToBodyQue(entvars_t* pev);
+extern void AddMapPluginEquipment();
 extern int giPrecacheGrunt;
 extern int gmsgSayText;
 extern int g_teamplay;
@@ -398,10 +399,10 @@ void ClientPutInServer( edict_t *pEntity )
 	pPlayer->LoadScore();
 	pPlayer->m_lastUserInput = g_engfuncs.pfnTime();
 
-	CALL_HOOKS_VOID(pfnClientPutInServer, pPlayer);
-
 	// Allocate a CBasePlayer for pev, and call spawn
 	pPlayer->Spawn();
+
+	CALL_HOOKS_VOID(pfnClientPutInServer, pPlayer);
 }
 
 /*
@@ -514,7 +515,9 @@ void ServerDeactivate( void )
 	g_mapWeapons.clear();
 	g_wavInfos.clear();
 	g_weaponClassnames.clear();
+	g_weaponNames.clear();
 	g_nomaptrans.clear();
+	g_unrecognizedCfgEquipment.clear();
 	clearNetworkMessageHistory();
 	g_mp3Command = "";
 	g_monstersNerfed = false;
@@ -555,6 +558,7 @@ void ServerDeactivate( void )
 
 #include "lagcomp.h"
 
+<<<<<<< HEAD
 void PrecacheWeapons() {
 	UTIL_PrecacheOther("item_suit");
 	UTIL_PrecacheOther("item_battery");
@@ -663,6 +667,8 @@ UTIL_PrecacheOther("monster_kingpin");
 
 }
 
+=======
+>>>>>>> a7b86a0c58a9dbf9a7d4b1cb6dff2aef25989e23
 void PrecacheTextureSounds() {
 	if (g_textureStats.tex_concrete) {
 		PRECACHE_FOOTSTEP_SOUNDS(g_stepSoundsConcrete)
@@ -720,6 +726,41 @@ void PrecacheTextureSounds() {
 	}
 }
 
+int g_weaponSlotMasks[MAX_WEAPONS];
+
+void MarkWeaponSlotConflicts() {
+	for (int i = 0; i < MAX_WEAPONS; i++)
+	{
+		ItemInfo& II = CBasePlayerItem::ItemInfoArray[i];
+
+		if (!II.iId)
+			continue;
+
+		int mask = 1 << II.iId;
+
+		for (int i = 0; i < MAX_WEAPONS; i++)
+		{
+			ItemInfo& II2 = CBasePlayerItem::ItemInfoArray[i];
+
+			if (!II2.iId)
+				continue;
+
+			// when multiple weapons share a slot, the client may not show any weapon in the menu
+			// if only one weapon is held from that slot (depending on weapon ID order). For example,
+			// if picking up ID 1, the menu slot is filled as expected, but then immediately removed
+			// because ID 2 isn't held, which shares the same slot (see WeaponsResource::DropWeapon).
+			// So, the client will be told that it holds every possible weapon for that slot, if any
+			// any weapon is held for that slot. A network message controls which weapon is rendered
+			// in the shared slot.
+			if (II.iSlot == II2.iSlot && II.iPosition == II2.iPosition) {
+				mask |= 1 << II2.iId;
+			}
+		}
+
+		g_weaponSlotMasks[II.iId] = mask;
+	}
+}
+
 void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 {
 	int				i;
@@ -760,8 +801,15 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 		}
 	}
 
-	PrecacheWeapons();
+	AddMapPluginEquipment();
+
+	for (std::string wepName : g_mapWeapons) {
+		UTIL_PrecacheOther(wepName.c_str());
+	}
+	
 	PrecacheTextureSounds();
+
+	MarkWeaponSlotConflicts();
 
 	if (mp_antiblock.value)
 		PRECACHE_SOUND_ENT(NULL, "weapons/xbow_hitbod2.wav");
@@ -807,7 +855,7 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 		g_tryPrecacheModels.size() + g_bsp.modelCount, g_tryPrecacheModels.size(), g_bsp.modelCount, 
 		g_tryPrecacheSounds.size(), g_tryPrecacheGeneric.size(), g_tryPrecacheEvents.size()));
 
-	if (g_tryPrecacheModels.size() > g_precachedModels.size()) {
+	if (g_tryPrecacheModels.size() + g_bsp.entityBspModelCount + 1 > MAX_PRECACHE_MODEL) {
 		ALERT(at_error, "Model precache overflow (%d / %d). The following models were not precached:\n",
 			g_tryPrecacheModels.size() + g_bsp.modelCount, MAX_PRECACHE);
 
@@ -1894,6 +1942,14 @@ void UpdateClientData ( const edict_t *ent, int sendweapons, struct clientdata_s
 	cd->watertype		= pev->watertype;
 	cd->weapons			= pev->weapons;
 
+	for (int i = 0; i < MAX_WEAPONS; i++) {
+		if (pev->weapons & (1 << i)) {
+			// weapons that share slots occupy multiple bits so that the menu renders correctly
+			// (client may think the slot is empty if only one weapon is held from a shared slot)
+			cd->weapons |= g_weaponSlotMasks[i];
+		}
+	}
+
 	if (pl->m_fakeSuit) {
 		cd->weapons |= 1 << WEAPON_SUIT;
 	}
@@ -2186,6 +2242,8 @@ edict_t* SpawnEdict(edict_t* pent) {
 	pEntity->pev->absmin = pEntity->pev->origin - Vector(1, 1, 1);
 	pEntity->pev->absmax = pEntity->pev->origin + Vector(1, 1, 1);
 
+	CALL_HOOKS(edict_t*, pfnEntityCreated, pEntity);
+
 	pEntity->Spawn();
 
 	// Try to get the pointer again, in case the spawn function deleted the entity.
@@ -2209,16 +2267,27 @@ edict_t* SpawnEdict(edict_t* pent) {
 		{
 			// Already dead? delete
 			if (pGlobal->state == GLOBAL_DEAD) {
+				// source of bugs
+				ALERT(at_console, "Removed '%s' (%s) due to global state\n",
+					STRING(pEntity->pev->targetname), STRING(pEntity->pev->classname));
+
 				REMOVE_ENTITY(pent);
 				return NULL;
 			}
 
-			else if (!FStrEq(STRING(gpGlobals->mapname), pGlobal->levelName))
+			else if (!FStrEq(STRING(gpGlobals->mapname), pGlobal->levelName)) {
+				ALERT(at_console, "Hiding '%s' (%s) due to global state\n",
+					STRING(pEntity->pev->targetname), STRING(pEntity->pev->classname));
+
 				pEntity->MakeDormant();	// Hasn't been moved to this level yet, wait but stay alive
+			}
 			// In this level & not dead, continue on as normal
 		}
 		else
 		{
+			ALERT(at_console, "Activating '%s' (%s) due to global state\n",
+				STRING(pEntity->pev->targetname), STRING(pEntity->pev->classname));
+
 			// Spawned entities default to 'On'
 			gGlobalState.EntityAdd(pEntity->pev->globalname, gpGlobals->mapname, GLOBAL_ON);
 			//				ALERT( at_console, "Added global entity %s (%s)\n", STRING(pEntity->pev->classname), STRING(pEntity->pev->globalname) );

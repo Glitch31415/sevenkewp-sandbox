@@ -83,6 +83,7 @@ EXPORT extern cvar_t	mp_antiblock; // enables player swapping with +use
 EXPORT extern cvar_t	mp_antiblock_cooldown; // how long a player needs to wait before swapping again after a "rude" swap
 EXPORT extern cvar_t	mp_min_score_mult; // minimum score multiplier for death penalties
 EXPORT extern cvar_t	mp_hevsuit_voice; // enable/disable the hev suit voice
+EXPORT extern cvar_t	npc_dropweapons; // enable/disable npcs dropping weapons
 
 // Enables classic func_pushable physics (which is horribly broken, but fun)
 // The higher your FPS, the faster you can boost pushables. You also get boosted.
@@ -181,6 +182,10 @@ EXPORT extern std::unordered_set<std::string> g_shuffledMonsterSounds; // classe
 EXPORT extern bool g_cfgsExecuted; // set to true after server and map cfgs are executed
 
 EXPORT extern std::unordered_set<std::string> g_nomaptrans; // trigger_changelevel disabled for these maps
+
+// lines in the cfg which could possibly be custom weapons. Not known until map plugins are loaded,
+// and map plugins aren't known until the cfg finishes parsing
+EXPORT extern std::vector<std::pair<std::string, std::string>> g_unrecognizedCfgEquipment;
 
 // mark a palyer weapon for precaching (alias names are ok)
 EXPORT void AddPrecacheWeapon(std::string wepName);

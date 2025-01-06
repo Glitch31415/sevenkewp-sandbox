@@ -232,7 +232,7 @@ CBaseEntity* ShootMortar(edict_t* pentOwner, Vector vecStart, Vector vecVelocity
 	TraceResult tr;
 	UTIL_TraceLine(vecStart, vecStart + Vector(0, 0, -4096), ignore_monsters, pentOwner, &tr);
 
-	CBaseEntity* pMortar = CBaseEntity::Create("monster_mortar", tr.vecEndPos, Vector(0, 0, 0), pentOwner);
+	CBaseEntity* pMortar = CBaseEntity::Create("monster_mortar", tr.vecEndPos, Vector(0, 0, 0), true, pentOwner);
 
 	pMortar->pev->nextthink = gpGlobals->time;
 
@@ -275,6 +275,7 @@ void AddAmmoNameToAmmoRegistry( const char *szAmmoname )
 
 
 bool g_registeringCustomWeps = false;
+std::unordered_set<std::string> g_weaponNames;
 std::unordered_set<std::string> g_weaponClassnames;
 
 const char* g_filledWeaponSlots[MAX_WEAPON_SLOTS][MAX_WEAPON_POSITIONS];
@@ -341,7 +342,7 @@ ItemInfo UTIL_RegisterWeapon( const char *szClassname )
 		}
 
 		if (info.iPosition < 0) {
-			ALERT(at_error, "Failed to register weapon '%s' (slot %d has too many weapons)\n",
+			ALERT(at_error, "Failed to register weapon '%s' (slot %d has too many weapons for automatic assignment)\n",
 				szClassname, info.iSlot);
 			goto cleanup;
 		}
@@ -350,14 +351,6 @@ ItemInfo UTIL_RegisterWeapon( const char *szClassname )
 			szClassname, info.iPosition, MAX_WEAPON_POSITIONS - 1);
 		goto cleanup;
 	}
-
-	if (g_filledWeaponSlots[info.iSlot][info.iPosition]) {
-		ALERT(at_error, "Failed to register weapon '%s' (slot %d position %d is filled by '%s')\n",
-			szClassname, info.iSlot, info.iPosition, g_filledWeaponSlots[info.iSlot][info.iPosition]);
-		goto cleanup;
-	}
-
-	g_filledWeaponSlots[info.iSlot][info.iPosition] = szClassname;
 
 	CBasePlayerItem::ItemInfoArray[info.iId] = info;
 
@@ -369,7 +362,8 @@ ItemInfo UTIL_RegisterWeapon( const char *szClassname )
 		AddAmmoNameToAmmoRegistry(info.pszAmmo2);
 	}
 
-	g_weaponClassnames.insert(info.pszName);
+	g_weaponNames.insert(info.pszName);
+	g_weaponClassnames.insert(szClassname);
 
 	// events must always be precached, and in the correct order, or else
 	// vanilla clients will play the wrong weapon events
@@ -378,9 +372,14 @@ ItemInfo UTIL_RegisterWeapon( const char *szClassname )
 	if (g_registeringCustomWeps) {
 		PRECACHE_HUD_FILES(("sprites/" + std::string(info.pszName) + ".txt").c_str());
 
-		ALERT(at_console, "Registered custom weapon '%s' (ID %d) to slot %d position %d\n",
-			szClassname, info.iId, info.iSlot, info.iPosition);
+		const char* conflictWep = g_filledWeaponSlots[info.iSlot][info.iPosition];
+		std::string conflict = conflictWep ? UTIL_VarArgs(" (conflicts with %s)", conflictWep) : "";
+
+		ALERT(at_console, "Registered custom weapon '%s' (ID %d) to slot %d position %d%s\n",
+			szClassname, info.iId, info.iSlot, info.iPosition, conflict.c_str());
 	}
+
+	g_filledWeaponSlots[info.iSlot][info.iPosition] = szClassname;
 
 cleanup:
 	REMOVE_ENTITY(pent);
