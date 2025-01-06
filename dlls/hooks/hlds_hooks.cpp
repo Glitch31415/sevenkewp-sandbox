@@ -558,7 +558,6 @@ void ServerDeactivate( void )
 
 #include "lagcomp.h"
 
-<<<<<<< HEAD
 void PrecacheWeapons() {
 	UTIL_PrecacheOther("item_suit");
 	UTIL_PrecacheOther("item_battery");
@@ -667,8 +666,6 @@ UTIL_PrecacheOther("monster_kingpin");
 
 }
 
-=======
->>>>>>> a7b86a0c58a9dbf9a7d4b1cb6dff2aef25989e23
 void PrecacheTextureSounds() {
 	if (g_textureStats.tex_concrete) {
 		PRECACHE_FOOTSTEP_SOUNDS(g_stepSoundsConcrete)

@@ -99,12 +99,8 @@ const char* CDeadHGrunt::m_szPoses[] = { "deadstomach", "deadside", "deadsitting
 void CHGrunt::Spawn() {
 	m_skinFrames = 2;
 	BaseSpawn();
-<<<<<<< HEAD
-	if (FBitSet(pev->weapons, HGRUNT_SHOTGUN))
-=======
 
 	if (m_iEquipment & MEQUIP_SHOTGUN)
->>>>>>> a7b86a0c58a9dbf9a7d4b1cb6dff2aef25989e23
 	{
 		SetBodygroup(GUN_GROUP, GUN_SHOTGUN);
 		m_cClipSize = 8;
