@@ -846,6 +846,14 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 	}
 	g_oldPlayerScores = g_playerScores;
 
+	// reset player inventories
+	if (g_clearInventoriesNextMap) {
+		g_playerInventory.clear();
+	}
+	g_clearInventoriesNextMap = true; // set to false by trigger_changelevel
+
+	g_customMuzzleFlashes.clear();
+
 	PrintEntindexStats();
 
 	g_engfuncs.pfnServerPrint(UTIL_VarArgs("Precache stats: %d models (%d MDL, %d BSP), %d sounds, %d generic, %d events\n",
