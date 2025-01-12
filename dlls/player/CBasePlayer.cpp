@@ -2467,12 +2467,12 @@ void CBasePlayer::PreThink(void)
 
 	CheckSuitUpdate();
 
-	// hide weapon hud if player has no weapons
-	if (!(pev->weapons & (1 << WEAPON_SUIT))) {
-		m_iHideHUD |= HIDEHUD_WEAPONS;
+	// only show weapon hud if player has a weapon besides the suit
+	if (pev->weapons & ~(1 << WEAPON_SUIT)) {
+		m_iHideHUD &= ~HIDEHUD_WEAPONS;
 	}
 	else {
-		m_iHideHUD &= ~HIDEHUD_WEAPONS;
+		m_iHideHUD |= HIDEHUD_WEAPONS;
 	}
 
 	// Observer Button Handling
@@ -2536,7 +2536,7 @@ void CBasePlayer::PreThink(void)
 				//ALERT( at_error, "In train mode with no train!\n" );
 				m_afPhysicsFlags &= ~PFLAG_ONTRAIN;
 				m_iTrain = TRAIN_NEW|TRAIN_OFF;
-				if (pTrain->Classify() == CLASS_VEHICLE)
+				if (pTrain && pTrain->Classify() == CLASS_VEHICLE)
 					((CFuncVehicle*)pTrain)->m_pDriver = NULL;
 				return;
 			}
@@ -4777,12 +4777,6 @@ void CBasePlayer :: UpdateClientData( void )
 			if ( !II->iId )
 				continue;
 
-			const char *pszName;
-			if (!II->pszName)
-				pszName = "Empty";
-			else
-				pszName = II->pszName;
-
 			MESSAGE_BEGIN(MSG_ONE, gmsgWeaponList, NULL, pev);
 			WRITE_STRING(II->pszName);			// string	weapon name
 			WRITE_BYTE(GetAmmoIndex(II->pszAmmo1));	// byte		Ammo Type
@@ -6524,8 +6518,6 @@ void CBasePlayer::ResolveWeaponSlotConflict(int wepId) {
 
 int CBasePlayer::GetCurrentIdForConflictedSlot(int wepId) {
 	int mask = g_weaponSlotMasks[wepId];
-
-	ItemInfo& II = CBasePlayerItem::ItemInfoArray[wepId];
 
 	if (count_bits_set(mask) <= 1) {
 		return wepId; // impossible for there to be a conflict
