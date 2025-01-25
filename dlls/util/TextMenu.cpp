@@ -194,6 +194,10 @@ void TextMenu::AddItem(std::string displayText, std::string optionData) {
 void TextMenu::Open(uint8_t duration, uint8_t page, CBasePlayer* player) {
 	uint16_t validSlots = 0;
 	
+	if (player && !IsValidPlayer(player->edict())) {
+		return; // can happen when using EHANDLE and the player leaves the game
+	}
+
 	if (!noexit)
 		validSlots = (1 << (g_exitOptionNum - 1)); // exit option always valid
 
@@ -246,7 +250,10 @@ void TextMenu::Open(uint8_t duration, uint8_t page, CBasePlayer* player) {
 	if (!noexit)
 		menuText += "\\y" + std::to_string(g_exitOptionNum % 10) + ":\\w Exit";
 
-	if (player && IsValidPlayer(player->edict())) {
+	if (menuText.size() > 187)
+		menuText = menuText.substr(0, 187);
+
+	if (player) {
 		MESSAGE_BEGIN(MSG_ONE, gmsgShowMenu, NULL, player->edict());
 		WRITE_SHORT(validSlots);
 		WRITE_CHAR(duration);
