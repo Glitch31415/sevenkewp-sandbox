@@ -826,7 +826,7 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 		PRECACHE_SOUND_ENT(NULL, "weapons/xbow_hitbod2.wav");
 
 	// Every call to ServerActivate should be matched by a call to ServerDeactivate
-	g_serveractive = 1;
+	//g_serveractive = 1;
 
 	// Link user messages here to make sure first client can get them...
 	LinkUserMessages();

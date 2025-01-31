@@ -514,7 +514,7 @@ bool SET_MODEL(edict_t* edict, const char* model) {
 		// BSP model. No special handling.
 		CALL_HOOKS(bool, pfnSetModel, edict, model);
 		g_engfuncs.pfnSetModel(edict, model);
-		if (!g_serveractive)
+		//if (!g_serveractive)
 			g_precachedModels.insert(model); // engine precaches entity BSP models automatically
 		CALL_HOOKS(bool, pfnSetModelPost, edict, model);
 		return false;
