@@ -558,114 +558,6 @@ void ServerDeactivate( void )
 
 #include "lagcomp.h"
 
-void PrecacheWeapons() {
-	UTIL_PrecacheOther("item_suit");
-	UTIL_PrecacheOther("item_battery");
-		UTIL_PrecacheOther("weapon_shotgun");
-		UTIL_PrecacheOther("ammo_buckshot");
-
-		UTIL_PrecacheOther("weapon_crowbar");
-
-		UTIL_PrecacheOther("weapon_9mmhandgun");
-		UTIL_PrecacheOther("ammo_9mmclip");
-
-		UTIL_PrecacheOther("weapon_9mmAR");
-		UTIL_PrecacheOther("ammo_9mmAR");
-		UTIL_PrecacheOther("ammo_ARgrenades");
-
-		UTIL_PrecacheOther("weapon_357");
-		UTIL_PrecacheOther("ammo_357");
-
-		UTIL_PrecacheOther("weapon_gauss");
-		UTIL_PrecacheOther("ammo_gaussclip");
-
-		UTIL_PrecacheOther("weapon_rpg");
-		UTIL_PrecacheOther("ammo_rpgclip");
-
-		UTIL_PrecacheOther("weapon_crossbow");
-		UTIL_PrecacheOther("ammo_crossbow");
-
-		UTIL_PrecacheOther("weapon_egon");
-		UTIL_PrecacheOther("ammo_gaussclip");
-
-		UTIL_PrecacheOther("weapon_tripmine");
-
-		UTIL_PrecacheOther("weapon_satchel");
-
-		UTIL_PrecacheOther("weapon_handgrenade");
-
-		UTIL_PrecacheOther("weapon_snark");
-
-		UTIL_PrecacheOther("weapon_hornetgun");
-
-		UTIL_PrecacheOther("weapon_grapple");
-
-		UTIL_PrecacheOther("weapon_pipewrench");
-
-		UTIL_PrecacheOther("weapon_displacer");
-
-		UTIL_PrecacheOther("weapon_shockrifle");
-
-		UTIL_PrecacheOther("weapon_sporelauncher");
-
-		UTIL_PrecacheOther("weapon_medkit");
-
-		UTIL_PrecacheOther("weapon_inventory");
-	UTIL_PrecacheOther("item_longjump");
-
-	UTIL_PrecacheOther("monster_snark");
-UTIL_PrecacheOther("monster_shockroach");
-UTIL_PrecacheOther("monster_rat");
-UTIL_PrecacheOther("monster_alien_babyvoltigore");
-UTIL_PrecacheOther("monster_babycrab");
-UTIL_PrecacheOther("monster_cockroach");
-UTIL_PrecacheOther("monster_flyer_flock");
-UTIL_PrecacheOther("monster_headcrab");
-UTIL_PrecacheOther("monster_leech");
-UTIL_PrecacheOther("monster_penguin");
-UTIL_PrecacheOther("monster_alien_controller");
-UTIL_PrecacheOther("monster_alien_slave");
-UTIL_PrecacheOther("monster_barney");
-UTIL_PrecacheOther("monster_bullchicken");
-//UTIL_PrecacheOther("monster_cleansuit_scientist");
-UTIL_PrecacheOther("monster_houndeye");
-UTIL_PrecacheOther("monster_human_assassin");
-UTIL_PrecacheOther("monster_human_grunt");
-UTIL_PrecacheOther("monster_human_grunt_ally");
-UTIL_PrecacheOther("monster_human_medic_ally");
-UTIL_PrecacheOther("monster_male_assassin");
-UTIL_PrecacheOther("monster_otis");
-UTIL_PrecacheOther("monster_pitdrone");
-UTIL_PrecacheOther("monster_scientist");
-UTIL_PrecacheOther("monster_zombie");
-UTIL_PrecacheOther("monster_alien_grunt");
-UTIL_PrecacheOther("monster_alien_voltigore");
-UTIL_PrecacheOther("monster_bigmomma");
-UTIL_PrecacheOther("monster_gargantua");
-UTIL_PrecacheOther("monster_geneworm");
-UTIL_PrecacheOther("monster_gonome");
-UTIL_PrecacheOther("monster_ichthyosaur");
-UTIL_PrecacheOther("monster_nihilanth");
-UTIL_PrecacheOther("monster_pitworm");
-UTIL_PrecacheOther("monster_pitworm_up");
-UTIL_PrecacheOther("monster_shocktrooper");
-UTIL_PrecacheOther("monster_barnacle");
-UTIL_PrecacheOther("monster_tentacle");
-UTIL_PrecacheOther("monster_zombie_soldier");
-UTIL_PrecacheOther("monster_shocktrooper");
-UTIL_PrecacheOther("monster_apache");
-UTIL_PrecacheOther("monster_osprey");
-UTIL_PrecacheOther("monster_miniturret");
-UTIL_PrecacheOther("monster_turret");
-UTIL_PrecacheOther("monster_sentry");
-UTIL_PrecacheOther("monster_babygarg");
-UTIL_PrecacheOther("monster_gman");
-UTIL_PrecacheOther("monster_stukabat");
-UTIL_PrecacheOther("monster_kingpin");
-
-
-}
-
 void PrecacheTextureSounds() {
 	if (g_textureStats.tex_concrete) {
 		PRECACHE_FOOTSTEP_SOUNDS(g_stepSoundsConcrete)
@@ -763,6 +655,109 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 	int				i;
 	CBaseEntity		*pClass;
 
+	UTIL_PrecacheOther("item_suit");
+	UTIL_PrecacheOther("item_battery");
+		UTIL_PrecacheOther("weapon_shotgun");
+		UTIL_PrecacheOther("ammo_buckshot");
+
+		UTIL_PrecacheOther("weapon_crowbar");
+
+		UTIL_PrecacheOther("weapon_9mmhandgun");
+		UTIL_PrecacheOther("ammo_9mmclip");
+
+		UTIL_PrecacheOther("weapon_9mmAR");
+		UTIL_PrecacheOther("ammo_9mmAR");
+		UTIL_PrecacheOther("ammo_ARgrenades");
+
+		UTIL_PrecacheOther("weapon_357");
+		UTIL_PrecacheOther("ammo_357");
+
+		UTIL_PrecacheOther("weapon_gauss");
+		UTIL_PrecacheOther("ammo_gaussclip");
+
+		UTIL_PrecacheOther("weapon_rpg");
+		UTIL_PrecacheOther("ammo_rpgclip");
+
+		UTIL_PrecacheOther("weapon_crossbow");
+		UTIL_PrecacheOther("ammo_crossbow");
+
+		UTIL_PrecacheOther("weapon_egon");
+		UTIL_PrecacheOther("ammo_gaussclip");
+
+		UTIL_PrecacheOther("weapon_tripmine");
+
+		UTIL_PrecacheOther("weapon_satchel");
+
+		UTIL_PrecacheOther("weapon_handgrenade");
+
+		UTIL_PrecacheOther("weapon_snark");
+
+		UTIL_PrecacheOther("weapon_hornetgun");
+
+		UTIL_PrecacheOther("weapon_grapple");
+
+		UTIL_PrecacheOther("weapon_pipewrench");
+
+		UTIL_PrecacheOther("weapon_displacer");
+
+		UTIL_PrecacheOther("weapon_shockrifle");
+
+		UTIL_PrecacheOther("weapon_sporelauncher");
+
+		UTIL_PrecacheOther("weapon_medkit");
+
+		UTIL_PrecacheOther("weapon_inventory");
+	UTIL_PrecacheOther("item_longjump");
+
+	UTIL_PrecacheOther("monster_snark");
+UTIL_PrecacheOther("monster_shockroach");
+UTIL_PrecacheOther("monster_rat");
+UTIL_PrecacheOther("monster_alien_babyvoltigore");
+UTIL_PrecacheOther("monster_babycrab");
+UTIL_PrecacheOther("monster_cockroach");
+UTIL_PrecacheOther("monster_flyer_flock");
+UTIL_PrecacheOther("monster_headcrab");
+UTIL_PrecacheOther("monster_leech");
+UTIL_PrecacheOther("monster_penguin");
+UTIL_PrecacheOther("monster_alien_controller");
+UTIL_PrecacheOther("monster_alien_slave");
+UTIL_PrecacheOther("monster_barney");
+UTIL_PrecacheOther("monster_bullchicken");
+UTIL_PrecacheOther("monster_cleansuit_scientist");
+UTIL_PrecacheOther("monster_houndeye");
+UTIL_PrecacheOther("monster_human_assassin");
+UTIL_PrecacheOther("monster_human_grunt");
+UTIL_PrecacheOther("monster_human_grunt_ally");
+UTIL_PrecacheOther("monster_human_medic_ally");
+UTIL_PrecacheOther("monster_male_assassin");
+UTIL_PrecacheOther("monster_otis");
+UTIL_PrecacheOther("monster_pitdrone");
+UTIL_PrecacheOther("monster_scientist");
+UTIL_PrecacheOther("monster_zombie");
+UTIL_PrecacheOther("monster_alien_grunt");
+UTIL_PrecacheOther("monster_alien_voltigore");
+UTIL_PrecacheOther("monster_bigmomma");
+UTIL_PrecacheOther("monster_gargantua");
+UTIL_PrecacheOther("monster_geneworm");
+UTIL_PrecacheOther("monster_gonome");
+UTIL_PrecacheOther("monster_ichthyosaur");
+UTIL_PrecacheOther("monster_nihilanth");
+UTIL_PrecacheOther("monster_pitworm");
+UTIL_PrecacheOther("monster_pitworm_up");
+UTIL_PrecacheOther("monster_shocktrooper");
+UTIL_PrecacheOther("monster_barnacle");
+UTIL_PrecacheOther("monster_tentacle");
+UTIL_PrecacheOther("monster_zombie_soldier");
+UTIL_PrecacheOther("monster_shocktrooper");
+UTIL_PrecacheOther("monster_apache");
+UTIL_PrecacheOther("monster_osprey");
+UTIL_PrecacheOther("monster_miniturret");
+UTIL_PrecacheOther("monster_turret");
+UTIL_PrecacheOther("monster_sentry");
+UTIL_PrecacheOther("monster_babygarg");
+UTIL_PrecacheOther("monster_gman");
+UTIL_PrecacheOther("monster_stukabat");
+UTIL_PrecacheOther("monster_kingpin");
 	// Clients have not been initialized yet
 	for ( i = 0; i < edictCount; i++ )
 	{

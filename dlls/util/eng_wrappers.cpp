@@ -173,13 +173,13 @@ int PRECACHE_GENERIC(const char* path) {
 	}
 
 	if (g_serveractive) {
-		//if (g_precachedGeneric.find(path) != g_precachedGeneric.end()) {
+		if (g_precachedGeneric.find(path) != g_precachedGeneric.end()) {
 			return g_engfuncs.pfnPrecacheGeneric(STRING(ALLOC_STRING(path)));
-		//}
-		//else {
-			//ALERT(at_warning, "PrecacheGeneric failed: %s\n", path);
-			//return -1;
-		//}
+		}
+		else {
+			ALERT(at_warning, "PrecacheGeneric failed: %s\n", path);
+			return -1;
+		}
 	}
 
 	if (lowerPath.find(" ") != std::string::npos) {
@@ -229,13 +229,13 @@ int PRECACHE_SOUND_ENT(CBaseEntity* ent, const char* path) {
 	}
 
 	if (g_serveractive) {
-		//if (g_precachedSounds.find(path) != g_precachedSounds.end()) {
+		if (g_precachedSounds.find(path) != g_precachedSounds.end()) {
 			return g_engfuncs.pfnPrecacheSound(STRING(ALLOC_STRING(path)));
-		//}
-		//else {
-			//ALERT(at_warning, "PrecacheSound failed: %s\n", path);
-			//return -1;
-		//}
+		}
+		else {
+			ALERT(at_warning, "PrecacheSound failed: %s\n", path);
+			return -1;
+		}
 	}
 
 	if (!path || !path[0]) {
@@ -434,13 +434,13 @@ int PRECACHE_MODEL_ENT(CBaseEntity* ent, const char* path) {
 	}
 
 	if (g_serveractive) {
-		//if (g_precachedModels.find(path) != g_precachedModels.end()) {
+		if (g_precachedModels.find(path) != g_precachedModels.end()) {
 			return g_engfuncs.pfnPrecacheModel(STRING(ALLOC_STRING(path)));
-		//}
-		//else {
-			//ALERT(at_warning, "PrecacheModel failed: %s\n", path);
-			//return -1;
-		//}
+		}
+		else {
+			ALERT(at_warning, "PrecacheModel failed: %s\n", path);
+			return -1;
+		}
 	}
 
 	if (!path || !path[0]) {
@@ -489,13 +489,13 @@ int PRECACHE_EVENT(int id, const char* path) {
 	path = lowerPath.c_str();
 
 	if (g_serveractive) {
-		//if (g_precachedEvents.find(path) != g_precachedEvents.end()) {
+		if (g_precachedEvents.find(path) != g_precachedEvents.end()) {
 			return g_precachedEvents[path];
-		//}
-		//else {
-			//ALERT(at_warning, "PrecacheEvent failed: %s\n", path);
-			//return -1;
-		//}
+		}
+		else {
+			ALERT(at_warning, "PrecacheEvent failed: %s\n", path);
+			return -1;
+		}
 	}
 
 	g_tryPrecacheEvents.insert(path);
