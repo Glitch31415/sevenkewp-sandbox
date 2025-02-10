@@ -708,7 +708,7 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 
 		UTIL_PrecacheOther("weapon_inventory");
 	UTIL_PrecacheOther("item_longjump");
-
+if (!(STRING(gpGlobals->mapname).contains("hl_c"))) {
 	UTIL_PrecacheOther("monster_snark");
 UTIL_PrecacheOther("monster_shockroach");
 UTIL_PrecacheOther("monster_rat");
@@ -758,6 +758,8 @@ UTIL_PrecacheOther("monster_babygarg");
 UTIL_PrecacheOther("monster_gman");
 UTIL_PrecacheOther("monster_stukabat");
 UTIL_PrecacheOther("monster_kingpin");
+}
+
 	// Clients have not been initialized yet
 	for ( i = 0; i < edictCount; i++ )
 	{
