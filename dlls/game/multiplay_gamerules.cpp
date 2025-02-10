@@ -627,7 +627,7 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 
 	// killers score, if it's a player
 	CBaseEntity *ep = CBaseEntity::Instance( pKiller );
-	if ( ep && ep->Classify() == CLASS_PLAYER )
+	if ( ep && ep->IsPlayer() )
 	{
 		CBasePlayer *PK = (CBasePlayer*)ep;
 
