@@ -709,7 +709,7 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 		UTIL_PrecacheOther("weapon_inventory");
 	UTIL_PrecacheOther("item_longjump");
 	
-if (!(STRING(gpGlobals->mapname).find(substr) != std::string::npos)) { // i love copy pasting code from the internet
+if (!(STRING(gpGlobals->mapname).find("hl_c") != std::string::npos)) { // i love copy pasting code from the internet
 	UTIL_PrecacheOther("monster_snark");
 UTIL_PrecacheOther("monster_shockroach");
 UTIL_PrecacheOther("monster_rat");
