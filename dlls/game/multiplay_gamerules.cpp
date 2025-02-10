@@ -600,7 +600,7 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 	FireTargets( "game_playerdie", pVictim, pVictim, USE_TOGGLE, 0 );
 	CBasePlayer *peKiller = NULL;
 	CBaseEntity *ktmp = CBaseEntity::Instance( pKiller );
-	if ( ktmp && (ktmp->Classify() == CLASS_PLAYER) )
+	if ( ktmp && ktmp->IsPlayer() )
 		peKiller = (CBasePlayer*)ktmp;
 
 	else if ( ktmp && ktmp->IsPlayer() )
