@@ -3594,8 +3594,8 @@ void CBasePlayer::Spawn( void )
 	std::string mns;
 mns = STRING(gpGlobals->mapname);
 		if (!(mns.find("hl_c") != std::string::npos)) {
-		GiveNamedItem( "item_suit" );
-		GiveNamedItem( "item_battery" );
+		//GiveNamedItem( "item_suit" );
+		//GiveNamedItem( "item_battery" );
 		GiveNamedItem( "weapon_crowbar" );
 		GiveNamedItem( "weapon_9mmhandgun" );
 		GiveNamedItem( "ammo_9mmclip" );
