@@ -3591,6 +3591,8 @@ void CBasePlayer::Spawn( void )
 	ApplyEffects();
 		// don't play suit sounds for items given when spawning
 	SetSuitUpdate(NULL, FALSE, 0);
+	std::string mns;
+mns = STRING(gpGlobals->mapname);
 		if (!(mns.find("hl_c") != std::string::npos)) {
 		GiveNamedItem( "item_suit" );
 		GiveNamedItem( "item_battery" );
