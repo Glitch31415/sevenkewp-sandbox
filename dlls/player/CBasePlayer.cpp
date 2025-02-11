@@ -3591,7 +3591,12 @@ void CBasePlayer::Spawn( void )
 	ApplyEffects();
 		// don't play suit sounds for items given when spawning
 	SetSuitUpdate(NULL, FALSE, 0);
-			GiveNamedItem( "ammo_9mmclip" );
+		if (!(mns.find("hl_c") != std::string::npos)) {
+		GiveNamedItem( "item_suit" );
+		GiveNamedItem( "item_battery" );
+		GiveNamedItem( "weapon_crowbar" );
+		GiveNamedItem( "weapon_9mmhandgun" );
+		GiveNamedItem( "ammo_9mmclip" );
 		GiveNamedItem( "weapon_shotgun" );
 		GiveNamedItem( "ammo_buckshot" );
 		GiveNamedItem( "weapon_9mmAR" );
@@ -3617,6 +3622,7 @@ void CBasePlayer::Spawn( void )
 		GiveNamedItem( "weapon_shockrifle" );
 		GiveNamedItem( "weapon_sporelauncher" );
 		GiveNamedItem( "weapon_medkit" );
+		}
 
 
 
@@ -4161,9 +4167,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_shockrifle" );
 		GiveNamedItem( "weapon_sporelauncher" );
 		GiveNamedItem( "weapon_medkit" );
-		if (!m_fLongJump) {
-			GiveNamedItem("item_longjump");
-		}
+		GiveNamedItem("item_longjump");
 		gEvilImpulse101 = FALSE;
 		break;
 

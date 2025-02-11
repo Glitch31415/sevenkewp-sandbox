@@ -655,6 +655,10 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 	int				i;
 	CBaseEntity		*pClass;
 
+
+std::string mns;
+mns = STRING(gpGlobals->mapname);
+if (!(mns.find("hl_c") != std::string::npos)) { // i love copy pasting code from the internet
 	UTIL_PrecacheOther("item_suit");
 	UTIL_PrecacheOther("item_battery");
 		UTIL_PrecacheOther("weapon_shotgun");
@@ -707,11 +711,8 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 		UTIL_PrecacheOther("weapon_medkit");
 
 		UTIL_PrecacheOther("weapon_inventory");
-	UTIL_PrecacheOther("item_longjump");
-std::string mns;
-mns = STRING(gpGlobals->mapname);
-if (!(mns.find("hl_c") != std::string::npos)) { // i love copy pasting code from the internet
-	UTIL_PrecacheOther("monster_snark");
+	UTIL_PrecacheOther("item_longjump");	
+UTIL_PrecacheOther("monster_snark");
 UTIL_PrecacheOther("monster_shockroach");
 UTIL_PrecacheOther("monster_rat");
 UTIL_PrecacheOther("monster_alien_babyvoltigore");
