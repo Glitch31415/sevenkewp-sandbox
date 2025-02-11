@@ -4139,7 +4139,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		// impulse 101 cheat
 		RETURN_IF_CHEATS_DISABLED()
 		gEvilImpulse101 = TRUE;
-		//GiveNamedItem( "item_suit" );
+		GiveNamedItem( "item_suit" );
 		GiveNamedItem( "item_battery" );
 		GiveNamedItem( "weapon_crowbar" );
 		GiveNamedItem( "weapon_9mmhandgun" );
