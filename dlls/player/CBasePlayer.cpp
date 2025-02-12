@@ -1385,7 +1385,10 @@ void CBasePlayer::WaterMove()
 	int bci;
 	bci = roundf(pev->air_finished - gpGlobals->time);
 	if (pev->movetype == MOVETYPE_NOCLIP)
+	{
+		pev->air_finished = gpGlobals->time + AIRTIME;
 		return;
+	}
 
 	if (pev->health < 0)
 		return;
