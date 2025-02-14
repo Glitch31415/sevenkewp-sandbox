@@ -54,6 +54,7 @@
 #include "CItemInventory.h"
 #include "CWeaponInventory.h"
 #include "CGamePlayerEquip.h"
+#include "CBaseButton.h"
 
 // #define DUCKFIX
 
@@ -2211,7 +2212,6 @@ void CBasePlayer::UpdateStatusBar()
 			newSBarState[ SBAR_ID_TARGETHEALTH ] = pEntity->pev->health;
 			newSBarState[ SBAR_ID_TARGETARMOR ] = pEntity->pev->armorvalue;
 
-			m_flStatusBarDisappearDelay = gpGlobals->time + 1.0;
 			lookingAtStatusEnt = true;
 		}
 		else if (pEntity->IsMonster() && pEntity->IsAlive() && !ignoreMonster) {
@@ -2255,10 +2255,33 @@ void CBasePlayer::UpdateStatusBar()
 			newSBarState[SBAR_ID_TARGETNAME] = entindex();
 			newSBarState[SBAR_ID_TARGETHEALTH] = hp;
 
-			m_flStatusBarDisappearDelay = gpGlobals->time + 1.0;
 			lookingAtStatusEnt = true;
 		}
-		else if (pEntity->IsBreakable() && !(pEntity->pev->spawnflags & SF_BREAK_TRIGGER_ONLY)) {
+		else if (pEntity->IsButton()) {
+			CBaseButton* but = (CBaseButton*)pEntity;
+			bool damagable = pEntity->pev->takedamage == DAMAGE_YES;
+			bool touchable = pEntity->pev->spawnflags & SF_BUTTON_TOUCH_ONLY;
+			bool canTriggerNow = but->m_toggle_state == TS_AT_BOTTOM;
+			bool repeatableTrigger = !but->m_fStayPushed || (but->pev->spawnflags & SF_BUTTON_TOGGLE);
+
+			if ((canTriggerNow || repeatableTrigger) && (damagable || touchable)) {
+				name = replaceString(pEntity->DisplayName(), "\n", " ");
+
+				const char* hint = "";
+				if (damagable) {
+					hint = " (shootable)";
+				}
+				else if (touchable) {
+					hint = " (touch only)";
+				}
+
+				strcpy_safe(sbuf1, UTIL_VarArgs("1 %s%s", name.c_str(), hint), SBAR_STRING_SIZE);
+				newSBarState[SBAR_ID_TARGETNAME] = ENTINDEX(pEntity->edict());
+
+				lookingAtStatusEnt = true;
+			}
+		}
+		else if (pEntity->IsBreakable() && !(pEntity->m_breakFlags & FL_BREAK_TRIGGER_ONLY)) {
 
 			name = replaceString(pEntity->DisplayName(), "\n", " ");
 			int hp = roundf(pEntity->pev->health);
@@ -2268,13 +2291,13 @@ void CBasePlayer::UpdateStatusBar()
 			if (irel == R_AL) {
 				hint = " (wrench repairs)";
 			}
-			else if (pEntity->pev->spawnflags & SF_BREAK_EXPLOSIVES_ONLY) {
+			else if (pEntity->m_breakFlags & FL_BREAK_EXPLOSIVES_ONLY) {
 				hint = " (explosives only)";
 			}
-			else if (pEntity->pev->spawnflags & SF_BREAK_INSTANT) {
+			else if (pEntity->m_breakFlags & FL_BREAK_INSTANT) {
 				CBreakable* breakable = (CBreakable*)pEntity;
 
-				if (breakable->m_instantBreakWeapon == BREAK_INSTANT_WRENCH) {
+				if (breakable->m_breakWeapon == BREAK_INSTANT_WRENCH) {
 					hint = " (use wrench)";
 				}
 				else {
@@ -2305,7 +2328,6 @@ void CBasePlayer::UpdateStatusBar()
 			strcpy_safe(sbuf0, UTIL_VarArgs("2 Health: %d", hp), SBAR_STRING_SIZE);
 			newSBarState[SBAR_ID_TARGETHEALTH] = hp;
 
-			m_flStatusBarDisappearDelay = gpGlobals->time + 1.0;
 			lookingAtStatusEnt = true;
 		}
 		else if (FClassnameIs(pEntity->pev, "func_pushable")) {
@@ -2325,10 +2347,12 @@ void CBasePlayer::UpdateStatusBar()
 			newSBarState[SBAR_ID_TARGETNAME] = ENTINDEX(pEntity->edict());
 			newSBarState[SBAR_ID_TARGETHEALTH] = 1;
 
-			m_flStatusBarDisappearDelay = gpGlobals->time + 1.0;
 			lookingAtStatusEnt = true;
 		}
 		
+		if (lookingAtStatusEnt) {
+			m_flStatusBarDisappearDelay = gpGlobals->time + 1.0;
+		}
 	}
 	
 	if ( !lookingAtStatusEnt && m_flStatusBarDisappearDelay > gpGlobals->time )
@@ -3508,6 +3532,8 @@ void CBasePlayer::Spawn( void )
 	g_pGameRules->SetDefaultPlayerTeam( this );
 	edict_t* pentSpawnSpot = g_pGameRules->GetPlayerSpawnSpot( this );
 
+	pev->view_ofs = VEC_VIEW;
+
 	if (!FNullEnt(pentSpawnSpot)) {
 		CBaseDMStart* spawn = (CBaseDMStart*)CBaseEntity::Instance(pentSpawnSpot);
 		spawn->SpawnPlayer(this);
@@ -3530,7 +3556,6 @@ void CBasePlayer::Spawn( void )
 	else
 		UTIL_SetSize(pev, VEC_HULL_MIN, VEC_HULL_MAX);
 
-    pev->view_ofs = VEC_VIEW;
 	Precache();
 	m_HackedGunPos		= Vector( 0, 32, 0 );
 
