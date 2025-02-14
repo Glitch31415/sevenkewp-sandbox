@@ -489,7 +489,8 @@ EXPORT float UTIL_DotPoints ( const Vector &vecSrc, const Vector &vecCheck, cons
 EXPORT void UTIL_StripToken( const char *pKey, char *pDest, int nLen);// for redundant keynames
 
 // Misc functions
-EXPORT extern void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
+EXPORT extern void FireTargets(const char* targetName, CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value=0.0f, float delay=0.0f);
+void FireTargetsDelayed(const char* target, string_t killTarget, CBaseEntity* pActivator, USE_TYPE useType, float delay);
 EXPORT void SetMovedir(entvars_t* pev);
 EXPORT Vector VecBModelOrigin( entvars_t* pevBModel );
 EXPORT int BuildChangeList( LEVELLIST *pLevelList, int maxList );
@@ -624,6 +625,7 @@ enum svc_commands_e
 #define SF_BREAK_TRIGGER_ONLY	1// may only be broken by trigger
 #define	SF_BREAK_TOUCH			2// can be 'crashed through' by running player (plate glass)
 #define SF_BREAK_PRESSURE		4// can be broken by a player standing on it
+#define SF_BREAK_REPAIRABLE		8// can be broken by a player standing on it
 #define SF_BREAK_INSTANT		256// instant break if hit with crowbar or wrench
 #define SF_BREAK_EXPLOSIVES_ONLY	512 // only damaged by DMG_BLAST
 
