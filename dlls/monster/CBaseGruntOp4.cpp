@@ -429,6 +429,8 @@ void CBaseGruntOp4::DeclineFollowing()
 
 void CBaseGruntOp4::Precache()
 {
+	TalkInit();
+
 	BasePrecache();
 
 	ShuffleSoundArrays();
@@ -477,8 +479,6 @@ void CBaseGruntOp4::Precache()
 	soundvariety.value = oldSoundVariety;
 
 	PRECACHE_SOUND("fgrunt/medic.wav");
-
-	TalkInit();
 }
 
 void CBaseGruntOp4::PlaySentence(const char* pszSentence, float duration, float volume, float attenuation)

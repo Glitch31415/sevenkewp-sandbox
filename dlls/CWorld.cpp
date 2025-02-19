@@ -95,12 +95,14 @@ void CWorld::loadReplacementFiles() {
 	StringMap& modelReplacementsMap = g_replacementFiles[g_modelReplacementsMap];
 	g_modelReplacements.clear();
 	g_modelReplacements.putAll(modelReplacementsMap);
-	g_modelReplacements.putAll(g_soundReplacementsMod);
+	g_modelReplacements.putAll(g_modelReplacementsMod);
 
 	StringMap& soundReplacementsMap = g_replacementFiles[g_soundReplacementsMap];
 	g_soundReplacements.clear();
 	g_soundReplacements.putAll(soundReplacementsMap);
 	g_soundReplacements.putAll(g_soundReplacementsMod);
+
+
 }
 
 void CWorld::loadSentenceFiles() {
@@ -130,8 +132,8 @@ void CWorld::loadSentenceFiles() {
 
 	// map models/sounds have priority over mod models
 	g_customSentences.clear();
-	g_customSentences.insert(g_customSentencesMap.begin(), g_customSentencesMap.end());
-	g_customSentences.insert(g_customSentencesMod.begin(), g_customSentencesMod.end());
+	g_customSentences.map.putAll(g_customSentencesMap.map);
+	g_customSentences.map.putAll(g_customSentencesMod.map);
 
 	g_customSentenceGroups.clear();
 	g_customSentenceGroups.insert(g_customSentenceGroupsMap.begin(), g_customSentenceGroupsMap.end());

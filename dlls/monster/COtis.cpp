@@ -696,6 +696,10 @@ void COtis :: Spawn()
 //=========================================================
 void COtis :: Precache()
 {
+	// every new otis must call this, otherwise
+	// when a level is loaded, nobody will talk (time is reset to 0)
+	TalkInit();
+
 	CTalkSquadMonster::Precache();
 
 	m_defaultModel = "models/otis.mdl";
@@ -733,9 +737,6 @@ void COtis :: Precache()
 
 	soundvariety.value = oldSoundVariety;
 
-	// every new otis must call this, otherwise
-	// when a level is loaded, nobody will talk (time is reset to 0)
-	TalkInit();
 	canBeMadAtPlayer = true;
 }	
 
