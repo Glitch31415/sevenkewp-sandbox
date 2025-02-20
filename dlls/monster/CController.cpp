@@ -316,8 +316,8 @@ void CController :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 			UTIL_ELight(entindex(), 1, g_vecZero, 32, RGBA(255, 192, 64), 10, 32);
 
-			const char* soundlist = m_soundReplacementKey ? STRING(m_soundReplacementKey) : "";
-			std::unordered_map<std::string, std::string> keys = { {"soundlist", soundlist} };
+			StringMap keys;
+			keys.put("soundlist", m_soundReplacementKey ? STRING(m_soundReplacementKey) : "");
 			CBaseMonster *pBall = (CBaseMonster*)Create( "controller_head_ball", vecStart, pev->angles, true, edict(), keys);
 
 			pBall->pev->velocity = Vector( 0, 0, 32 );
@@ -407,7 +407,7 @@ void CController::Precache()
 	PRECACHE_SOUND("weapons/electro4.wav");
 
 	const char* soundlist = m_soundReplacementKey ? STRING(m_soundReplacementKey) : "";
-	std::unordered_map<std::string, std::string> keys = { {"soundlist", soundlist} };
+	StringMap keys = { {"soundlist", soundlist} };
 	UTIL_PrecacheOther( "controller_head_ball", keys);
 }	
 
