@@ -5,11 +5,7 @@
 #include "CBasePlayer.h"
 
 #define MAX_UNLAG_STATES 50
-<<<<<<< HEAD
-#define MAX_EDICTS (100000) // set larger than the max value gpGlobals->maxEntities can be
-=======
 #define MAX_UNLAG_EDICTS MAX_CLIENT_ENTS // only need to unlag the edicts which can potentially be networked
->>>>>>> 63e448ca7fba38842d6c78b5c300e552cfde5c8a
 #define PING_SMOOTHING_COUNT 100 // number of ping states used to calculate a stable ping value
 
 struct EntState {
