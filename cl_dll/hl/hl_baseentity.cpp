@@ -61,7 +61,7 @@ int CBaseEntity :: IsDormant( void ) { return 0; }
 BOOL CBaseEntity :: IsInWorld( void ) { return TRUE; }
 int CBaseEntity::ShouldToggle( USE_TYPE useType, BOOL currentState ) { return 0; }
 int	CBaseEntity :: DamageDecal( int bitsDamageType ) { return -1; }
-CBaseEntity * CBaseEntity::Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, bool spawn, edict_t *pentOwner, std::unordered_map<std::string, std::string> keys) { return NULL; }
+CBaseEntity * CBaseEntity::Create( const char *szName, const Vector &vecOrigin, const Vector &vecAngles, bool spawn, edict_t *pentOwner, const StringMap& keys) { return NULL; }
 void CBaseEntity::SUB_Remove( void ) { }
 void CBaseEntity::UpdateOnRemove( void ) { }
 void CBaseEntity::SetClassify( int ) { }
@@ -89,7 +89,7 @@ void DBG_AssertFunction(BOOL fExpr,	const char*	szExpr,	const char*	szFile,	int 
 
 // UTIL_* Stubs
 void UTIL_PrecacheOther( const char *szClassname ) { }
-void UTIL_PrecacheOther( const char *szClassname, std::unordered_map<std::string, std::string> keys ) { }
+void UTIL_PrecacheOther( const char *szClassname, const StringMap& keys ) { }
 void UTIL_BloodDrips( const Vector &origin, const Vector &direction, int color, int amount ) { }
 void UTIL_DecalTrace( TraceResult *pTrace, int decalNumber ) { }
 void UTIL_GunshotDecalTrace( TraceResult *pTrace, int decalNumber ) { }
