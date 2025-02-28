@@ -191,6 +191,7 @@ void CMedkit::PrimaryAttack()
 		mon->TakeHealth(healAmount, DMG_MEDKITHEAL);
 		if ((IRelationship(m_pPlayer->Classify(), mon->Classify()) != R_AL) && (IRelationship(m_pPlayer->Classify(), mon->Classify()) != R_NO)) {
 			mon->SetClassify(CLASS_PLAYER_ALLY);
+			mon->m_IsPlayerAlly = TRUE;
 		}
 		mon->GiveScorePoints(m_pPlayer->pev, -healAmount);
 
@@ -294,6 +295,7 @@ void CMedkit::SecondaryAttack()
 		bestTarget->pev->health = V_min(bestTarget->pev->max_health, 1);
 		if ((IRelationship(m_pPlayer->Classify(), bestTarget->Classify()) != R_AL) && (IRelationship(m_pPlayer->Classify(), bestTarget->Classify()) != R_NO)) {
 			bestTarget->SetClassify(CLASS_PLAYER_ALLY);
+			bestTarget->m_IsPlayerAlly = TRUE;
 		}
 		bestTarget->GiveScorePoints(m_pPlayer->pev, -bestTarget->pev->health);
 
