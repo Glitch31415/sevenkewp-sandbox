@@ -189,9 +189,10 @@ void CMedkit::PrimaryAttack()
 		m_pPlayer->m_iWeaponVolume = MEDKIT_VOLUME;
 
 		mon->TakeHealth(healAmount, DMG_MEDKITHEAL);
-		if ((mon->Classify() != CLASS_PLAYER_ALLY) && (mon->Classify() != CLASS_HUMAN_PASSIVE)) {
-			mon->m_IsPlayerAlly = TRUE;
-		}
+		//if ((mon->Classify() != CLASS_PLAYER_ALLY) && (mon->Classify() != CLASS_HUMAN_PASSIVE)) {
+			//mon->m_IsPlayerAlly = TRUE;
+		//}
+		mon->SetClassify(CLASS_PLAYER_ALLY);
 		mon->GiveScorePoints(m_pPlayer->pev, -healAmount);
 
 		CTalkSquadMonster* talkMon = mon->MyTalkSquadMonsterPointer();
@@ -292,10 +293,10 @@ void CMedkit::SecondaryAttack()
 
 		bestTarget->Revive();
 		bestTarget->pev->health = V_min(bestTarget->pev->max_health, 1);
-		if ((bestTarget->Classify() != CLASS_PLAYER_ALLY) && (bestTarget->Classify() != CLASS_HUMAN_PASSIVE)) {
-			UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%i", bestTarget->Classify()));
-			bestTarget->m_IsPlayerAlly = TRUE;
-		}
+		//if ((bestTarget->Classify() != CLASS_PLAYER_ALLY) && (bestTarget->Classify() != CLASS_HUMAN_PASSIVE)) {
+			//bestTarget->m_IsPlayerAlly = TRUE;
+		//}
+		bestTarget->SetClassify(CLASS_PLAYER_ALLY);
 		bestTarget->GiveScorePoints(m_pPlayer->pev, -bestTarget->pev->health);
 
 		CTalkSquadMonster* talkMon = bestTarget->MyTalkSquadMonsterPointer();
