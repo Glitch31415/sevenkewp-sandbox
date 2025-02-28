@@ -189,7 +189,9 @@ void CMedkit::PrimaryAttack()
 		m_pPlayer->m_iWeaponVolume = MEDKIT_VOLUME;
 
 		mon->TakeHealth(healAmount, DMG_MEDKITHEAL);
-		mon->m_IsPlayerAlly = TRUE;
+		if (mon->IRelationship(m_pPlayer) != R_AL) {
+			mon->m_IsPlayerAlly = TRUE;
+		}
 		mon->GiveScorePoints(m_pPlayer->pev, -healAmount);
 
 		CTalkSquadMonster* talkMon = mon->MyTalkSquadMonsterPointer();
@@ -290,7 +292,9 @@ void CMedkit::SecondaryAttack()
 
 		bestTarget->Revive();
 		bestTarget->pev->health = V_min(bestTarget->pev->max_health, 1);
-		bestTarget->m_IsPlayerAlly = TRUE;
+		if (mon->IRelationship(m_pPlayer) != R_AL) {
+			mon->m_IsPlayerAlly = TRUE;
+		}
 		bestTarget->GiveScorePoints(m_pPlayer->pev, -bestTarget->pev->health);
 
 		CTalkSquadMonster* talkMon = bestTarget->MyTalkSquadMonsterPointer();
