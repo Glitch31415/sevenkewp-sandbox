@@ -292,8 +292,8 @@ void CMedkit::SecondaryAttack()
 
 		bestTarget->Revive();
 		bestTarget->pev->health = V_min(bestTarget->pev->max_health, 1);
-		if (mon->IRelationship(m_pPlayer) != R_AL) {
-			mon->m_IsPlayerAlly = TRUE;
+		if (bestTarget->IRelationship(m_pPlayer) != R_AL) {
+			bestTarget->m_IsPlayerAlly = TRUE;
 		}
 		bestTarget->GiveScorePoints(m_pPlayer->pev, -bestTarget->pev->health);
 
