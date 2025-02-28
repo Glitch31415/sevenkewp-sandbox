@@ -659,7 +659,7 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 
 std::string mns;
 mns = STRING(gpGlobals->mapname);
-if (!(mns.find("hl_c") != std::string::npos)) { // i love copy pasting code from the internet
+if ((mns.find("sandbox") != std::string::npos)) { // i love copy pasting code from the internet
 	UTIL_PrecacheOther("item_suit");
 	UTIL_PrecacheOther("item_battery");
 		UTIL_PrecacheOther("weapon_shotgun");
