@@ -189,7 +189,7 @@ void CMedkit::PrimaryAttack()
 		m_pPlayer->m_iWeaponVolume = MEDKIT_VOLUME;
 
 		mon->TakeHealth(healAmount, DMG_MEDKITHEAL);
-		if (mon->IRelationship(m_pPlayer) != R_AL) {
+		if ((mon->IRelationship(m_pPlayer) != R_AL) && (mon->IRelationship(m_pPlayer) != R_NO)) {
 			mon->m_IsPlayerAlly = TRUE;
 		}
 		mon->GiveScorePoints(m_pPlayer->pev, -healAmount);
@@ -292,7 +292,7 @@ void CMedkit::SecondaryAttack()
 
 		bestTarget->Revive();
 		bestTarget->pev->health = V_min(bestTarget->pev->max_health, 1);
-		if (bestTarget->IRelationship(m_pPlayer) != R_AL) {
+		if ((bestTarget->IRelationship(m_pPlayer) != R_AL) && (bestTarget->IRelationship(m_pPlayer) != R_NO)) {
 			bestTarget->m_IsPlayerAlly = TRUE;
 		}
 		bestTarget->GiveScorePoints(m_pPlayer->pev, -bestTarget->pev->health);
