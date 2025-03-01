@@ -169,9 +169,13 @@ void CShotgun::PrimaryAttack()
 	lagcomp_begin(m_pPlayer);
 
 		//vecDir = m_pPlayer->FireBulletsPlayer( 9, vecSrc, vecAiming, VECTOR_CONE_1DEGREES*1.5, 131072, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
+		
 		for (int i = 0; i < 9; i++) {
 			float flDamage;
-
+			edict_t		*pentIgnore;
+			TraceResult tr, beam_tr;
+			float flMaxFrac = 1.0;
+			int fFirstBeam = 1;
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + Vector(0, 0, 0) );
 	Vector vecAiming;
 	
@@ -498,7 +502,10 @@ void CShotgun::SecondaryAttack( void )
 		//vecDir = m_pPlayer->FireBulletsPlayer( 18, vecSrc, vecAiming, VECTOR_CONE_1DEGREES*3, 131072, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 		for (int i = 0; i < 18; i++) {
 			float flDamage;
-
+			edict_t		*pentIgnore;
+			TraceResult tr, beam_tr;
+			float flMaxFrac = 1.0;
+			int fFirstBeam = 1;
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + Vector(0, 0, 0) );
 	Vector vecAiming;
 	
