@@ -169,7 +169,7 @@ void CShotgun::PrimaryAttack()
 	lagcomp_begin(m_pPlayer);
 
 		//vecDir = m_pPlayer->FireBulletsPlayer( 9, vecSrc, vecAiming, VECTOR_CONE_1DEGREES*1.5, 131072, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
-		for (int i = 0; i < 9; i++) {
+		//for (int i = 0; i < 9; i++) {
 			float flDamage;
 			edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
@@ -424,7 +424,7 @@ default:
 		//}
 	}
 
-		}
+		//}
 
 	lagcomp_end();
 
