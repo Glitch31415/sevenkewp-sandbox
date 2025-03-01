@@ -168,10 +168,6 @@ void CShotgun::PrimaryAttack()
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
 	lagcomp_begin(m_pPlayer);
 
-#ifdef CLIENT_DLL
-	if ( bIsMultiplayer() )
-#else
-
 		//vecDir = m_pPlayer->FireBulletsPlayer( 9, vecSrc, vecAiming, VECTOR_CONE_1DEGREES*1.5, 131072, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 		for (int i = 0; i < 9; i++) {
 			float flDamage;
@@ -497,9 +493,6 @@ void CShotgun::SecondaryAttack( void )
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
 	lagcomp_begin(m_pPlayer);
 
-#ifdef CLIENT_DLL
-	if ( bIsMultiplayer() )
-#else
 
 		// untouched default single player
 		//vecDir = m_pPlayer->FireBulletsPlayer( 18, vecSrc, vecAiming, VECTOR_CONE_1DEGREES*3, 131072, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
