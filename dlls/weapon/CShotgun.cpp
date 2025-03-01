@@ -172,6 +172,7 @@ void CShotgun::PrimaryAttack()
 		
 			float flDamage;
 			edict_t		*pentIgnore;
+			pentIgnore = m_pPlayer->edict();
 			TraceResult tr, beam_tr;
 			float flMaxFrac = 1.0;
 			int fFirstBeam = 1;
@@ -500,6 +501,7 @@ void CShotgun::SecondaryAttack( void )
 		//vecDir = m_pPlayer->FireBulletsPlayer( 18, vecSrc, vecAiming, VECTOR_CONE_1DEGREES*3, 131072, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 			float flDamage;
 			edict_t		*pentIgnore;
+			pentIgnore = m_pPlayer->edict();
 			TraceResult tr, beam_tr;
 			float flMaxFrac = 1.0;
 			int fFirstBeam = 1;
