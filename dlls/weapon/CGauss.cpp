@@ -513,21 +513,21 @@ case 1:
 	//head
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 0.4 * prevmaxhealth * angcheck;
+	flpDamage = 0.6 * prevmaxhealth * angcheck;
 	flDamage = flDamage - flpDamage;
 	break;
 case 2:
 	//chest
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 0.75 * prevmaxhealth * angcheck;
+	flpDamage = 1.125 * prevmaxhealth * angcheck;
 	flDamage = flDamage - flpDamage;
 	break;
 case 3:
 	//stomach
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 0.5 * prevmaxhealth * angcheck;
+	flpDamage = 0.75 * prevmaxhealth * angcheck;
 	flDamage = flDamage - flpDamage;
 	break;
 case 4:
@@ -535,7 +535,7 @@ case 5:
 	//left + right arm
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 0.3 * prevmaxhealth * angcheck;
+	flpDamage = 0.45 * prevmaxhealth * angcheck;
 	flDamage = flDamage - flpDamage;
 	break;
 case 6:
@@ -543,7 +543,7 @@ case 7:
 	//left + right leg
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 0.6 * prevmaxhealth * angcheck;
+	flpDamage = 0.9 * prevmaxhealth * angcheck;
 	flDamage = flDamage - flpDamage;
 	break;
 case 10:
@@ -557,7 +557,7 @@ case 11:
 default:
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 0.5 * prevmaxhealth * angcheck;
+	flpDamage = 0.75 * prevmaxhealth * angcheck;
 	flDamage = flDamage - flpDamage;
 	//UTIL_ClientPrintAll(print_chat, "uh oh default");
 	break;
@@ -632,7 +632,7 @@ default:
 							if (n == 0) n = 1;
 							if (sdm == true) { // if not a damage-able entity
 								if (pEntity->pev->rendermode == kRenderNormal) { // if not transparent
-									flDamage -= 6*n;
+									flDamage -= 7.5*n;
 								}
 								else {
 									flDamage -= n;
