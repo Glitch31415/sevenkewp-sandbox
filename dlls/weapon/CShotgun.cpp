@@ -198,7 +198,7 @@ void CShotgun::PrimaryAttack()
 			
 	}
     Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
-	Vector vecDir = (vecAiming + spread).Normalize();
+	vecDir = (vecAiming + spread).Normalize();
 	Vector vecDest = vecSrc + (vecDir * 8192);
 	
 	float dmg_mult = GetDamageModifier();
