@@ -163,7 +163,7 @@ void CShotgun::PrimaryAttack()
 	//Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
 	Vector vecDir;
-	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usSingleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
+	
 	m_pPlayer->pev->punchangle = Vector(-7.5, 0, 0);
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
 	lagcomp_begin(m_pPlayer);
@@ -197,6 +197,7 @@ void CShotgun::PrimaryAttack()
 
 			Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
 			vecDir = (vecAiming + spread).Normalize();
+			PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usSingleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
 			Vector vecDest = vecSrc + (vecDir * 8192);
 			
 			float dmg_mult = GetDamageModifier();
@@ -491,7 +492,7 @@ void CShotgun::SecondaryAttack( void )
 	//Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
 	Vector vecDir;
-	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usDoubleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
+	
 	m_pPlayer->pev->punchangle = Vector(-15, 0, 0);
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_556);
 	lagcomp_begin(m_pPlayer);
@@ -525,6 +526,7 @@ void CShotgun::SecondaryAttack( void )
 			z = x * x + y * y;
 			Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
 			vecDir = (vecAiming + spread).Normalize();
+			PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usDoubleFire, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
 			Vector vecDest = vecSrc + (vecDir * 8192);
 			
 			float dmg_mult = GetDamageModifier();
