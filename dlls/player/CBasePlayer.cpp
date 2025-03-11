@@ -3619,7 +3619,6 @@ void CBasePlayer::Spawn( void )
 	ApplyEffects();
 		// don't play suit sounds for items given when spawning
 	SetSuitUpdate(NULL, FALSE, 0);
-<<<<<<< HEAD
 	std::string mns;
 mns = STRING(gpGlobals->mapname);
 		if (!(mns.find("hl_c") != std::string::npos)) {
@@ -3657,10 +3656,8 @@ mns = STRING(gpGlobals->mapname);
 
 
 
-=======
 
 	CALL_HOOKS_VOID(pfnPlayerSpawn, this);
->>>>>>> 51adc85b0b4fd1a3557b9c33527d03a06dd9775c
 }
 
 void CBasePlayer :: Precache( void )
