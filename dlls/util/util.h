@@ -899,4 +899,4 @@ EXPORT void UTIL_RespawnAllPlayers(bool moveLivingPlayers=true, bool respawnDead
 EXPORT Vector UTIL_RotatePoint(Vector pos, Vector angles);
 EXPORT Vector UTIL_UnwindPoint(Vector pos, Vector angles);
 
-EXPORT void UTIL_BeamPoints(Vector start, Vector end, int modelIdx, uint8_t frameStart, uint8_t framerate, uint8_t life, uint8_t width, uint8_t noise, RGBA color, uint8_t speed, int msgMode=MSG_BROADCAST, const float* msgOrigin=NULL, edict_t* targetEnt=NULL);
+
