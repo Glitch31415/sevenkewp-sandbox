@@ -75,7 +75,7 @@ void UTIL_PlayRicochetSound(edict_t* ent) {
 
 void te_debug_beam(Vector start, Vector end, uint8_t life, RGBA c, int msgType, edict_t* dest)
 {
-	UTIL_BeamPoints(start, end, MODEL_INDEX("sprites/laserbeam.spr"), 0, 0, life, 16, 0,
+	UTIL_BeamPoints(start, end, MODEL_INDEX("sprites/laserbeam.spr"), 0, 0, life, 8, 0,
 		c, 0, msgType, NULL, dest);
 }
 

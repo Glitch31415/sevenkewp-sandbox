@@ -226,11 +226,11 @@ while (flDamage > 1 && loops < 25)
 		{
 			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = 0;
-			UTIL_BeamPoints(vecSrc + (gpGlobals->v_up * -7) + (gpGlobals->v_forward * 24) + (gpGlobals->v_right * 6), tr.vecEndPos, MODEL_INDEX("sprites/laserbeam.spr"), 0, 0, 1, 8, 0, RGBA(255, 255, 255, flDamage), 0, NULL, NULL, NULL);
+			te_debug_beam(vecSrc + (gpGlobals->v_up * -7) + (gpGlobals->v_forward * 24) + (gpGlobals->v_right * 6), tr.vecEndPos, 1, RGBA(255, 255, 255, flDamage), NULL, NULL);
 
 		}
 		else {
-			UTIL_BeamPoints(vecSrc, tr.vecEndPos, MODEL_INDEX("sprites/laserbeam.spr"), 0, 0, 1, 8, 0, RGBA(255, 255, 255, flDamage), 0, NULL, NULL, NULL);
+			te_debug_beam(vecSrc, tr.vecEndPos, 1, RGBA(255, 255, 255, flDamage), NULL, NULL);
 		}
 		float n = 0;
 		if (pEntity->pev->takedamage)
