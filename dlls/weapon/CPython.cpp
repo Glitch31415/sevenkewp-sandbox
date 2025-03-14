@@ -263,11 +263,11 @@ while (flDamage > 1 && loops < 25)
 		{
 			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = 0;
-			te_debug_beam(vecSrc + (gpGlobals->v_up * -3.5) + (gpGlobals->v_forward * 23) + (gpGlobals->v_right * 5.5), tr.vecEndPos, 1, RGBA(255, 255, 255, flDamage), NULL, NULL);
+			//(vecSrc + (gpGlobals->v_up * -3.5) + (gpGlobals->v_forward * 23) + (gpGlobals->v_right * 5.5), tr.vecEndPos, 1, RGBA(255, 255, 255, flDamage), NULL, NULL);
 
 		}
 		else {
-			te_debug_beam(vecSrc, tr.vecEndPos, 1, RGBA(255, 255, 255, flDamage), NULL, NULL);
+			//te_debug_beam(vecSrc, tr.vecEndPos, 1, RGBA(255, 255, 255, flDamage), NULL, NULL);
 		}
 		float n = 0;
 		if (pEntity->pev->takedamage)
