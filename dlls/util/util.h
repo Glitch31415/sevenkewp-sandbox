@@ -72,17 +72,6 @@ extern ThreadSafeQueue<AlertMsgCall> g_thread_prints;
 
 EXPORT extern std::string g_lastMapName;
 
-<<<<<<< HEAD
-#define NOT_PRECACHED_MODEL "models/" MOD_MODEL_FOLDER "not_precached.mdl"
-#define MERGED_ITEMS_MODEL "models/" MOD_MODEL_FOLDER "w_items_v2.mdl"
-#define NOT_PRECACHED_SOUND "common/null.wav"
-#define MAX_PRECACHE 2048
-#define MAX_PRECACHE_SOUND 2047
-#define MAX_PRECACHE_MODEL 2046
-#define MAX_PRECACHE_EVENT 1024
-
-=======
->>>>>>> e2b505dc3c06e2014d58b470fcc825b5565eb657
 enum AdminLevel {
 	ADMIN_NO,
 	ADMIN_YES,
