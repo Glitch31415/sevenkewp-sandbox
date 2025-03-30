@@ -198,7 +198,7 @@ void CBaseMonster::Listen(void)
 	float	hearingSensitivity;
 	CSound* pCurrentSound;
 
-	m_iAudibleList = 1;
+	m_iAudibleList = SOUNDLIST_EMPTY;
 	ClearConditions(bits_COND_HEAR_SOUND | bits_COND_SMELL | bits_COND_SMELL_FOOD);
 	m_afSoundTypes = 0;
 
