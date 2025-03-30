@@ -5665,13 +5665,6 @@ void CBaseMonster::MaintainSchedule(void)
 //=========================================================
 void CBaseMonster::RunTask(Task_t* pTask)
 {
-	Look(m_flDistLook);
-	Listen();// check for audible sounds. 
-
-			// now filter conditions.
-	ClearConditions(IgnoreConditions());
-
-	GetEnemy();
 	switch (pTask->iTask)
 	{
 	case TASK_TURN_RIGHT:
