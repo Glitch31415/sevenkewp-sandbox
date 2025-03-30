@@ -5223,6 +5223,7 @@ MONSTERSTATE CBaseMonster::GetIdealState(void)
 			if (pSound)
 			{
 				MakeIdealYaw(pSound->m_vecOrigin);
+				ChangeYaw(pev->yaw_speed);
 				if (pSound->m_iType & (bits_SOUND_COMBAT | bits_SOUND_DANGER))
 					m_IdealMonsterState = MONSTERSTATE_ALERT;
 			}
@@ -5263,6 +5264,7 @@ MONSTERSTATE CBaseMonster::GetIdealState(void)
 			ASSERT(pSound != NULL);
 			if (pSound)
 				MakeIdealYaw(pSound->m_vecOrigin);
+				ChangeYaw(pev->yaw_speed);
 		}
 		break;
 	}

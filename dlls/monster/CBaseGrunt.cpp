@@ -2626,12 +2626,12 @@ Schedule_t *CBaseGrunt :: GetSchedule( void )
 				}
 				return GetScheduleOfType(SCHED_TAKE_COVER_FROM_BEST_SOUND);
 			}
-			
+			/*
 			if (!HasConditions( bits_COND_SEE_ENEMY ) && ( pSound->m_iType & (bits_SOUND_PLAYER | bits_SOUND_COMBAT) ))
 			{
 				MakeIdealYaw( pSound->m_vecOrigin );
 			}
-			
+			*/
 		}
 	}
 	
