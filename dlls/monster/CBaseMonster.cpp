@@ -5141,8 +5141,8 @@ void CBaseMonster::RunAI(void)
 		// things will happen before the player gets there!
 		// UPDATE: We now let COMBAT state monsters think and act fully outside of player PVS. This allows the player to leave 
 		// an area where monsters are fighting, and the fight will continue.
-		if (UTIL_IsClientInPVS(edict()) || (m_MonsterState == MONSTERSTATE_COMBAT))
-		{
+		//if (UTIL_IsClientInPVS(edict()) || (m_MonsterState == MONSTERSTATE_COMBAT))
+		//{
 			Look(m_flDistLook);
 			Listen();// check for audible sounds. 
 
@@ -5150,7 +5150,7 @@ void CBaseMonster::RunAI(void)
 			ClearConditions(IgnoreConditions());
 
 			GetEnemy();
-		}
+		//}
 
 		// do these calculations if monster has an enemy.
 		if (m_hEnemy != NULL)
