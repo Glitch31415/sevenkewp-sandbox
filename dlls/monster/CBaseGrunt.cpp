@@ -330,21 +330,8 @@ BOOL CBaseGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 	if (HasEquipment(MEQUIP_HAND_GRENADE))
 	{
 		// find feet
-		if (RANDOM_LONG(0,1))
-		{
-			// magically know where they are
-			if (m_hEnemy->IsBSPModel()) {
-				vecTarget = m_hEnemy->GetTargetOrigin();
-			}
-			else {
-				vecTarget = Vector(m_hEnemy->pev->origin.x, m_hEnemy->pev->origin.y, m_hEnemy->pev->absmin.z);
-			}
-		}
-		else
-		{
-			// toss it to where you last saw them
+					// toss it to where you last saw them
 			vecTarget = m_vecEnemyLKP;
-		}
 		// vecTarget = m_vecEnemyLKP + (m_hEnemy->BodyTarget( pev->origin ) - m_hEnemy->pev->origin);
 		// estimate position
 		// vecTarget = vecTarget + m_hEnemy->pev->velocity * 2;
@@ -2639,12 +2626,12 @@ Schedule_t *CBaseGrunt :: GetSchedule( void )
 				}
 				return GetScheduleOfType(SCHED_TAKE_COVER_FROM_BEST_SOUND);
 			}
-			/*
+			
 			if (!HasConditions( bits_COND_SEE_ENEMY ) && ( pSound->m_iType & (bits_SOUND_PLAYER | bits_SOUND_COMBAT) ))
 			{
 				MakeIdealYaw( pSound->m_vecOrigin );
 			}
-			*/
+			
 		}
 	}
 	
