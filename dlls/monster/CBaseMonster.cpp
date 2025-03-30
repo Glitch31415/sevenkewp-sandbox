@@ -198,7 +198,7 @@ void CBaseMonster::Listen(void)
 	float	hearingSensitivity;
 	CSound* pCurrentSound;
 
-	m_iAudibleList = SOUNDLIST_EMPTY;
+	m_iAudibleList = 1;
 	ClearConditions(bits_COND_HEAR_SOUND | bits_COND_SMELL | bits_COND_SMELL_FOOD);
 	m_afSoundTypes = 0;
 
@@ -5223,7 +5223,7 @@ MONSTERSTATE CBaseMonster::GetIdealState(void)
 			if (pSound)
 			{
 				MakeIdealYaw(pSound->m_vecOrigin);
-				//if (pSound->m_iType & (bits_SOUND_COMBAT | bits_SOUND_DANGER))
+				if (pSound->m_iType & (bits_SOUND_COMBAT | bits_SOUND_DANGER))
 					m_IdealMonsterState = MONSTERSTATE_ALERT;
 			}
 		}
