@@ -2398,7 +2398,7 @@ Schedule_t* CBaseGrunt::GetMonsterStateSchedule(void) {
 			// never flinch or retreat from light damage
 			ClearConditions(bits_COND_LIGHT_DAMAGE);
 			
-			return CTalkSquadMonster::GetSchedule();
+			return CBaseMonster::GetSchedule();
 		}
 	}
 
@@ -2571,7 +2571,7 @@ Schedule_t* CBaseGrunt::GetMonsterStateSchedule(void) {
 		break;
 	}
 
-	return CTalkSquadMonster::GetSchedule();
+	return CBaseMonster::GetSchedule();
 }
 
 Schedule_t *CBaseGrunt :: GetSchedule( void )

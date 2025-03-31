@@ -996,7 +996,7 @@ Schedule_t *CScientist :: GetSchedule ( void )
 		break;
 	}
 	
-	return CTalkSquadMonster::GetSchedule();
+	return CBaseMonster::GetSchedule();
 }
 
 const char* CScientist::GetTaskName(int taskIdx) {

@@ -1130,7 +1130,7 @@ Schedule_t *COtis :: GetSchedule ( void )
 		break;
 	}
 	
-	return CTalkSquadMonster::GetSchedule();
+	return CBaseMonster::GetSchedule();
 }
 
 MONSTERSTATE COtis :: GetIdealState ( void )

@@ -819,7 +819,7 @@ Schedule_t *CBarney :: GetSchedule ( void )
 		break;
 	}
 	
-	return CTalkSquadMonster::GetSchedule();
+	return CBaseMonster::GetSchedule();
 }
 
 MONSTERSTATE CBarney :: GetIdealState ( void )

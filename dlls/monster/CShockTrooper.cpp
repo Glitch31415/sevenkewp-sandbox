@@ -2152,7 +2152,7 @@ Schedule_t* CShockTrooper::GetSchedule()
 	}
 
 	// no special cases here, call the base class
-	return CTalkSquadMonster::GetSchedule();
+	return CBaseMonster::GetSchedule();
 }
 
 //=========================================================
