@@ -2609,8 +2609,8 @@ Schedule_t *CBaseGrunt :: GetSchedule( void )
 		ASSERT(pSound != NULL);
 		if (pSound)
 		{
-			if (pSound->m_iType & bits_SOUND_DANGER)
-			{
+			//if (pSound->m_iType & bits_SOUND_DANGER)
+			//{
 				// dangerous sound nearby!
 
 				//!!!KELLY - currently, this is the grunt's signal that a grenade has landed nearby,
@@ -2625,7 +2625,7 @@ Schedule_t *CBaseGrunt :: GetSchedule( void )
 					JustSpoke();
 				}
 				return GetScheduleOfType(SCHED_TAKE_COVER_FROM_BEST_SOUND);
-			}
+			//}
 			/*
 			if (!HasConditions( bits_COND_SEE_ENEMY ) && ( pSound->m_iType & (bits_SOUND_PLAYER | bits_SOUND_COMBAT) ))
 			{
