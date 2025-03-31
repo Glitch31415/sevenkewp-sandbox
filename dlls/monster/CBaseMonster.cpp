@@ -193,7 +193,7 @@ void CBaseMonster::BarnacleVictimReleased(void)
 //=========================================================
 void CBaseMonster::Listen(void)
 {
-	UTIL_ClientPrintAll(print_console, UTIL_VarArgs("%s", STRING(pev->classname)));
+	
 	int		iSound;
 	int		iMySounds;
 	float	hearingSensitivity;
@@ -226,8 +226,7 @@ void CBaseMonster::Listen(void)
 			break;
 		}
 
-		if ((pCurrentSound->m_iType & iMySounds) &&
-			(pCurrentSound->m_vecOrigin - EarPosition()).Length() <= pCurrentSound->m_iVolume * hearingSensitivity)
+		if 	(pCurrentSound->m_vecOrigin - EarPosition()).Length() <= pCurrentSound->m_iVolume * hearingSensitivity)
 
 			//if ( ( g_pSoundEnt->m_SoundPool[ iSound ].m_iType & iMySounds ) && ( g_pSoundEnt->m_SoundPool[ iSound ].m_vecOrigin - EarPosition()).Length () <= g_pSoundEnt->m_SoundPool[ iSound ].m_iVolume * hearingSensitivity ) 
 		{
