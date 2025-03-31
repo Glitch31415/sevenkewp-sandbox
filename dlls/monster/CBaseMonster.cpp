@@ -193,6 +193,7 @@ void CBaseMonster::BarnacleVictimReleased(void)
 //=========================================================
 void CBaseMonster::Listen(void)
 {
+	UTIL_ClientPrintAll(print_console, UTIL_VarArgs("%s", STRING(pev->classname)));
 	int		iSound;
 	int		iMySounds;
 	float	hearingSensitivity;
@@ -238,7 +239,7 @@ void CBaseMonster::Listen(void)
 			{
 				// this is an audible sound.
 				SetConditions(bits_COND_HEAR_SOUND);
-				UTIL_ClientPrintAll(print_console, UTIL_VarArgs("%s", STRING(pev->classname)));
+				
 			}
 			else
 			{
