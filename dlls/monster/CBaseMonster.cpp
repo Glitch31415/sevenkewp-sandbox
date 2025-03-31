@@ -238,6 +238,7 @@ void CBaseMonster::Listen(void)
 			{
 				// this is an audible sound.
 				SetConditions(bits_COND_HEAR_SOUND);
+				UTIL_ClientPrintAll(print_console, this->DisplayName);
 			}
 			else
 			{
