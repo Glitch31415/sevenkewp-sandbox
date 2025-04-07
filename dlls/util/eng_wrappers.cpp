@@ -402,9 +402,23 @@ void PRECACHE_MODEL_EXTRAS(CBaseEntity* ent, const char* path, studiohdr_t* mdl)
 	}
 }
 
+const char* getNotPrecachedModelPath() {
+	const char* replacement = g_modelReplacements.get(NOT_PRECACHED_MODEL);
+	if (replacement) {
+		// TODO: haven't tested if string_t conversion is necessary for the listen server.
+		return STRING(ALLOC_STRING(replacement));
+	}
+	return STRING(ALLOC_STRING(NOT_PRECACHED_MODEL));
+}
+
 int PRECACHE_MODEL_ENT(CBaseEntity* ent, const char* path) {
 	std::string lowerPath = toLowerCase(path);
 	path = lowerPath.c_str();
+
+	// don't track BSP models in MDL hashmaps
+	if (path[0] == '*') {
+		return g_engfuncs.pfnPrecacheModel(path);
+	}
 
 	const char* replacement = g_modelReplacements.get(path);
 	if (replacement) {
@@ -420,7 +434,7 @@ int PRECACHE_MODEL_ENT(CBaseEntity* ent, const char* path) {
 		// files with spaces causes clients to hang at "Verifying resources"
 		// and the file doesn't download
 		ALERT(at_error, "Precached model with spaces: '%s'\n", path);
-		return g_engfuncs.pfnPrecacheModel(NOT_PRECACHED_MODEL);
+		return g_engfuncs.pfnPrecacheModel(getNotPrecachedModelPath());
 	}
 
 	bool alreadyPrecached = g_precachedModels.hasKey(path);
@@ -430,7 +444,7 @@ int PRECACHE_MODEL_ENT(CBaseEntity* ent, const char* path) {
 			g_missingModels.put(path);
 		}
 
-		return g_engfuncs.pfnPrecacheModel(NOT_PRECACHED_MODEL);
+		return g_engfuncs.pfnPrecacheModel(getNotPrecachedModelPath());
 	}
 
 	if (g_serveractive) {
@@ -444,13 +458,16 @@ int PRECACHE_MODEL_ENT(CBaseEntity* ent, const char* path) {
 	}
 
 	if (!path || !path[0]) {
-		return g_engfuncs.pfnPrecacheModel(NOT_PRECACHED_MODEL);
+		return g_engfuncs.pfnPrecacheModel(getNotPrecachedModelPath());
 	}
 
 	g_tryPrecacheModels.put(path);
 
+	// account for automatic engine precaching of bsp models
+	int precachedBspModels = sv_precache_bspmodels->value ? g_bsp.entityBspModelCount : 0;
+
 	// Tested with sc_darknebula.
-	if (g_tryPrecacheModels.size() + g_bsp.entityBspModelCount + 1 <= MAX_PRECACHE_MODEL) {
+	if (g_tryPrecacheModels.size() + precachedBspModels + 1 <= MAX_PRECACHE_MODEL) {
 		if (!g_precachedModels.hasKey(path))
 			g_precachedModels.put(path);
 		string_t spath = ALLOC_STRING(path);
@@ -458,7 +475,7 @@ int PRECACHE_MODEL_ENT(CBaseEntity* ent, const char* path) {
 		g_indexModels[modelIdx] = spath;
 
 		std::string pathstr = std::string(path);
-		if (pathstr.find(".mdl") == pathstr.size() - 4) {
+		if (pathstr.size() && pathstr.find(".mdl") == pathstr.size() - 4) {
 			PRECACHE_MODEL_EXTRAS(ent, path, GET_MODEL_PTR(modelIdx));
 		}
 
@@ -467,7 +484,7 @@ int PRECACHE_MODEL_ENT(CBaseEntity* ent, const char* path) {
 		return modelIdx;
 	}
 	else {
-		return g_engfuncs.pfnPrecacheModel(NOT_PRECACHED_MODEL);
+		return g_engfuncs.pfnPrecacheModel(getNotPrecachedModelPath());
 	}
 }
 
@@ -486,7 +503,7 @@ int PRECACHE_REPLACEMENT_MODEL_ENT(CBaseEntity* ent, const char* path) {
 		return PRECACHE_MODEL_ENT(ent, path);
 	}
 
-	return g_engfuncs.pfnPrecacheModel(NOT_PRECACHED_MODEL);
+	return g_engfuncs.pfnPrecacheModel(getNotPrecachedModelPath());
 }
 
 int PRECACHE_MODEL_NULLENT(const char* path) {
@@ -524,6 +541,10 @@ bool SET_MODEL(edict_t* edict, const char* model) {
 	if (model && model[0] == '*') {
 		// BSP model. No special handling.
 		CALL_HOOKS(bool, pfnSetModel, edict, model);
+		
+		if (!g_precaching_bsp_models && !sv_precache_bspmodels->value)
+			return false;
+
 		g_engfuncs.pfnSetModel(edict, model);
 		if (!g_serveractive)
 			g_precachedModels.put(model); // engine precaches entity BSP models automatically
@@ -602,7 +623,7 @@ int MODEL_INDEX(const char* model) {
 
 	if (!g_precachedModels.hasKey(lowerPath.c_str())) {
 		ALERT(at_error, "MODEL_INDEX not precached: %s\n", model);
-		return g_engfuncs.pfnModelIndex(NOT_PRECACHED_MODEL);
+		return g_engfuncs.pfnModelIndex(getNotPrecachedModelPath());
 	}
 
 	return g_engfuncs.pfnModelIndex(model);
