@@ -379,7 +379,7 @@ BOOL CBarney :: CheckRangeAttack1 ( float flDot, float flDist )
 			m_checkAttackTime = gpGlobals->time + 1;
 			if ( tr.flFraction == 1.0 || (tr.pHit != NULL && CBaseEntity::Instance(tr.pHit) == pEnemy) ) {
 				m_lastAttackCheck = TRUE;
-				UTIL_ClientPrintAll(print_chat, "true");
+				UTIL_ClientPrintAll(print_chat, "triggered");
 				m_timefinishcheck = gpGlobals->time;
 			}
 			else {
