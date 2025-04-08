@@ -92,18 +92,16 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				if (distance < 1) {
 					distance = 1;
 				}
-				float drf = RANDOM_FLOAT(0.01, 199.99);
-				if (drf >= 100) {
-					distance = (((((-100) * distance) / drf) / distance) + 1) + distance;
-				}
-				else {
-					distance = (((((-1 * distance) / 10) / (drf - 200)) * distance) - ((pow(distance, 2))/1000)) + distance;
-				}
-				if (distance < 1) {
-					distance = 1;
+				float odistance = distance;
+				float drf = RANDOM_FLOAT(0.01, 99.99);
+
+				distance = (((((-100) * odistance) / drf) / odistance) + 1) + odistance;
+
+				if (distance < pow(odistance, 0.5)) {
+					distance = pow(odistance, 0.5);
 				}
 				if (std::isnan(distance)) {
-					distance = 1;
+					distance = pow(odistance, 0.5);
 				}
 				flAdjustedDamage = (flDamage/(distance * 0.00318198051534)) - (distance * 0.00795495128835);
 				//flAdjustedDamage = flDamage - flAdjustedDamage;
