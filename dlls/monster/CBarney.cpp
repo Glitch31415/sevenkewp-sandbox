@@ -362,12 +362,10 @@ void CBarney :: SetYawSpeed ( void )
 BOOL CBarney :: CheckRangeAttack1 ( float flDot, float flDist )
 {
 	distfactor = flDist / 2000;
-	reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
-	if (gpGlobals->time >= (m_checkAttackTime+reactiontim)) {
 	if (flDot >= 0.5 )
 	{
-		//if ( gpGlobals->time > m_checkAttackTime )
-		//{
+		if ( gpGlobals->time > m_checkAttackTime )
+		{
 			TraceResult tr;
 			
 			Vector shootOrigin = pev->origin + Vector( 0, 0, 55 );
@@ -381,16 +379,14 @@ BOOL CBarney :: CheckRangeAttack1 ( float flDot, float flDist )
 			m_checkAttackTime = gpGlobals->time + 1;
 			if ( tr.flFraction == 1.0 || (tr.pHit != NULL && CBaseEntity::Instance(tr.pHit) == pEnemy) ) {
 				m_lastAttackCheck = TRUE;
-				UTIL_ClientPrintAll(print_chat, "triggered");
 				m_timefinishcheck = gpGlobals->time;
 			}
 			else {
 				m_lastAttackCheck = FALSE;
 			}
 			m_checkAttackTime = gpGlobals->time + 1.5;
-		//}
+		}
 		return m_lastAttackCheck;
-	}
 	}
 	return FALSE;
 }
@@ -402,8 +398,8 @@ BOOL CBarney :: CheckRangeAttack1 ( float flDot, float flDist )
 //=========================================================
 void CBarney :: BarneyFirePistol ( void )
 {
-	//reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
-	//if (gpGlobals->time >= (m_timefinishcheck+reactiontim)) {
+	reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+	if (gpGlobals->time >= (m_timefinishcheck+reactiontim)) {
 	Vector vecShootOrigin;
 
 	UTIL_MakeVectors(pev->angles);
@@ -430,7 +426,7 @@ void CBarney :: BarneyFirePistol ( void )
 
 	// UNDONE: Reload?
 	m_cAmmoLoaded--;// take away a bullet!
-	//}
+	}
 }
 		
 //=========================================================
