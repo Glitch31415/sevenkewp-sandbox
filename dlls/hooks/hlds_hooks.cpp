@@ -703,7 +703,6 @@ void MarkWeaponSlotConflicts() {
 
 void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 {
-<<<<<<< HEAD
 	int				i;
 	CBaseEntity		*pClass;
 
@@ -850,8 +849,6 @@ UTIL_PrecacheOther("monster_kingpin");
 		}
 	}
 
-=======
->>>>>>> 6ca703dbb14832da33032b5c3d5579369db4486e
 	// reset player inventories
 	if (g_clearInventoriesNextMap) {
 		g_playerInventory.clear();
