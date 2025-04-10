@@ -61,13 +61,13 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=OFF -DINCREASED_SERVER_LIMITS=ON
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=OFF
         cmake --build .
 
     - name: Build plugins
       run: |
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=ON -DINCREASED_SERVER_LIMITS=ON
+        cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_CLIENT=OFF -DBUILD_SERVER=ON -DBUILD_PLUGINS=ON
         cmake --build .
 
     - name: Build client
