@@ -704,7 +704,6 @@ void MarkWeaponSlotConflicts() {
 
 void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 {
-<<<<<<< HEAD
 	int				i;
 	CBaseEntity		*pClass;
 
@@ -850,9 +849,7 @@ UTIL_PrecacheOther("monster_kingpin");
 			pClass->MyMonsterPointer()->Nerf();
 		}
 	}
-=======
 	EnvWeatherMapInit();
->>>>>>> 7fd42b69ef4555b912c212675c5144f95d1e2e0d
 
 	// reset player inventories
 	if (g_clearInventoriesNextMap) {
