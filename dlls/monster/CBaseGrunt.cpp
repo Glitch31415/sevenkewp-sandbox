@@ -2830,7 +2830,7 @@ void CBaseGrunt::ScheduleChange(void) {
 
 void CBaseGrunt::UpdateOnRemove(void) {
 	RemoveRpgLaser();
-	CBaseEntity::UpdateOnRemove();
+	CBaseMonster::UpdateOnRemove();
 }
 
 void CBaseGrunt::Revive() {
