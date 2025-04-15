@@ -96,8 +96,9 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 
 				if (distance < pow(odistance, 0.5)) {
 					distance = pow(odistance, 0.5);
-					UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", distance));
+					
 				}
+				UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", distance));
 				if (std::isnan(distance)) {
 					continue;
 					UTIL_ClientPrintAll(print_chat, "distance nan");
@@ -111,8 +112,9 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				}
 				if (flAdjustedDamage > 2*flDamage) {
 					flAdjustedDamage = 2*flDamage;
-					UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", flAdjustedDamage));
+					
 				}
+				UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", flAdjustedDamage));
 				if (std::isnan(flAdjustedDamage)) {
 					continue;
 					UTIL_ClientPrintAll(print_chat, "fladjusteddamage nan");
