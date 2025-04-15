@@ -101,7 +101,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 					distance = pow(odistance, 0.5);
 				}
 				if (std::isnan(distance)) {
-					distance = pow(odistance, 0.5);
+					distance = odistance;
 				}
 				flAdjustedDamage = (flDamage/(distance * 0.00318198051534)) - (distance * 0.00795495128835);
 				//flAdjustedDamage = flDamage - flAdjustedDamage;
@@ -114,7 +114,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 					flAdjustedDamage = 2*flDamage;
 				}
 				if (std::isnan(flAdjustedDamage)) {
-					flAdjustedDamage = 2*flDamage;
+					flAdjustedDamage = flDamage;
 				}
 			
 				// ALERT( at_console, "hit %s\n", STRING( pEntity->pev->classname ) );
