@@ -80,7 +80,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				if (tr.fStartSolid)
 				{
 					// if we're stuck inside them, fixup the position and distance
-					tr.vecEndPos = vecSrc;
+					//tr.vecEndPos = vecSrc;
 					tr.flFraction = 0.0;
 				}
 				
