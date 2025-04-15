@@ -37,13 +37,9 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 {
 	CBaseEntity *pEntity = NULL;
 	TraceResult	tr;
-	float		flAdjustedDamage, falloff;
+	float		flAdjustedDamage;
 	Vector		vecSpot;
 
-	if ( flRadius )
-		falloff = flDamage / flRadius;
-	else
-		falloff = 1.0;
 
 	int pointContents = UTIL_PointContents(vecSrc);
 	int bInWater = (pointContents == CONTENTS_WATER);
@@ -80,6 +76,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 
 			if ( tr.flFraction == 1.0 || tr.pHit == pEntity->edict() )
 			{// the explosion can 'see' this entity, so hurt them!
+				UTIL_ClientPrintAll(print_chat, "hurting");
 				if (tr.fStartSolid)
 				{
 					// if we're stuck inside them, fixup the position and distance
@@ -102,7 +99,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 					UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", distance));
 				}
 				if (std::isnan(distance)) {
-					distance = odistance;
+					continue;
 					UTIL_ClientPrintAll(print_chat, "distance nan");
 				}
 				flAdjustedDamage = (flDamage/(distance * 0.00318198051534)) - (distance * 0.00795495128835);
@@ -117,7 +114,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 					UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", flAdjustedDamage));
 				}
 				if (std::isnan(flAdjustedDamage)) {
-					flAdjustedDamage = flDamage;
+					continue;
 					UTIL_ClientPrintAll(print_chat, "fladjusteddamage nan");
 				}
 			
