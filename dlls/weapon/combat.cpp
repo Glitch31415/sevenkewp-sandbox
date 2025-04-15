@@ -54,7 +54,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 		pevAttacker = pevInflictor;
 
 	// iterate on all entities in the vicinity.
-	while ((pEntity = UTIL_FindEntityInSphere( pEntity, vecSrc, 999999 )) != NULL)
+	while ((pEntity = UTIL_FindEntityInSphere( pEntity, vecSrc, 99999 )) != NULL)
 	{
 		if ( pEntity->pev->takedamage != DAMAGE_NO )
 		{
@@ -76,7 +76,6 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 
 			if ( tr.flFraction == 1.0 || tr.pHit == pEntity->edict() )
 			{// the explosion can 'see' this entity, so hurt them!
-				UTIL_ClientPrintAll(print_chat, "hurting");
 				if (tr.fStartSolid)
 				{
 					// if we're stuck inside them, fixup the position and distance
@@ -98,7 +97,6 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 					distance = pow(odistance, 0.5);
 					
 				}
-				UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", distance));
 				if (std::isnan(distance)) {
 					continue;
 				}
@@ -113,7 +111,6 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 					flAdjustedDamage = 2*flDamage;
 					
 				}
-				UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", flAdjustedDamage));
 				if (std::isnan(flAdjustedDamage)) {
 					continue;
 				}
