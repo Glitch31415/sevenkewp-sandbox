@@ -4443,14 +4443,11 @@ void CBaseMonster::BecomeDead(void)
 
 	// make the corpse fly away from the attack vector
 	pev->movetype = MOVETYPE_TOSS;
-<<<<<<< HEAD
 	pev->solid = SOLID_NOT;
-=======
 
 	m_killedTime = gpGlobals->time;
 
 	CleanupLocalCorpses();
->>>>>>> 49ed4e87b519fbf0880ea6b5f91ce4f07d5db7d7
 	//pev->flags &= ~FL_ONGROUND;
 	//pev->origin.z += 2;
 	//pev->velocity = g_vecAttackDir * -1;
