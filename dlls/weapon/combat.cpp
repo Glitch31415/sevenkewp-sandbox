@@ -86,9 +86,9 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				
 				// decrease damage for an ent that's farther from the bomb.
 				float distance = ( vecSrc - tr.vecEndPos ).Length();
-				//if (distance < 1) {
-					//distance = 1;
-				//}
+				if (distance < 0.001) {
+					continue;
+				}
 				float odistance = distance;
 				float drf = RANDOM_FLOAT(0.01, 99.99);
 
@@ -101,7 +101,6 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", distance));
 				if (std::isnan(distance)) {
 					continue;
-					UTIL_ClientPrintAll(print_chat, "distance nan");
 				}
 				flAdjustedDamage = (flDamage/(distance * 0.00318198051534)) - (distance * 0.00795495128835);
 				//flAdjustedDamage = flDamage - flAdjustedDamage;
@@ -117,7 +116,6 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("%f", flAdjustedDamage));
 				if (std::isnan(flAdjustedDamage)) {
 					continue;
-					UTIL_ClientPrintAll(print_chat, "fladjusteddamage nan");
 				}
 			
 				// ALERT( at_console, "hit %s\n", STRING( pEntity->pev->classname ) );
