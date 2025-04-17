@@ -207,7 +207,7 @@ void CMedkit::PrimaryAttack()
 			pitch = ((float)ammoLeft / (gSkillData.sk_plr_hpmedic*2)) * 20.5f + 80;
 		}
 		
-		EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_WEAPON, "items/medshot4.wav", 1, ATTN_NORM, 0, pitch);
+		EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_ITEM, "items/medshot4.wav", 1, ATTN_NORM, 0, pitch);
 
 		m_flNextPrimaryAttack = GetNextAttackDelay(1.0f);
 	}
