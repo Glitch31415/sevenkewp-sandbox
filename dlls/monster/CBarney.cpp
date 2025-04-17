@@ -688,6 +688,9 @@ Schedule_t* CBarney :: GetScheduleOfType ( int Type )
 {
 	Schedule_t *psched;
 
+	// react to player sounds when an enemy
+	bool IsPlayerAlly = CBaseEntity::IRelationship(Classify(), CLASS_PLAYER) <= R_NO;
+
 	switch( Type )
 	{
 	case SCHED_ARM_WEAPON:
@@ -704,7 +707,7 @@ Schedule_t* CBarney :: GetScheduleOfType ( int Type )
 		// when 'used' 
 		psched = CTalkSquadMonster::GetScheduleOfType(Type);
 
-		if (psched == slIdleStand)
+		if (psched == slIdleStand && IsPlayerAlly)
 			return slBaFaceTarget;	// override this for different target face behavior
 		else
 			return psched;
@@ -717,7 +720,7 @@ Schedule_t* CBarney :: GetScheduleOfType ( int Type )
 		// when standing during idle
 		psched = CTalkSquadMonster::GetScheduleOfType(Type);
 
-		if (psched == slIdleStand)
+		if (psched == slIdleStand && IsPlayerAlly)
 		{
 			// just look straight ahead.
 			return slIdleBaStand;
