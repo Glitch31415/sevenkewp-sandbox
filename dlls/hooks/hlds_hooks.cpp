@@ -515,6 +515,8 @@ void ServerDeactivate( void )
 	g_missingModels.clear();
 	g_precachedSounds.clear();
 	g_precachedEvents.clear();
+	g_precachedSpr.clear();
+	g_precachedMdl.clear();
 	g_tryPrecacheGeneric.clear();
 	g_tryPrecacheModels.clear();
 	g_tryPrecacheSounds.clear();
