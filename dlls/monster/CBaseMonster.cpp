@@ -4698,7 +4698,7 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	float	flTake;
 	Vector	vecDir;
 
-	if (IsImmune(pevAttacker))
+	if (IsImmune(pevAttacker, flDamage))
 		return 0;
 
 	if (!IsAlive())
@@ -7743,7 +7743,7 @@ const char* CBaseMonster::DisplayName() {
 	return m_displayName ? STRING(m_displayName) : CBaseEntity::DisplayName();
 }
 
-bool CBaseMonster::IsImmune(entvars_t* attacker) {
+bool CBaseMonster::IsImmune(entvars_t* attacker, float damage) {
 	if (!pev->takedamage || (pev->flags & FL_GODMODE)) {
 		return true;
 	}
@@ -7756,7 +7756,7 @@ bool CBaseMonster::IsImmune(entvars_t* attacker) {
 		return false;
 	}
 
-	return ShouldBlockFriendlyFire(attacker);
+	return damage > 0 && ShouldBlockFriendlyFire(attacker);
 }
 
 void CBaseMonster::SetSize(Vector defaultMins, Vector defaultMaxs) {
