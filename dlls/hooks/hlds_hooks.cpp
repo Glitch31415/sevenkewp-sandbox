@@ -708,7 +708,6 @@ void MarkWeaponSlotConflicts() {
 
 void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 {
-<<<<<<< HEAD
 	int				i;
 	CBaseEntity		*pClass;
 
@@ -819,45 +818,6 @@ UTIL_PrecacheOther("monster_gman");
 UTIL_PrecacheOther("monster_stukabat");
 UTIL_PrecacheOther("monster_kingpin");
 }
-
-	// Clients have not been initialized yet
-	for ( i = 0; i < edictCount; i++ )
-	{
-		if ( pEdictList[i].free )
-			continue;
-		
-		// Clients aren't necessarily initialized until ClientPutInServer()
-		if ( i < clientMax || !pEdictList[i].pvPrivateData )
-			continue;
-
-		bool isBspModel = pEdictList[i].v.model && STRING(pEdictList[i].v.model)[0] == '*';
-		bool isSwimmable = pEdictList[i].v.skin <= CONTENTS_WATER && pEdictList[i].v.skin > CONTENTS_TRANSLUCENT;
-		if (isBspModel && isSwimmable) {
-			g_textureStats.tex_water = true;
-		}
-
-		pClass = CBaseEntity::Instance( &pEdictList[i] );
-		// Activate this entity if it's got a class & isn't dormant
-		if ( pClass && !(pClass->pev->flags & FL_DORMANT) )
-		{
-			pClass->Activate();
-		}
-		else
-		{
-			ALERT( at_console, "Can't instance %s\n", STRING(pEdictList[i].v.classname) );
-			continue;
-		}
-
-		// nerf monster health/spawners now that all entities have spawned (can check/update connections)
-		CBaseMonster* monster = pClass->MyMonsterPointer();
-		if (monster) {
-			pClass->MyMonsterPointer()->Nerf();
-		}
-	}
-	EnvWeatherMapInit();
-
-=======
->>>>>>> 2ca3b3f11e5834dd37fd7ac310617f0037f27dfb
 	// reset player inventories
 	if (g_clearInventoriesNextMap) {
 		g_playerInventory.clear();
