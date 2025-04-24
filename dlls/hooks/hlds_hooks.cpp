@@ -76,7 +76,7 @@ int g_packClientIdx = 0;
 extern bool g_fog_enabled;
 extern int g_fog_start_dist;
 extern int g_fog_end_dist;
-void EnvWeatherMapInit();
+void EnvWeatherServerDeactivate();
 
 DLL_FUNCTIONS dllFuncs = {
 	GameDLLInit,				//pfnGameInit
@@ -495,6 +495,8 @@ void ServerDeactivate( void )
 			(int)plr->pev->frags, plr->m_iDeaths);
 	}
 
+	EnvWeatherServerDeactivate();
+
 	g_lastMapName = STRING(gpGlobals->mapname);
 
 	g_serveractive = 0;
@@ -513,6 +515,8 @@ void ServerDeactivate( void )
 	g_missingModels.clear();
 	g_precachedSounds.clear();
 	g_precachedEvents.clear();
+	g_precachedSpr.clear();
+	g_precachedMdl.clear();
 	g_tryPrecacheGeneric.clear();
 	g_tryPrecacheModels.clear();
 	g_tryPrecacheSounds.clear();
@@ -704,6 +708,7 @@ void MarkWeaponSlotConflicts() {
 
 void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 {
+<<<<<<< HEAD
 	int				i;
 	CBaseEntity		*pClass;
 
@@ -851,6 +856,8 @@ UTIL_PrecacheOther("monster_kingpin");
 	}
 	EnvWeatherMapInit();
 
+=======
+>>>>>>> 2ca3b3f11e5834dd37fd7ac310617f0037f27dfb
 	// reset player inventories
 	if (g_clearInventoriesNextMap) {
 		g_playerInventory.clear();

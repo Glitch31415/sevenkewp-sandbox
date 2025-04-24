@@ -7507,6 +7507,7 @@ void CBaseMonster::StartFollowing(CBaseEntity* pLeader)
 	m_hTargetEnt = pLeader;
 	ClearConditions(bits_COND_CLIENT_PUSH);
 	ClearSchedule();
+	m_vecMoveGoal = m_hTargetEnt->pev->origin;
 
 	StartFollowingSound();
 }
