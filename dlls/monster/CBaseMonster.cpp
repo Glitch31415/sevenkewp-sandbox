@@ -2215,6 +2215,47 @@ void CBaseMonster::MonsterInit(void)
 	//SetUse(&CBaseMonster::MonsterUse);
 	SetUse(&CBaseMonster::FollowerUse);
 	SetTouch(&CBaseMonster::PushTouch);
+
+	UnstuckSpawnPosition();
+}
+
+void CBaseMonster::UnstuckSpawnPosition() {
+	// unstuck monsters if spawned inside the floor/ceiling
+	// (unless it's a barnacle/turret or smth that doesn't move)
+	if (pev->movetype == MOVETYPE_STEP) {
+		edict_t* pent = edict();
+		TraceResult tr;
+		
+		TRACE_MONSTER_HULL(pent, pent->v.origin, pent->v.origin + Vector(0, 0, pev->maxs.z), ignore_monsters, pent, &tr);
+
+		if (tr.fAllSolid) {
+			Vector upPos = tr.vecEndPos;
+			TRACE_MONSTER_HULL(pent, upPos, upPos - Vector(0, 0, 4096), ignore_monsters, pent, &tr);
+
+			if (!tr.fAllSolid)
+				UTIL_SetOrigin(&pent->v, tr.vecEndPos);
+			else {
+				// tracing downward sometimes doesn't hit floors when starting in the solid area
+				// so try another trace from the original position. Logically this doesn't make sense
+				// but idk why the trace is skipping empty areas and thinking the whole trace is solid.
+				TRACE_MONSTER_HULL(pent, pent->v.origin, pent->v.origin - Vector(0, 0, 256), ignore_monsters, pent, &tr);
+				if (!tr.fAllSolid)
+					UTIL_SetOrigin(&pent->v, tr.vecEndPos);
+				else
+					ALERT(at_console, "Can't find valid spawn position for %s\n", STRING(pent->v.classname));
+			}
+
+			// not using this because it will send the monster through solid entities if the monster is spawning
+			// inside of another monster (startSolid)
+			//DROP_TO_FLOOR(pent);
+		}
+		else if (tr.fStartSolid) {
+			// was stuck in the floor, drop from the upward trace position
+			TRACE_MONSTER_HULL(pent, tr.vecEndPos, tr.vecEndPos - Vector(0, 0, pev->maxs.z), ignore_monsters, pent, &tr);
+			if (!tr.fAllSolid)
+				UTIL_SetOrigin(&pent->v, tr.vecEndPos);
+		}
+	}
 }
 
 //=========================================================
