@@ -726,6 +726,7 @@ mns = STRING(gpGlobals->mapname);
 if ((mns.find("sandbox") != std::string::npos)) { // i love copy pasting code from the internet
 	UTIL_PrecacheOther("item_suit");
 	UTIL_PrecacheOther("item_battery");
+	UTIL_PrecacheOther("weapon_knife");
 		UTIL_PrecacheOther("weapon_shotgun");
 		UTIL_PrecacheOther("ammo_buckshot");
 
