@@ -58,6 +58,10 @@ void CKnife::Spawn()
 
 void CKnife::Precache(void)
 {
+<<<<<<< HEAD
+=======
+	m_hasHandModels = true;
+>>>>>>> a86c5e5c92cc3035d68f3c53d5496c61e48644dd
 	m_defaultModelV = "models/v_knife.mdl";
 	m_defaultModelP = "models/p_knife.mdl";
 	m_defaultModelW = "models/w_knife.mdl";

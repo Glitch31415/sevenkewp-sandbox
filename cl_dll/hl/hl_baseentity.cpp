@@ -347,7 +347,6 @@ void CBasePlayer::AddPoints( int score, BOOL bAllowNegativeScore ) { }
 void CBasePlayer::AddPointsToTeam( int score, BOOL bAllowNegativeScore ) { } 
 Vector CBasePlayer::BodyTarget(const Vector& posSrc) { return Vector(); }
 void CBasePlayer::Revive() { }
-float CBasePlayer::GetDamageModifier() { return 0; }
 float CBasePlayer::GetDamage(float defaultDamage) { return defaultDamage; }
 const char* CBasePlayer::GetDeathNoticeWeapon() { return 0; }
 
@@ -400,7 +399,7 @@ void CBasePlayerWeapon::RetireWeapon(void) { }
 void CBasePlayerWeapon::KeyValue(KeyValueData* pkvd) {}
 void CBasePlayerWeapon::Precache() {}
 CBaseEntity* CBasePlayerWeapon::Respawn() { return NULL;  }
-const char* CBasePlayerWeapon::GetModelV() { return 0; }
+const char* CBasePlayerWeapon::GetModelV(const char*) { return 0; }
 const char* CBasePlayerWeapon::GetModelP() { return 0; }
 const char* CBasePlayerWeapon::GetModelW() { return 0; }
 void CBasePlayerWeapon::SetWeaponModelW() { }
