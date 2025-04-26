@@ -6659,7 +6659,7 @@ const char* CBasePlayer::GetDeathNoticeWeapon() {
 
 void CBasePlayer::NightvisionUpdate() {
 
-	if (!m_flashlightEnabled || flashlight.value < 2 || g_engfuncs.pfnTime() - m_lastNightvisionUpdate < 0.25f) {
+	if (!m_flashlightEnabled || flashlight.value < 2 || g_engfuncs.pfnTime() - m_lastNightvisionUpdate < 1.0f) {
 		return;
 	}
 
@@ -6671,7 +6671,7 @@ void CBasePlayer::NightvisionUpdate() {
 	m_nightvisionColor = RGB((int)((100-pev->health)*2.55*copacity), (int)(255*copacity), 0);
 	const int radius = 255; // 255 makes more sense, but it's really laggy for all PCs
 	const RGB color = RGB(128, 128, 128);
-	const int life = 2;
+	const int life = 12;
 	const int decay = 1;
 
 	if (UTIL_IsValidTempEntOrigin(pev->origin)) {
