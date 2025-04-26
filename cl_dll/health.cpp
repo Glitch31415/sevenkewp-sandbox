@@ -227,7 +227,11 @@ int CHudHealth::Draw(float flTime)
 		int iWidth = HealthWidth/10;
 		FillRGBA(x, y, iWidth, iHeight, 255, 160, 0, a);
 	}
-
+	float copacity = 1.00;
+	if (m_iHealth <= 50) {
+		copacity = 1-((float)(100-m_iHealth)/100);
+	}
+	pPlayer->m_nightvisionColor = RGB((int)((100-m_iHealth)*2.55*copacity), (int)(255*copacity), 0);
 	DrawDamage(flTime);
 	return DrawPain(flTime);
 }
