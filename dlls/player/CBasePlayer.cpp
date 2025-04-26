@@ -3394,11 +3394,7 @@ void CBasePlayer::PostThink()
 
 	//UpdateMonsterInfo();
 	UpdateScore();
-	float copacity = 1.00;
-	if (pev->health <= 50) {
-		copacity = 1-((float)(100-pev->health)/100);
-	}
-	m_nightvisionColor = RGB((int)((100-pev->health)*2.55*copacity), (int)(255*copacity), 0);
+
 	NightvisionUpdate();
 
 pt_end:
@@ -6666,7 +6662,11 @@ void CBasePlayer::NightvisionUpdate() {
 	}
 
 	m_lastNightvisionUpdate = g_engfuncs.pfnTime();
-	
+	float copacity = 1.00;
+	if (pev->health <= 50) {
+		copacity = 1-((float)(100-pev->health)/100);
+	}
+	m_nightvisionColor = RGB((int)((100-pev->health)*2.55*copacity), (int)(255*copacity), 0);
 	const int radius = 255; // 255 makes more sense, but it's really laggy for all PCs
 	const RGB color = RGB(128, 128, 128);
 	const int life = 2;
