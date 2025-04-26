@@ -4036,6 +4036,7 @@ void CBasePlayer :: FlashlightTurnOn( void )
 		}
 		else {
 			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, SOUND_NIGHTVISION_ON, 1.0, ATTN_NORM, 0, PITCH_NORM);
+			SetBits(pev->effects, EF_NIGHTVISION);
 			UTIL_ScreenFade(this, m_nightvisionColor.ToVector(), 0.1f, 5.0f, 255, FFADE_MODULATE | FFADE_OUT);
 			
 			// give some time to fade in
@@ -4061,6 +4062,7 @@ void CBasePlayer :: FlashlightTurnOff( void )
 	}
 	else {
 		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, SOUND_NIGHTVISION_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM);
+		ClearBits(pev->effects, EF_NIGHTVISION);
 		UTIL_ScreenFade(this, m_nightvisionColor.ToVector(), 0.1f, 0.15f, 255, FFADE_MODULATE | FFADE_IN);
 	}
 
