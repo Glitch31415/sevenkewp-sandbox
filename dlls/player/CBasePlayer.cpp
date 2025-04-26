@@ -6659,42 +6659,46 @@ const char* CBasePlayer::GetDeathNoticeWeapon() {
 
 void CBasePlayer::NightvisionUpdate() {
 
-	if (!m_flashlightEnabled || flashlight.value < 2 || g_engfuncs.pfnTime() - m_lastNightvisionUpdate < 0.1f) {
+	if (!m_flashlightEnabled || flashlight.value < 2) {
 		return;
 	}
 
-	m_lastNightvisionUpdate = g_engfuncs.pfnTime();
+
 	float copacity = 1.00;
 	if (pev->health <= 50) {
 		copacity = 1-((float)(100-pev->health)/100);
 	}
-	m_nightvisionColor = RGB((int)((100-pev->health)*2.55*copacity), (int)(255*copacity), 0);
-	const int radius = 255; // 255 makes more sense, but it's really laggy for all PCs
-	const RGB color = RGB(128, 128, 128);
-	const int life = 2;
-	const int decay = 1;
-
-	if (UTIL_IsValidTempEntOrigin(pev->origin)) {
-		// unreliable messages can be sent faster
-		MESSAGE_BEGIN(MSG_ONE_UNRELIABLE, SVC_TEMPENTITY, NULL, pev);
-		WRITE_BYTE(TE_DLIGHT);
-		WRITE_COORD_VECTOR(pev->origin);
-		WRITE_BYTE(radius);
-		WRITE_BYTE(color.r);
-		WRITE_BYTE(color.g);
-		WRITE_BYTE(color.b);
-		WRITE_BYTE(life);
-		WRITE_BYTE(decay);
-		MESSAGE_END();
+	m_nightvisionColor = RGB((int)((100-pev->health)*2.55*copacity), (int)(255*copacity), (int)(255*copacity));
+	if (g_engfuncs.pfnTime() - m_lastNightvisionUpdate < 5f) {
+		m_lastNightvisionUpdate = g_engfuncs.pfnTime();
+		const int radius = 4096; // 255 makes more sense, but it's really laggy for all PCs
+		const RGB color = RGB(128, 128, 128);
+		const int life = 2;
+		const int decay = 1;
+	
+		if (UTIL_IsValidTempEntOrigin(pev->origin)) {
+			// unreliable messages can be sent faster
+			MESSAGE_BEGIN(MSG_ONE_UNRELIABLE, SVC_TEMPENTITY, NULL, pev);
+			WRITE_BYTE(TE_DLIGHT);
+			WRITE_COORD_VECTOR(pev->origin);
+			WRITE_BYTE(radius);
+			WRITE_BYTE(color.r);
+			WRITE_BYTE(color.g);
+			WRITE_BYTE(color.b);
+			WRITE_BYTE(life);
+			WRITE_BYTE(decay);
+			MESSAGE_END();
+		}
+		else {
+			UTIL_DLight(pev->origin, radius, color, life, decay);
+		}
+	
+		if (g_engfuncs.pfnTime() - m_lastNightvisionFadeUpdate < 1.0f) {
+			return;
+		}
+		m_lastNightvisionFadeUpdate = g_engfuncs.pfnTime();
+	
+		UTIL_ScreenFade(this, m_nightvisionColor.ToVector(), 0.1f, 3.0f, 255, FFADE_MODULATE | FFADE_IN, true);
 	}
-	else {
-		UTIL_DLight(pev->origin, radius, color, life, decay);
-	}
 
-	if (g_engfuncs.pfnTime() - m_lastNightvisionFadeUpdate < 1.0f) {
-		return;
-	}
-	m_lastNightvisionFadeUpdate = g_engfuncs.pfnTime();
-
-	UTIL_ScreenFade(this, m_nightvisionColor.ToVector(), 0.1f, 3.0f, 255, FFADE_MODULATE | FFADE_IN, true);
 }
