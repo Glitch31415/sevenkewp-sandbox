@@ -6657,7 +6657,7 @@ const char* CBasePlayer::GetDeathNoticeWeapon() {
 
 void CBasePlayer::NightvisionUpdate() {
 
-	if (!m_flashlightEnabled || flashlight.value < 2 || g_engfuncs.pfnTime() - m_lastNightvisionUpdate < 0.05f) {
+	if (!m_flashlightEnabled || flashlight.value < 2 || g_engfuncs.pfnTime() - m_lastNightvisionUpdate < 0.1f) {
 		return;
 	}
 

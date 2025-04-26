@@ -403,8 +403,11 @@ void ClientPutInServer( edict_t *pEntity )
 	pPlayer->QueryClientType();
 	pPlayer->LoadScore();
 	pPlayer->m_lastUserInput = g_engfuncs.pfnTime();
-
-	pPlayer->m_nightvisionColor = RGB(0, 255, 0);
+	copacity = 1.00;
+	if (pPlayer->pev->health <= 50) {
+		copacity = 1-((float)(100-pPlayer->pev->health)/100);
+	}
+	pPlayer->m_nightvisionColor = RGB((100-pPlayer->pev->health)*2.55*copacity, 255*copacity, 0);
 
 	// Allocate a CBasePlayer for pev, and call spawn
 	pPlayer->Spawn();
