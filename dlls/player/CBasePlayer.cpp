@@ -2517,7 +2517,7 @@ void CBasePlayer::PreThink(void)
 	CheckSuitUpdate();
 
 	// only show weapon hud if player has a weapon besides the suit
-	if (pev->weapons & ~(1 << WEAPON_SUIT)) {
+	if (pev->weapons & ~(1 << WEAPON_SUIT) && !m_weaponsDisabled) {
 		m_iHideHUD &= ~HIDEHUD_WEAPONS;
 	}
 	else {
@@ -3395,6 +3395,8 @@ void CBasePlayer::PostThink()
 	//UpdateMonsterInfo();
 	UpdateScore();
 
+	NightvisionUpdate();
+
 pt_end:
 #if defined( CLIENT_WEAPONS )
 		// Decay timers on weapons
@@ -3502,12 +3504,12 @@ void CBasePlayer::Spawn( void )
 	m_lastDropTime = 0;
 	m_lastDamageEnt = NULL;
 	m_lastDamageType = 0;
-	m_friction_modifier = 1.0f;
-	m_gravity_modifier = 0;
-	m_speed_modifier = 0;
-	m_airTimeModifier = 0;
-	m_weaponsDisabled = false;
+	ResetEffects();
 	m_droppedDeathWeapons = false;
+	if (m_flashlightEnabled && flashlight.value >= 2) {
+		UTIL_ScreenFade(this, g_vecZero, 0, 0, 0, 0, true); // remove nightvision fade
+	}
+	m_flashlightEnabled = false;
 	memset(m_nextItemPickups, 0, sizeof(float) * MAX_WEAPONS);
 
 	if( pev->iuser1 != OBS_NONE )
@@ -4014,7 +4016,7 @@ CBaseEntity *FindEntityForward( CBaseEntity *pMe )
 
 BOOL CBasePlayer :: FlashlightIsOn( void )
 {
-	return FBitSet(pev->effects, EF_DIMLIGHT);
+	return m_flashlightEnabled;
 }
 
 void CBasePlayer :: FlashlightTurnOn( void )
@@ -4026,29 +4028,48 @@ void CBasePlayer :: FlashlightTurnOn( void )
 
 	if ( (pev->weapons & (1<<WEAPON_SUIT)) )
 	{
-		EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, SOUND_FLASHLIGHT_ON, 1.0, ATTN_NORM, 0, PITCH_NORM );
-		SetBits(pev->effects, EF_DIMLIGHT);
+		m_flashlightEnabled = true;
+
+		if (flashlight.value == 1) {
+			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, SOUND_FLASHLIGHT_ON, 1.0, ATTN_NORM, 0, PITCH_NORM);
+			SetBits(pev->effects, EF_DIMLIGHT);
+		}
+		else {
+			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, SOUND_NIGHTVISION_ON, 1.0, ATTN_NORM, 0, PITCH_NORM);
+			UTIL_ScreenFade(this, m_nightvisionColor.ToVector(), 0.1f, 5.0f, 255, FFADE_MODULATE | FFADE_OUT);
+			
+			// give some time to fade in
+			m_lastNightvisionUpdate = m_lastNightvisionFadeUpdate = g_engfuncs.pfnTime();
+		}
+		
 		MESSAGE_BEGIN( MSG_ONE, gmsgFlashlight, NULL, pev );
 		WRITE_BYTE(1);
 		WRITE_BYTE(m_iFlashBattery);
 		MESSAGE_END();
 
 		m_flFlashLightTime = FLASH_DRAIN_TIME + gpGlobals->time;
-
 	}
 }
 
 void CBasePlayer :: FlashlightTurnOff( void )
 {
-	EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, SOUND_FLASHLIGHT_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM );
-    ClearBits(pev->effects, EF_DIMLIGHT);
+	m_flashlightEnabled = false;
+
+	if (flashlight.value == 1) {
+		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, SOUND_FLASHLIGHT_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM);
+		ClearBits(pev->effects, EF_DIMLIGHT);
+	}
+	else {
+		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, SOUND_NIGHTVISION_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM);
+		UTIL_ScreenFade(this, m_nightvisionColor.ToVector(), 0.1f, 0.15f, 255, FFADE_MODULATE | FFADE_IN);
+	}
+
 	MESSAGE_BEGIN( MSG_ONE, gmsgFlashlight, NULL, pev );
 	WRITE_BYTE(0);
 	WRITE_BYTE(m_iFlashBattery);
 	MESSAGE_END();
 
 	m_flFlashLightTime = FLASH_CHARGE_TIME + gpGlobals->time;
-
 }
 
 /*
@@ -5034,11 +5055,33 @@ void CBasePlayer :: EnableControl(BOOL fControl)
 }
 
 void CBasePlayer::DisableWeapons(bool disable) {
-	if (disable) {
-		SelectItem("weapon_inventory");
+	bool changed = m_weaponsDisabled != disable;
+	m_weaponsDisabled = disable;
+
+	if (!changed) {
+		return;
 	}
 
-	m_weaponsDisabled = disable;
+	if (disable) {
+		if (HasNamedPlayerItem("weapon_inventory")) {
+			SelectItem("weapon_inventory");
+		}
+		else if (m_pActiveItem) {
+			CBasePlayerWeapon* wep = m_pActiveItem.GetEntity()->GetWeaponPtr();
+			wep->Holster();
+			m_pLastItem = m_pActiveItem;
+			m_pActiveItem = NULL;
+		}
+	}
+	else {
+		CBasePlayerWeapon* wep = m_pLastItem ? m_pLastItem.GetEntity()->GetWeaponPtr() : NULL;
+		if (wep) {
+			SwitchWeapon(wep);
+		}
+		else {
+			g_pGameRules->GetNextBestWeapon(this, NULL);
+		}
+	}
 }
 
 //=========================================================
@@ -6296,11 +6339,6 @@ void CBasePlayer::Revive() {
 	}
 }
 
-float CBasePlayer::GetDamageModifier() {
-	float weapon_damage_mult = m_pActiveItem ? m_pActiveItem->GetDamageModifier() : 1.0f;
-	return CBaseMonster::GetDamageModifier() * weapon_damage_mult;
-}
-
 float CBasePlayer::GetDamage(float defaultDamage) {
 	return m_pActiveItem ? m_pActiveItem->GetDamage(defaultDamage) : CBaseMonster::GetDamage(defaultDamage);
 }
@@ -6615,4 +6653,42 @@ int CBasePlayer::GetCurrentIdForConflictedSlot(int wepId) {
 
 const char* CBasePlayer::GetDeathNoticeWeapon() {
 	return m_pActiveItem ? m_pActiveItem->GetDeathNoticeWeapon() : "skull";
+}
+
+void CBasePlayer::NightvisionUpdate() {
+
+	if (!m_flashlightEnabled || flashlight.value < 2 || g_engfuncs.pfnTime() - m_lastNightvisionUpdate < 0.05f) {
+		return;
+	}
+
+	m_lastNightvisionUpdate = g_engfuncs.pfnTime();
+
+	const int radius = 100; // 255 makes more sense, but it's really laggy for all PCs
+	const RGB color = RGB(128, 128, 128);
+	const int life = 2;
+	const int decay = 1;
+
+	if (UTIL_IsValidTempEntOrigin(pev->origin)) {
+		// unreliable messages can be sent faster
+		MESSAGE_BEGIN(MSG_ONE_UNRELIABLE, SVC_TEMPENTITY, NULL, pev);
+		WRITE_BYTE(TE_DLIGHT);
+		WRITE_COORD_VECTOR(pev->origin);
+		WRITE_BYTE(radius);
+		WRITE_BYTE(color.r);
+		WRITE_BYTE(color.g);
+		WRITE_BYTE(color.b);
+		WRITE_BYTE(life);
+		WRITE_BYTE(decay);
+		MESSAGE_END();
+	}
+	else {
+		UTIL_DLight(pev->origin, radius, color, life, decay);
+	}
+
+	if (g_engfuncs.pfnTime() - m_lastNightvisionFadeUpdate < 1.0f) {
+		return;
+	}
+	m_lastNightvisionFadeUpdate = g_engfuncs.pfnTime();
+
+	UTIL_ScreenFade(this, m_nightvisionColor.ToVector(), 0.1f, 3.0f, 255, FFADE_MODULATE | FFADE_IN, true);
 }

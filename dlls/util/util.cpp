@@ -107,7 +107,7 @@ HashMap<custom_muzzle_flash_t> g_customMuzzleFlashes;
 // maps a lower-cased file path to a replacement map
 std::unordered_map<std::string, StringMap> g_replacementFiles;
 
-MessageHistoryItem g_hudMsgHistory[MAX_TEXT_CHANNELS];
+MessageHistoryItem g_hudMsgHistory[MAX_TEXT_CHANNELS*33];
 
 TYPEDESCRIPTION	gEntvarsDescription[] =
 {
@@ -1071,12 +1071,12 @@ void UTIL_ScreenFadeBuild( ScreenFade &fade, const Vector &color, float fadeTime
 }
 
 
-void UTIL_ScreenFadeWrite( const ScreenFade &fade, CBaseEntity *pEntity )
+void UTIL_ScreenFadeWrite( const ScreenFade &fade, CBaseEntity *pEntity, bool reliable)
 {
 	if ( !pEntity || !pEntity->IsNetClient() )
 		return;
 
-	MESSAGE_BEGIN( MSG_ONE, gmsgFade, NULL, pEntity->edict() );		// use the magic #1 for "one client"
+	MESSAGE_BEGIN(reliable ? MSG_ONE : MSG_ONE_UNRELIABLE, gmsgFade, NULL, pEntity->edict() );		// use the magic #1 for "one client"
 		
 		WRITE_SHORT( fade.duration );		// fade lasts this long
 		WRITE_SHORT( fade.holdTime );		// fade lasts this long
@@ -1102,17 +1102,17 @@ void UTIL_ScreenFadeAll( const Vector &color, float fadeTime, float fadeHold, in
 	{
 		CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
 	
-		UTIL_ScreenFadeWrite( fade, pPlayer );
+		UTIL_ScreenFadeWrite( fade, pPlayer, true );
 	}
 }
 
 
-void UTIL_ScreenFade( CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags )
+void UTIL_ScreenFade( CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags, bool reliable )
 {
 	ScreenFade	fade;
 
 	UTIL_ScreenFadeBuild( fade, color, fadeTime, fadeHold, alpha, flags );
-	UTIL_ScreenFadeWrite( fade, pEntity );
+	UTIL_ScreenFadeWrite( fade, pEntity, reliable );
 }
 
 // client crashes if lines are longer than ~80 characters
@@ -1209,8 +1209,9 @@ void UTIL_HudMessage( CBaseEntity *pEntity, const hudtextparms_t &textparms, con
 		uint16_t y = FixedSigned16(textparms.y, 1 << 13);
 		float holdTime = textparms.holdTime;
 
-		if (textparms.effect != 2 && !pEntity) {
-			MessageHistoryItem& lastMessage = g_hudMsgHistory[chan];
+		if (textparms.effect != 2) {
+			int poffset = pEntity ? pEntity->entindex()*MAX_TEXT_CHANNELS : 0;
+			MessageHistoryItem& lastMessage = g_hudMsgHistory[poffset + chan];
 			float now = g_engfuncs.pfnTime();
 
 			if (lastMessage.endTime >= now) {
@@ -1233,6 +1234,13 @@ void UTIL_HudMessage( CBaseEntity *pEntity, const hudtextparms_t &textparms, con
 			}
 
 			lastMessage.endTime = lastMessage.startTime + textparms.fadeinTime + holdTime + textparms.fadeoutTime;
+
+			if (!pEntity) {
+				// update history for all players on this channel
+				for (int i = 1; i < 33; i++) {
+					g_hudMsgHistory[i * MAX_TEXT_CHANNELS + chan] = lastMessage;
+				}
+			}
 		}
 
 		MESSAGE_BEGIN(msgMode, SVC_TEMPENTITY, NULL, pEntity ? pEntity->edict() : NULL);
@@ -3011,11 +3019,10 @@ void UTIL_ForceRetouch(edict_t* ent) {
 
 const char* UTIL_GetReplacementSound(edict_t* ent, const char* sound) {
 	CBaseEntity* base = CBaseEntity::Instance(ent);
-	CBaseMonster* monst = base ? base->MyMonsterPointer() : NULL;
 
-	if (monst && monst->m_soundReplacementPath) {
+	if (base && base->m_soundReplacementPath) {
 		StringMap& soundReplacements =
-			g_replacementFiles[STRING(monst->m_soundReplacementPath)];
+			g_replacementFiles[STRING(base->m_soundReplacementPath)];
 
 		const char* replacement = soundReplacements.get(sound);
 
