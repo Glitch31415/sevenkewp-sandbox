@@ -6669,7 +6669,7 @@ void CBasePlayer::NightvisionUpdate() {
 		copacity = 1-((float)(100-pev->health)/100);
 	}
 	m_nightvisionColor = RGB((int)((100-pev->health)*2.55*copacity), (int)(255*copacity), (int)(255*copacity));
-	if (g_engfuncs.pfnTime() - m_lastNightvisionUpdate < 5f) {
+	if (g_engfuncs.pfnTime() - m_lastNightvisionUpdate < 5.0f) {
 		m_lastNightvisionUpdate = g_engfuncs.pfnTime();
 		const int radius = 4096; // 255 makes more sense, but it's really laggy for all PCs
 		const RGB color = RGB(128, 128, 128);
