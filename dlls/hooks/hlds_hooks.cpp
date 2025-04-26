@@ -403,7 +403,7 @@ void ClientPutInServer( edict_t *pEntity )
 	pPlayer->QueryClientType();
 	pPlayer->LoadScore();
 	pPlayer->m_lastUserInput = g_engfuncs.pfnTime();
-	copacity = 1.00;
+	float copacity = 1.00;
 	if (pPlayer->pev->health <= 50) {
 		copacity = 1-((float)(100-pPlayer->pev->health)/100);
 	}
