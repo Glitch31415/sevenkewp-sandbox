@@ -6663,7 +6663,7 @@ void CBasePlayer::NightvisionUpdate() {
 
 	m_lastNightvisionUpdate = g_engfuncs.pfnTime();
 
-	const int radius = 100; // 255 makes more sense, but it's really laggy for all PCs
+	const int radius = 255; // 255 makes more sense, but it's really laggy for all PCs
 	const RGB color = RGB(128, 128, 128);
 	const int life = 2;
 	const int decay = 1;
