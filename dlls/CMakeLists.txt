@@ -221,12 +221,14 @@ set(TRIGGER_POINT_SRC
 	triggers/CGamePlayerHurt.cpp
 	triggers/CGameScore.cpp
 	triggers/CGameText.cpp
+	triggers/CGlobalLightControl.cpp
 	triggers/CMultiManager.cpp
 	triggers/CMultiSource.cpp
 	triggers/CRenderFxManager.cpp
 	triggers/CStripWeapons.cpp
 	triggers/CTriggerCamera.cpp
 	triggers/CTargetCDAudio.cpp
+	triggers/CTriggerChangeClass.cpp
 	triggers/CTriggerChangeModel.cpp
 	triggers/CTriggerChangeSky.cpp
 	triggers/CTriggerChangeTarget.cpp

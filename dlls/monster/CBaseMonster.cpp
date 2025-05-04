@@ -7747,6 +7747,10 @@ void CBaseMonster::SetHealth() {
 
 void CBaseMonster::InitModel() {
 	SET_MODEL(edict(), GetModel());
+	InitSkin();
+}
+
+void CBaseMonster::InitSkin() {
 	bool isAlly = CBaseEntity::IRelationship(Classify(), CLASS_PLAYER) == R_AL;
 
 	if (isAlly != m_friendlySkinFirst) {
@@ -8323,4 +8327,9 @@ float CBaseMonster::LastHurtTriggerTime(CBaseEntity* ent) {
 	}
 
 	return 0;
+}
+
+void CBaseMonster::SetClassification(int newClass) {
+	CBaseEntity::SetClassification(newClass);
+	InitSkin();
 }
