@@ -279,7 +279,7 @@ BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 		// verify that a bullet fired from the gun will hit the enemy before the world.
 		UTIL_TraceLine( vecSrc, m_hEnemy->BodyTarget(vecSrc), ignore_monsters, ignore_glass, ENT(pev), &tr);
 
-		if ( tr.flFraction == 1.0 || tr.pHit == m_hEnemy.GetEdict() )
+		if ( tr.flFraction == 1.0 || tr.pHit == m_hEnemy.GetEdict() || CBaseEntity::Instance(tr.pHit)->pev->rendermode == kRenderNormal)
 		{
 			return TRUE;
 		}
