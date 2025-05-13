@@ -379,13 +379,9 @@ while (flDamage > 1 && loops < 25)
 						//if (n < flDamage)
 						//{
 							if (n == 0) n = 1;
-							if (sdm == true) { // if not a damage-able entity
-								if (pEntity->pev->rendermode == kRenderNormal) { // if not transparent
+							if (sdm == true && pEntity->pev->rendermode == kRenderNormal) { // if not a damage-able entity and if not transparent
 									flDamage -= 7.5*n;
-								}
-								else {
-									flDamage -= n;
-								}
+
 							}
 							//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 3: %f", flDamage));
 
