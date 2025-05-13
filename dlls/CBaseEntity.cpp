@@ -1032,7 +1032,7 @@ Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDir
 		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
 
 		// do damage, paint decals
-		if (tr.flFraction != 1.0 && CBaseEntity::Instance(tr.pHit)->rendermode == kRenderNormal)
+		if (tr.flFraction != 1.0 && CBaseEntity::Instance(tr.pHit)->pev->rendermode == kRenderNormal)
 		{
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
 			UTIL_ClientPrintAll(print_chat, "actually hit something");
