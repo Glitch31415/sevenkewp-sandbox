@@ -1131,11 +1131,14 @@ UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr
 				break;
 			}
 		}
-			vecSrc = tr.vecEndPos + vecDir; // this is so inefficient lmao
+			vecSrc = tr.vecEndPos + (vecDir*0.001); // this is so inefficient lmao
 			ALERT(at_console, "looping\n");
 			ALERT(at_console, "%f\n", vecSrc.x);
 			ALERT(at_console, "%f\n", vecSrc.y);
 			ALERT(at_console, "%f\n", vecSrc.z);
+			if (vecSrc.magnitude > 16384) {
+				ahs = true;
+			}
 			vecEnd = vecSrc + vecDir * flDistance;
 		}
 		
