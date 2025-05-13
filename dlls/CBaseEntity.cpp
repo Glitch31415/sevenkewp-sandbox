@@ -1029,7 +1029,7 @@ Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDir
 		Vector vecEnd;
 
 		vecEnd = vecSrc + vecDir * flDistance;
-		ahs = false;
+		bool ahs = false;
 		while (ahs == false) {
 UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
 
