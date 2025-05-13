@@ -1032,9 +1032,10 @@ Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDir
 		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
 
 		// do damage, paint decals
-		if (tr.flFraction != 1.0)
+		if (tr.flFraction != 1.0 && CBaseEntity::Instance(tr.pHit)->rendermode == kRenderNormal)
 		{
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
+			UTIL_ClientPrintAll(print_chat, "actually hit something");
 			
 			// lag compensation debug code (shows a trace and monster state for misses)
 			/*
@@ -1120,7 +1121,7 @@ Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDir
 				// only decal glass
 				if (!FNullEnt(tr.pHit) && VARS(tr.pHit)->rendermode != 0)
 				{
-					UTIL_ClientPrintAll(print_chat, "glass");
+					
 					UTIL_DecalTrace(&tr, DECAL_GLASSBREAK1 + RANDOM_LONG(0, 2));
 				}
 
