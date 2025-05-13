@@ -1136,7 +1136,7 @@ UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr
 			ALERT(at_console, "%f\n", vecSrc.x);
 			ALERT(at_console, "%f\n", vecSrc.y);
 			ALERT(at_console, "%f\n", vecSrc.z);
-			if (vecSrc.magnitude > 16384) {
+			if (vecSrc.Length() > 16384) {
 				ahs = true;
 			}
 			vecEnd = vecSrc + vecDir * flDistance;
