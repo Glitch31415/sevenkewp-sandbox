@@ -1132,8 +1132,10 @@ UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr
 			}
 		}
 			vecSrc = tr.vecEndPos + vecDir; // this is so inefficient lmao
-			ALERT(at_console, "looping");
-			ALERT(at_console, vecSrc);
+			ALERT(at_console, "looping\n");
+			ALERT(at_console, "%f\n", vecSrc.x);
+			ALERT(at_console, "%f\n", vecSrc.y);
+			ALERT(at_console, "%f\n", vecSrc.z);
 			vecEnd = vecSrc + vecDir * flDistance;
 		}
 		
