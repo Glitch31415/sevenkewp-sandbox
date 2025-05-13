@@ -1132,7 +1132,7 @@ UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr
 			}
 		}
 		if (ahs == false) {
-			vecSrc = tr.vecEndPos + vecDir;
+			vecSrc = tr.vecEndPos + vecDir; // this is so inefficient lmao
 			vecEnd = vecSrc + vecDir * flDistance;
 		}
 		}
