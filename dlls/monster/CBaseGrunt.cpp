@@ -264,7 +264,7 @@ BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 		return FALSE;
 	}
 
-	if ( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= maxShootDist && flDot >= 0.5 && NoFriendlyFire() )
+	if ( flDist <= maxShootDist && flDot >= 0.5 && NoFriendlyFire() )
 	{
 		TraceResult	tr;
 
