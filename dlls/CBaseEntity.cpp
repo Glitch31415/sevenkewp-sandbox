@@ -888,8 +888,9 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 		Vector vecEnd;
 
 		vecEnd = vecSrc + vecDir * flDistance;
+		bool ahs = false;
+		while (ahs == false) {
 		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
-
 		tracer = 0;
 		if (iTracerFreq != 0 && (tracerCount++ % iTracerFreq) == 0)
 		{
@@ -918,8 +919,9 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 			}
 		}
 		// do damage, paint decals
-		if (tr.flFraction != 1.0)
+		if (tr.flFraction != 1.0 && CBaseEntity::Instance(tr.pHit)->pev->rendermode == kRenderNormal)
 		{
+			ahs = true;
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
 
 			if (iDamage)
@@ -978,7 +980,18 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 
 				break;
 			}
+			
 		}
+			vecSrc = tr.vecEndPos + (vecDir*0.01); // this is so inefficient lmao
+			if (vecSrc.Length() > 16384) {
+				ahs = true;
+			}
+			vecEnd = vecSrc + vecDir * flDistance;
+		}
+		
+
+
+
 		// make bullet trails
 		UTIL_BubbleTrail(vecSrc, tr.vecEndPos, (flDistance * tr.flFraction) / 64.0);
 	}
@@ -1038,7 +1051,6 @@ UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr
 		{
 			ahs = true;
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
-			UTIL_ClientPrintAll(print_chat, "actually hit something");
 			
 			// lag compensation debug code (shows a trace and monster state for misses)
 			/*
@@ -1131,11 +1143,8 @@ UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr
 				break;
 			}
 		}
-			vecSrc = tr.vecEndPos + (vecDir*0.001); // this is so inefficient lmao
-			ALERT(at_console, "looping\n");
-			ALERT(at_console, "%f\n", vecSrc.x);
-			ALERT(at_console, "%f\n", vecSrc.y);
-			ALERT(at_console, "%f\n", vecSrc.z);
+			vecSrc = tr.vecEndPos + (vecDir*0.01); // this is so inefficient lmao
+
 			if (vecSrc.Length() > 16384) {
 				ahs = true;
 			}
