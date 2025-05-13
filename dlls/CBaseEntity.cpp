@@ -919,7 +919,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 			}
 		}
 		// do damage, paint decals
-		if (tr.flFraction != 1.0 && (CBaseEntity::Instance(tr.pHit)->pev->rendermode == kRenderNormal or CBaseEntity::Instance(tr.pHit)->pev->IsBreakable()))
+		if (tr.flFraction != 1.0 && (CBaseEntity::Instance(tr.pHit)->pev->rendermode == kRenderNormal or CBaseEntity::Instance(tr.pHit)->IsBreakable()))
 		{
 			ahs = true;
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
@@ -1047,7 +1047,7 @@ Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDir
 UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
 
 		// do damage, paint decals
-		if (tr.flFraction != 1.0 && (CBaseEntity::Instance(tr.pHit)->pev->rendermode == kRenderNormal or CBaseEntity::Instance(tr.pHit)->pev->IsBreakable()))
+		if (tr.flFraction != 1.0 && (CBaseEntity::Instance(tr.pHit)->pev->rendermode == kRenderNormal or CBaseEntity::Instance(tr.pHit)->IsBreakable()))
 		{
 			ahs = true;
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
