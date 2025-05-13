@@ -1131,11 +1131,10 @@ UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr
 				break;
 			}
 		}
-		if (ahs == false) {
 			vecSrc = tr.vecEndPos + vecDir; // this is so inefficient lmao
-			UTIL_ClientPrintAll(print_console, UTIL_VarArgs("%v", vecSrc));
+			ConsolePrint("looping");
+			ConsolePrint(vecSrc);
 			vecEnd = vecSrc + vecDir * flDistance;
-		}
 		}
 		
 		// make bullet trails
