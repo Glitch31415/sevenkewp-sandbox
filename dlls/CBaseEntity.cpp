@@ -1029,11 +1029,14 @@ Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDir
 		Vector vecEnd;
 
 		vecEnd = vecSrc + vecDir * flDistance;
-		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
+		ahs = false;
+		while (ahs == false) {
+UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
 
 		// do damage, paint decals
 		if (tr.flFraction != 1.0 && CBaseEntity::Instance(tr.pHit)->pev->rendermode == kRenderNormal)
 		{
+			ahs = true;
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
 			UTIL_ClientPrintAll(print_chat, "actually hit something");
 			
@@ -1128,6 +1131,12 @@ Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDir
 				break;
 			}
 		}
+		if (ahs == false) {
+			vecSrc = tr.vecEndPos;
+			vecEnd = vecSrc + vecDir * flDistance;
+		}
+		}
+		
 		// make bullet trails
 		UTIL_BubbleTrail(vecSrc, tr.vecEndPos, (flDistance * tr.flFraction) / 64.0);
 	}
