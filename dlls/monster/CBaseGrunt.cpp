@@ -271,7 +271,7 @@ BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 		if ( !m_hEnemy->IsPlayer() && flDist <= 64 )
 		{
 			// kick nonclients, but don't shoot at them.
-			return FALSE;
+			//return FALSE;
 		}
 
 		Vector vecSrc = GetGunPosition();
@@ -1054,6 +1054,8 @@ void CBaseGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			break;
 
 		case HGRUNT_AE_BURST2:
+			Shoot(false);
+			break;
 		case HGRUNT_AE_BURST3:
 			Shoot(false);
 			break;
