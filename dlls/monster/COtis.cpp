@@ -558,9 +558,9 @@ BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 				shootTarget = pEnemy->Center();
 			}
 
-			UTIL_TraceLine( shootOrigin, shootTarget, dont_ignore_monsters, ENT(pev), &tr );
+			UTIL_TraceLine( shootOrigin, shootTarget, dont_ignore_monsters, ignore_glass, ENT(pev), &tr );
 			m_checkAttackTime = gpGlobals->time + 1;
-			if ( tr.flFraction == 1.0 || (tr.pHit != NULL && CBaseEntity::Instance(tr.pHit) == pEnemy) ) {
+			if ( tr.flFraction == 1.0 || (tr.pHit != NULL && CBaseEntity::Instance(tr.pHit) == pEnemy) or CBaseEntity::Instance(tr.pHit)->pev->rendermode != kRenderNormal ) {
 				m_lastAttackCheck = TRUE;
 				m_timefinishcheck = gpGlobals->time;
 			}
