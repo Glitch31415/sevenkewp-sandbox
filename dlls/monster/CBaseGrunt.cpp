@@ -283,8 +283,9 @@ BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 
 		if ( tr.flFraction == 1.0 || tr.pHit == m_hEnemy.GetEdict() or CBaseEntity::Instance(tr.pHit)->pev->rendermode != kRenderNormal)
 		{
-			return TRUE;
+			UTIL_ClientPrintAll(print_chat, "sees through non-solid wall");
 			m_lastAttackCheck = true;
+			return TRUE;
 		}
 
 		return m_lastAttackCheck;
