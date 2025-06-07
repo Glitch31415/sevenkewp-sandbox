@@ -484,9 +484,14 @@ int g_serveractive = 0;
 bool g_can_set_bsp_models = false;
 int g_edictsinit = 0;
 bool g_monstersNerfed = false;
+uint64_t g_levelChangeTime = 0; // time level change started
+uint64_t g_levelChangePluginTime = 0; // time spent in level change plugin hooks
 
 void ServerDeactivate( void )
 {
+	write_perf_marker("level_change_start");
+	g_levelChangeTime = getEpochMillis();
+
 	// It's possible that the engine will call this function more times than is necessary
 	//  Therefore, only run it one time for each call to ServerActivate 
 	if ( g_serveractive != 1 )
@@ -580,7 +585,9 @@ void ServerDeactivate( void )
 	//    SHA-1: 0c95b51652eda12e0b268631d1421634614c661f
 	//    fix physics breaking after long uptime
 
+	uint64_t hookStartTime = getEpochMillis();
 	CALL_HOOKS_VOID(pfnServerDeactivate);
+	g_levelChangePluginTime = getEpochMillis() - hookStartTime;
 }
 
 #include "lagcomp.h"
@@ -648,7 +655,6 @@ int PrecacheBspModels(bool serverSideModels) {
 
 	edict_t* edicts = ENT(0);
 
-	int numPrecached = 0;
 	StringSet uniqueBspModels;
 
 	for (int i = gpGlobals->maxClients + 1; i < gpGlobals->maxEntities; i++)
@@ -996,7 +1002,18 @@ UTIL_PrecacheOther("monster_kingpin");
 
 	LoadAdminList();
 
+	uint64_t hookStartTime = getEpochMillis();
 	CALL_HOOKS_VOID(pfnServerActivate);
+	g_levelChangePluginTime += getEpochMillis() - hookStartTime;
+
+	if (mp_perf.value && g_levelChangeTime) {
+		write_perf_marker("level_change_end");
+		uint64_t now = getEpochMillis();
+		uint32_t totalTime = now - g_levelChangeTime;
+		uint32_t gameTime = totalTime - g_levelChangePluginTime;
+		uint32_t pluginTime = g_levelChangePluginTime;
+		ALERT(at_logged, "Level change finished in %u ms (%u game, %u plugins)", totalTime, gameTime, pluginTime);
+	}
 }
 
 /*
