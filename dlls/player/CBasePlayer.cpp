@@ -3814,6 +3814,9 @@ GiveNamedItem("ammo_uziclip");
 
 
 
+	// for when mic audio breaks due to teleports or something else I don't understand yet
+	UTIL_ResetVoiceChannel(this);
+
 	CALL_HOOKS_VOID(pfnPlayerSpawn, this);
 }
 
