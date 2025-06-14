@@ -1331,6 +1331,9 @@ int CBaseMonster::CheckLocalMove(const Vector& vecStart, const Vector& vecEnd, C
 
 	vecStartPos = pev->origin;
 
+	if (pflDist)
+		*pflDist = 0; // initialize output
+
 	static cvar_t* dev = CVAR_GET_POINTER("developer");
 
 	if (dev->value == 255) {
