@@ -29,30 +29,18 @@ void CFuncTankGun::Fire(const Vector& barrelEnd, const Vector& forward, entvars_
 				switch (m_bulletType)
 				{
 				case TANK_BULLET_9MM:
-<<<<<<< HEAD
 					FireBullets(1, barrelEnd, forward, gTankSpread[m_spread], 131072, BULLET_MONSTER_9MM, 1, m_iBulletDamage, pevAttacker);
+					PLAY_DISTANT_SOUND(edict(), DISTANT_357);
 					break;
 
 				case TANK_BULLET_MP5:
 					FireBullets(1, barrelEnd, forward, gTankSpread[m_spread], 131072, BULLET_MONSTER_MP5, 1, m_iBulletDamage, pevAttacker);
+					PLAY_DISTANT_SOUND(edict(), DISTANT_357);
 					break;
 
 				case TANK_BULLET_12MM:
 					FireBullets(1, barrelEnd, forward, gTankSpread[m_spread], 131072, BULLET_MONSTER_12MM, 1, m_iBulletDamage, pevAttacker);
-=======
-					FireBullets(1, barrelEnd, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_9MM, 1, m_iBulletDamage, pevAttacker);
 					PLAY_DISTANT_SOUND(edict(), DISTANT_357);
-					break;
-
-				case TANK_BULLET_MP5:
-					FireBullets(1, barrelEnd, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_MP5, 1, m_iBulletDamage, pevAttacker);
-					PLAY_DISTANT_SOUND(edict(), DISTANT_357);
-					break;
-
-				case TANK_BULLET_12MM:
-					FireBullets(1, barrelEnd, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_12MM, 1, m_iBulletDamage, pevAttacker);
-					PLAY_DISTANT_SOUND(edict(), DISTANT_357);
->>>>>>> 82925e9047d69c2f1cd978924f2f0649d236c5d6
 					break;
 
 				default:
