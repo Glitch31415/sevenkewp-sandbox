@@ -192,9 +192,9 @@ int CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 			GiveScorePoints(pevAttacker, flDamage * 0.5f);
 
 		// do the damage
-		pev->health = V_min(pev->max_health, pev->health - flDamage);
+		pev->health = pev->health - flDamage;
 
-		if (pev->health <= 0)
+		if ((int)pev->health <= 0)
 		{
 			Killed(pevAttacker, GIB_NORMAL);
 			BreakableDie(Instance(pevAttacker));
@@ -1230,13 +1230,18 @@ void CBaseEntity::TraceBleed(float flDamage, Vector vecDir, TraceResult* ptr, in
 // This updates global tables that need to know about entities being removed
 void CBaseEntity::UpdateOnRemove(void)
 {
-	int	i;
+	// notify owner so more monsters can be spawned
+	CBaseEntity* pOwner = CBaseEntity::Instance(pev->owner);
+	if (pOwner) {
+		pOwner->DeathNotice(pev);
+		pev->owner = NULL;
+	}
 
 	if (FBitSet(pev->flags, FL_GRAPHED))
 	{
 		// this entity was a LinkEnt in the world node graph, so we must remove it from
 		// the graph since we are removing it from the world.
-		for (i = 0; i < WorldGraph.m_cLinks; i++)
+		for (int i = 0; i < WorldGraph.m_cLinks; i++)
 		{
 			if (WorldGraph.m_pLinkPool[i].m_pLinkEnt == pev)
 			{

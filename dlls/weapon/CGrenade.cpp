@@ -192,6 +192,7 @@ void CGrenade::Detonate( void )
 	CBaseEntity* pOwner = CBaseEntity::Instance(pev->owner);
 	if (pOwner) {
 		pOwner->DeathNotice(pev);
+		pev->owner = NULL;
 	}
 
 	TraceResult tr;

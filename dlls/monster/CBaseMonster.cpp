@@ -4613,6 +4613,7 @@ void CBaseMonster::Killed(entvars_t* pevAttacker, int iGib)
 	if (pOwner)
 	{
 		pOwner->DeathNotice(pev);
+		pev->owner = NULL;
 	}
 
 	if (ShouldGibMonster(iGib))
@@ -4756,7 +4757,7 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	}
 
 	// do the damage
-	pev->health = V_min(pev->max_health, pev->health - flTake);
+	pev->health = pev->health - flTake;
 
 	// HACKHACK Don't kill monsters in a script.  Let them break their scripts first
 	if (m_MonsterState == MONSTERSTATE_SCRIPT)
@@ -8232,13 +8233,7 @@ int CBaseMonster::IRelationship(CBaseEntity* pTarget)
 	return CBaseToggle::IRelationship(pTarget);
 }
 
-void CBaseMonster::UpdateOnRemove(void) {
-	// notify owner so more monsters can be spawned
-	CBaseEntity* pOwner = CBaseEntity::Instance(pev->owner);
-	if (pOwner) {
-		pOwner->DeathNotice(pev);
-	}
-	
+void CBaseMonster::UpdateOnRemove(void) {	
 	// doing this breaks/crashes maps (frightmanor), need to ripent
 	/*
 	pev->health = 0;

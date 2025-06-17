@@ -186,6 +186,7 @@ void CRoach :: Killed( entvars_t *pevAttacker, int iGib )
 	if ( pOwner )
 	{
 		pOwner->DeathNotice( pev );
+		pev->owner = NULL;
 	}
 	UTIL_Remove( this );
 }
