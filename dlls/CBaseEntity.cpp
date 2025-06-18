@@ -1232,9 +1232,9 @@ void CBaseEntity::UpdateOnRemove(void)
 {
 	// notify owner so more monsters can be spawned
 	CBaseEntity* pOwner = CBaseEntity::Instance(pev->owner);
-	if (pOwner) {
+	if (pOwner && !m_deathNoticeSent) {
 		pOwner->DeathNotice(pev);
-		pev->owner = NULL;
+		m_deathNoticeSent = true;
 	}
 
 	if (FBitSet(pev->flags, FL_GRAPHED))
