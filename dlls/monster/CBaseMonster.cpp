@@ -4766,7 +4766,7 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		return 0;
 	}
 
-	if (pev->health <= 0)
+	if (pev->health < 1) // not 0 because players enter a semi-dead state when between 0 and 1
 	{
 
 
