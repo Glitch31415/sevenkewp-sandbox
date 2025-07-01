@@ -90,6 +90,10 @@ void CPipewrench::Precache()
 
 BOOL CPipewrench::Deploy()
 {
+	CBasePlayer* m_pPlayer = GetPlayer();
+	if (!m_pPlayer)
+		return FALSE;
+
 	return DefaultDeploy(GetModelV(), GetModelP(), PIPEWRENCH_DRAW, "crowbar");
 }
 
@@ -120,10 +124,29 @@ void CPipewrench::PrimaryAttack()
 
 void CPipewrench::SecondaryAttack()
 {
+	CBasePlayer* m_pPlayer = GetPlayer();
+	if (!m_pPlayer)
+		return;
+
 	if (m_iSwingMode != SWING_START_BIG)
 	{
 		SendWeaponAnim(PIPEWRENCH_BIG_SWING_START);
 		m_flBigSwingStart = gpGlobals->time;
+
+		
+		if (m_pPlayer->m_playerModelAnimSet != PMODEL_ANIMS_HALF_LIFE) {
+			strcpy_safe(m_pPlayer->m_szAnimExtention, "wrench", 32);
+			strcpy_safe(m_pPlayer->m_szAnimAction, "cock", 32);
+		}
+		m_pPlayer->SetAnimation(PLAYER_COCK_WEAPON);
+	}
+	else if (m_pPlayer->m_playerModelAnimSet == PMODEL_ANIMS_HALF_LIFE) {
+		// reset the cocking animation if interrupted 
+		if (m_pPlayer->m_Activity == ACT_WALK) {
+			m_pPlayer->SetAnimation(PLAYER_COCK_WEAPON);
+			m_pPlayer->pev->frame = 1; // last frame estimate
+			m_pPlayer->SetAnimation(PLAYER_WALK); // find the actual last frame
+		}
 	}
 
 	m_iSwingMode = SWING_START_BIG;
@@ -210,8 +233,7 @@ bool CPipewrench::Swing(const bool bFirst)
 			}
 			*/
 
-			// player "shoot" animation
-			m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+			PlayerModelSwingAnim();
 
 			switch (((m_iSwing++) % 2) + 1)
 			{
@@ -252,8 +274,7 @@ bool CPipewrench::Swing(const bool bFirst)
 			break;
 		}
 
-		// player "shoot" animation
-		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+		PlayerModelSwingAnim();
 
 #ifndef CLIENT_DLL
 
@@ -438,16 +459,10 @@ void CPipewrench::BigSwing()
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
 
 		SendWeaponAnim(PIPEWRENCH_BIG_SWING_MISS);
-
-		// player "shoot" animation
-		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 	}
 	else
 	{
 		SendWeaponAnim(PIPEWRENCH_BIG_SWING_HIT);
-
-		// player "shoot" animation
-		m_pPlayer->SetAnimation(PLAYER_ATTACK1);
 
 #ifndef CLIENT_DLL
 
@@ -574,6 +589,9 @@ void CPipewrench::BigSwing()
 		m_flNextSecondaryAttack = GetNextAttackDelay(1.0);
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
 	}
+
+	PlayerModelSwingAnim();
+	m_iSwingMode = SWING_NONE;
 }
 
 void CPipewrench::WeaponIdle()
@@ -619,6 +637,19 @@ void CPipewrench::WeaponIdle()
 		}
 
 		SendWeaponAnim(iAnim);
+	}
+}
+
+void CPipewrench::PlayerModelSwingAnim() {
+	CBasePlayer* m_pPlayer = GetPlayer();
+	if (!m_pPlayer)
+		return;
+	
+	m_pPlayer->SetAnimation(PLAYER_ATTACK1);
+
+	if (m_pPlayer->m_playerModelAnimSet != PMODEL_ANIMS_HALF_LIFE) {
+		strcpy_safe(m_pPlayer->m_szAnimExtention, "crowbar", 32);
+		strcpy_safe(m_pPlayer->m_szAnimAction, "aim", 32);
 	}
 }
 

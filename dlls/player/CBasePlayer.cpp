@@ -1047,9 +1047,16 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 	float speed;
 	char szAnim[64];
 
+	bool hasNewAnims = m_playerModelAnimSet != PMODEL_ANIMS_HALF_LIFE;
+
+	if (!hasNewAnims && playerAnim == PLAYER_DEPLOY_WEAPON) {
+		return; // HL models don't have these animations
+	}
+
 	speed = pev->velocity.Length2D();
 	bool upperBodyActing = (m_Activity == ACT_RANGE_ATTACK1 || m_Activity == ACT_RELOAD
-		|| m_Activity == ACT_USE || m_Activity == ACT_ARM);
+		|| m_Activity == ACT_USE || m_Activity == ACT_ARM || m_Activity == ACT_DISARM
+		|| m_Activity == ACT_THREAT_DISPLAY);
 
 	if (pev->flags & FL_FROZEN)
 	{
@@ -1076,6 +1083,8 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 	case PLAYER_ATTACK1:
 	case PLAYER_USE:
 	case PLAYER_DROP_ITEM:
+	case PLAYER_DEPLOY_WEAPON:
+	case PLAYER_COCK_WEAPON:
 		switch( m_Activity )
 		{
 		case ACT_DIESIMPLE:
@@ -1089,7 +1098,13 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 				m_IdealActivity = ACT_RANGE_ATTACK1;
 			}
 			else if (playerAnim == PLAYER_DROP_ITEM) {
+				m_IdealActivity = ACT_DISARM;
+			}
+			else if (playerAnim == PLAYER_DEPLOY_WEAPON) {
 				m_IdealActivity = ACT_ARM;
+			}
+			else if (playerAnim == PLAYER_COCK_WEAPON) {
+				m_IdealActivity = ACT_THREAT_DISPLAY;
 			}
 			else {
 				m_IdealActivity = ACT_USE;
@@ -1100,7 +1115,10 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 	case PLAYER_IDLE:
 	case PLAYER_WALK:
 	{
-		if (pev->waterlevel > 1)
+		if (m_afPhysicsFlags & PFLAG_ONBARNACLE) {
+			m_IdealActivity = m_isBarnacleFood ? ACT_BARNACLE_CHEW : ACT_BARNACLE_PULL;
+		}
+		else if (pev->waterlevel > 1)
 		{
 			if (speed < 128 && !(pev->flags & FL_DUCKING))
 				m_IdealActivity = ACT_HOVER;
@@ -1117,6 +1135,12 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 		}
 		break;
 	}
+	case PLAYER_BARNACLE_HIT:
+		m_IdealActivity = ACT_BARNACLE_HIT;
+		break;
+	case PLAYER_BARNACLE_CRUNCH:
+		m_IdealActivity = ACT_BARNACLE_CHOMP;
+		break;
 	}
 
 	switch (m_IdealActivity)
@@ -1144,6 +1168,15 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 		if (pev->sequence == animDesired)
 			return;
 
+		if (hasNewAnims) {
+			if (m_IdealActivity == ACT_HOP) {
+				animDesired = LookupSequence("jump2"); // totally different anim
+			}
+			if (m_IdealActivity == ACT_LEAP) {
+				animDesired = LookupSequence("long_jump2"); // more accurate hitboxes
+			}
+		}
+
 		pev->gaitsequence = 0;
 		pev->sequence = animDesired;
 		pev->frame = 0;
@@ -1152,7 +1185,8 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 	}
 	case ACT_RANGE_ATTACK1:
 	{
-		if ((m_Activity == ACT_HOP || m_Activity == ACT_LEAP) && pev->frame < 220) {
+		int minAttackFrame = hasNewAnims ? 58 : 220;
+		if ((m_Activity == ACT_HOP || m_Activity == ACT_LEAP) && pev->frame < minAttackFrame) {
 			// jump animation has priority
 			return;
 		}
@@ -1162,12 +1196,12 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 		else
 			strcpy_safe(szAnim, "ref_shoot_", 64);
 
-		if (!strcmp(m_szAnimExtention, "bow")) {
-			strcat_safe(szAnim, "shotgun", 64); // hl bow shoot anim is the same as aiming
+		strcat_safe(szAnim, m_szAnimExtention, 64);
+
+		if (hasNewAnims && !strcmp(m_szAnimExtention, "shotgun")) {
+			strcat_safe(szAnim, "2", 64); // the second anim includes cocking
 		}
-		else {
-			strcat_safe(szAnim, m_szAnimExtention, 64);
-		}
+
 
 		animDesired = LookupSequence(szAnim);
 		if (animDesired == -1)
@@ -1187,12 +1221,95 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 
 		pev->sequence = animDesired;
 		ResetSequenceInfo();
+
+		if (hasNewAnims) {
+			pev->framerate = 1.0f; // undo custom model adjustments (xbow shoot)
+		}
+
 		break;
 	}
+	
+	case ACT_BARNACLE_CHEW:
+	case ACT_BARNACLE_PULL:
+	{
+		bool specialAnimPlaying = m_Activity == ACT_BARNACLE_HIT || m_Activity == ACT_BARNACLE_CHOMP;
+		if (specialAnimPlaying && !m_fSequenceFinished) {
+			return;
+		}
+
+		if (hasNewAnims) {
+			if (m_IdealActivity == ACT_BARNACLE_CHEW)
+				animDesired = LookupSequence("barnaclechew");
+			else
+				animDesired = LookupSequence("barnaclepull");
+		}
+		else {
+			animDesired = LookupSequence("headshot");
+		}
+
+		if (pev->sequence == animDesired)
+			return;
+
+		m_Activity = m_IdealActivity;
+		pev->sequence = animDesired;
+
+		if (hasNewAnims) {
+			pev->gaitsequence = pev->sequence;
+			pev->frame = 0;
+			ResetSequenceInfo();
+		}
+		else {
+			pev->gaitsequence = LookupSequence("treadwater");
+			pev->frame = (2.0f / 28.0f) * 255.0f;
+			ResetSequenceInfo();
+			pev->framerate = FLT_MIN;
+		}
+		return;
+	}
+
+	case ACT_BARNACLE_HIT:
+		animDesired = LookupSequence(hasNewAnims ? "barnaclehit" : "headshot");
+		m_Activity = m_IdealActivity;
+		pev->sequence = animDesired;
+		
+		if (hasNewAnims) {
+			pev->gaitsequence = pev->sequence;
+			pev->frame = 0;
+			ResetSequenceInfo();
+		}
+		else {
+			pev->gaitsequence = LookupSequence("treadwater");
+			pev->frame = (2.0f / 28.0f) * 255.0f;
+			ResetSequenceInfo();
+			pev->framerate = FLT_MIN;
+		}
+		return;
+
+	case ACT_BARNACLE_CHOMP:
+		animDesired = LookupSequence(hasNewAnims ? "barnaclecrunch" : "headshot");
+		m_Activity = m_IdealActivity;
+		pev->sequence = animDesired;
+		pev->frame = 0;
+		ResetSequenceInfo();
+
+		if (hasNewAnims) {
+			pev->gaitsequence = pev->sequence;
+			pev->frame = 0;
+			ResetSequenceInfo();
+		}
+		else {
+			pev->gaitsequence = LookupSequence("treadwater");
+			pev->frame = (3.0f / 28.0f) * 255.0f;
+			ResetSequenceInfo();
+			pev->framerate = FLT_MIN;
+		}
+		return;
 
 	case ACT_USE:
+	case ACT_DISARM:
 	case ACT_ARM:
 	case ACT_RELOAD:
+	case ACT_THREAT_DISPLAY:
 	{
 		if ((m_Activity == ACT_HOP || m_Activity == ACT_LEAP) && pev->frame < 200) {
 			// jump animation has priority
@@ -1203,16 +1320,42 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 		const char* seqName = "";
 
 		if (m_IdealActivity == ACT_ARM) {
+			strcpy_safe(szAnim, ducking ? "crouch_draw_" : "ref_draw_", 64);
+			strcat_safe(szAnim, m_szAnimExtention, 64);
+			seqName = szAnim;
+		}
+		else if (m_IdealActivity == ACT_DISARM) {
 			seqName = ducking ? "crouch_shoot_squeak" : "ref_shoot_squeak";
 		}
 		else if (m_IdealActivity == ACT_USE) {
 			seqName = ducking ? "crouch_shoot_trip" : "ref_shoot_trip";
 		}
-		else {
+		else if (m_IdealActivity == ACT_THREAT_DISPLAY) {
+			if (hasNewAnims) {
+				strcpy_safe(szAnim, ducking ? "crouch_cock_" : "ref_cock_", 64);
+				strcat_safe(szAnim, m_szAnimExtention, 64);
+				seqName = szAnim;
+			}
+			else {
+				// the only animation that looks like charging up is a reversed crowbar swing
+				seqName = "ref_shoot_crowbar";
+			}
+		}
+		else { // reload
+
+			// snark petting kind of looks like a reload in HL
 			seqName = ducking ? "crouch_aim_squeak" : "ref_aim_squeak";
+
+			if (hasNewAnims) {
+				duration = 0; // this hacky way to add new anims is not needed for SC models where each gun has its own anim.
+				strcpy_safe(szAnim, ducking ? "crouch_reload_" : "ref_reload_", 64);
+				strcat_safe(szAnim, m_szAnimExtention, 64);
+				seqName = szAnim;
+			}
 		}
 
-		animDesired = LookupSequence(seqName);
+		void* mdl = m_playerModel ? m_playerModel : GET_MODEL_PTR(ENT(pev));
+		animDesired = ::LookupSequence(mdl, seqName);
 
 		if (animDesired == -1)
 			animDesired = 0;
@@ -1224,6 +1367,7 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 
 		//if (!m_fSequenceLoops)
 		{
+			// TODO: this isn't enough. Deploy anims are skipping some early frames.
 			pev->effects |= EF_NOINTERP;
 		}
 
@@ -1231,6 +1375,22 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 
 		pev->sequence = animDesired;
 		ResetSequenceInfo();
+
+		if (m_IdealActivity == ACT_THREAT_DISPLAY && !hasNewAnims) {
+			bool isGrenade = !strcmp(m_szAnimExtention, "grenade");
+
+			if (isGrenade) {
+				pev->frame = (3.0f / 13.0f) * 255.0f;
+				ResetSequenceInfo();
+				pev->framerate = -0.08f;
+			}
+			else { // wrench
+				pev->frame = (3.5f / 13.0f) * 255.0f;
+				ResetSequenceInfo();
+				pev->framerate = -0.05f;
+			}
+		}
+
 		break;
 	}
 	case ACT_WALK:
@@ -1238,18 +1398,58 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 		if (!upperBodyActing || m_fSequenceFinished)
 		{
 			if (FBitSet(pev->flags, FL_DUCKING))	// crouching
-				strcpy_safe(szAnim, "crouch_aim_", 64);
+				strcpy_safe(szAnim, "crouch_", 64);
 			else
-				strcpy_safe(szAnim, "ref_aim_", 64);
+				strcpy_safe(szAnim, "ref_", 64);
+
+			strcat_safe(szAnim, m_szAnimAction, 64);
+			strcat_safe(szAnim, "_", 64);
 			strcat_safe(szAnim, m_szAnimExtention, 64);
 			animDesired = LookupSequence(szAnim);
-			if (animDesired == -1)
-				animDesired = 0;
+
+			if (animDesired == -1) {
+				// no weapons held animations for the upper body
+
+				if (FBitSet(pev->flags, FL_DUCKING)) {
+					if (speed > 0) {
+						animDesired = 6;
+						SyncGaitAnimations(animDesired, speed, 0.0135f);
+					}
+					else if (speed == 0) {
+						animDesired = 7;
+					}
+				}
+				else {
+					if (speed > 220) {
+						animDesired = 3;
+						SyncGaitAnimations(animDesired, speed, 0.003f);
+					}
+					else if (speed > 0) {
+						animDesired = 4;
+						SyncGaitAnimations(animDesired, speed, 0.0155f);
+					}
+					else if (speed == 0) {
+						animDesired = 0;
+					}
+				}
+			}
+
 			m_Activity = ACT_WALK;
 		}
 		else
 		{
 			animDesired = pev->sequence;
+
+			if (m_Activity == ACT_THREAT_DISPLAY && !hasNewAnims) {
+				// stop the chargeup animation
+				bool isGrenade = !strcmp(m_szAnimExtention, "grenade");
+				float endFrame = ((isGrenade ? 2.2f : 2.5f) / 13.0f) * 255.0f;
+
+				if (pev->frame < endFrame) {
+					pev->frame = endFrame;
+					pev->framerate = FLT_MIN;
+				}
+			}
 		}
 	}
 	}
@@ -1277,7 +1477,7 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 	else
 	{
 		// pev->gaitsequence	= LookupActivity( ACT_WALK );
-		pev->gaitsequence	= LookupSequence( "deep_idle" );
+		pev->gaitsequence = LookupSequence("deep_idle");
 	}
 
 	if (duration) {
@@ -1847,6 +2047,26 @@ void CBasePlayer::PlayerUse ( void )
 	if ( ! ((pev->button | m_afButtonPressed | m_afButtonReleased) & IN_USE) )
 		return;
 
+	// continuous use animation
+	if ((pev->button & IN_USE) && (m_Activity == ACT_WALK || m_Activity == ACT_USE)) {
+		if (m_Activity != ACT_USE) {
+			SetAnimation(PLAYER_USE);
+		}
+		else {
+			if (pev->framerate > 0 && pev->frame > 85) {
+				pev->frame = 85;
+				pev->framerate = -0.2f;
+			}
+			else if (pev->framerate < 0 && pev->frame < 65) {
+				pev->frame = 65;
+				pev->framerate = 0.2f;
+			}
+		}
+	}
+	else if (m_Activity == ACT_USE) {
+		pev->framerate = 1.0f;
+	}
+
 	// Hit Use on a train?
 	if ( m_afButtonPressed & IN_USE )
 	{
@@ -1998,13 +2218,7 @@ void CBasePlayer::PlayerUse ( void )
 
 		// if antiblock is enabled, don't trigger things until the button is released
 		// because the player might be holding it down for an antiblock attempt
-		bool isToggleUse;
-		if (mp_antiblock.value) {
-			isToggleUse = shouldToggle && (caps & (FCAP_IMPULSE_USE | FCAP_ONOFF_USE));
-		}
-		else {
-			isToggleUse = shouldToggle && (caps & (FCAP_IMPULSE_USE | FCAP_ONOFF_USE));
-		}
+		bool isToggleUse = shouldToggle && (caps & (FCAP_IMPULSE_USE | FCAP_ONOFF_USE));
 
 		if (isContinuousUse || (isToggleUse && !m_useExpired))
 		{
@@ -5150,9 +5364,11 @@ void CBasePlayer::SetPrefsFromUserinfo(char* infobuffer)
 // FBecomeProne - Overridden for the player to set the proper
 // physics flags when a barnacle grabs player.
 //=========================================================
-BOOL CBasePlayer :: FBecomeProne ( void )
+BOOL CBasePlayer ::BarnacleVictimCaught( void )
 {
 	m_afPhysicsFlags |= PFLAG_ONBARNACLE;
+	m_isBarnacleFood = false;
+	SetAnimation(PLAYER_BARNACLE_HIT);
 	return TRUE;
 }
 
@@ -5163,7 +5379,9 @@ BOOL CBasePlayer :: FBecomeProne ( void )
 //=========================================================
 void CBasePlayer :: BarnacleVictimBitten ( entvars_t *pevBarnacle )
 {
-	TakeDamage ( pevBarnacle, pevBarnacle, pev->health + pev->armorvalue, DMG_SLASH | DMG_ALWAYSGIB );
+	m_isBarnacleFood = true;
+	TakeDamage ( pevBarnacle, pevBarnacle, gSkillData.sk_barnacle_dmg_bite, DMG_SLASH | DMG_ALWAYSGIB );
+	SetAnimation(PLAYER_BARNACLE_CRUNCH);
 }
 
 //=========================================================
@@ -5172,6 +5390,7 @@ void CBasePlayer :: BarnacleVictimBitten ( entvars_t *pevBarnacle )
 //=========================================================
 void CBasePlayer :: BarnacleVictimReleased ( void )
 {
+	m_isBarnacleFood = false;
 	m_afPhysicsFlags &= ~PFLAG_ONBARNACLE;
 }
 
@@ -6840,4 +7059,48 @@ void CBasePlayer::NightvisionUpdate() {
 	m_lastNightvisionFadeUpdate = g_engfuncs.pfnTime();
 
 	UTIL_ScreenFade(this, m_nightvisionColor.ToVector(), 0.1f, 3.0f, 255, FFADE_MODULATE | FFADE_IN, true);
+}
+
+void CBasePlayer::ResetSequenceInfo() {
+	CBaseAnimating::ResetSequenceInfo();
+
+	if (m_playerModel) {
+		// m_flFrameRate must match the model or else the animations stutters
+		float oldFrameRate = m_flFrameRate;
+		GetSequenceInfo(m_playerModel, pev, &m_flFrameRate, &m_flGroundSpeed);
+		pev->framerate *= oldFrameRate / m_flFrameRate;
+	}
+}
+
+void CBasePlayer::SyncGaitAnimations(int animDesired, float gaitSpeed, float defaultSyncMultiplier) {
+	pev->framerate = gaitSpeed * defaultSyncMultiplier;
+	
+	if (!m_playerModel) {
+		return;
+	}
+
+	studiohdr_t* defaultModel = (studiohdr_t*)GET_MODEL_PTR(ENT(pev));
+
+	if (!defaultModel || animDesired >= defaultModel->numseq || animDesired >= m_playerModel->numseq) {
+		return;
+	}
+
+	mstudioseqdesc_t* defaultSeq = (mstudioseqdesc_t*)((byte*)defaultModel + defaultModel->seqindex) + animDesired;
+	mstudioseqdesc_t* customSeq = (mstudioseqdesc_t*)((byte*)m_playerModel + m_playerModel->seqindex) + animDesired;
+
+	float defaultFramerate = 256 * defaultSeq->fps / (defaultSeq->numframes - 1);
+	float customFramerate = 256 * customSeq->fps / (customSeq->numframes - 1);
+
+	if (!customFramerate || !customSeq->linearmovement[0])
+		return;
+
+	// client-side gait fps depends on linear movement value stored in their model
+	// which may not match the default player.mdl value.
+	pev->framerate *= defaultSeq->linearmovement[0] / customSeq->linearmovement[0];
+
+	// undo the framerate adjustment in ResetSequenceInfo
+	pev->framerate *= defaultFramerate / customFramerate;
+
+	// TODO: predict gait frame calculated by the client.
+	// Arm and leg movements are starting on the wrong frames.
 }

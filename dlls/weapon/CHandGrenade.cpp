@@ -83,8 +83,13 @@ int CHandGrenade::GetItemInfo(ItemInfo *p)
 
 BOOL CHandGrenade::Deploy( )
 {
+	CBasePlayer* m_pPlayer = GetPlayer();
+	if (!m_pPlayer)
+		return FALSE;
+
 	m_flReleaseThrow = -1;
-	return DefaultDeploy(GetModelV(), GetModelP(), HANDGRENADE_DRAW, "crowbar" );
+	const char* animext = m_pPlayer->m_playerModelAnimSet == PMODEL_ANIMS_HALF_LIFE ? "squeak" : "gren";
+	return DefaultDeploy(GetModelV(), GetModelP(), HANDGRENADE_DRAW, animext);
 }
 
 BOOL CHandGrenade::CanHolster( void )
@@ -129,6 +134,24 @@ void CHandGrenade::PrimaryAttack()
 
 		SendWeaponAnim( HANDGRENADE_PINPULL );
 		m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 0.5;
+
+		if (m_pPlayer->m_playerModelAnimSet == PMODEL_ANIMS_HALF_LIFE) {
+			strcpy_safe(m_pPlayer->m_szAnimExtention, "grenade", 32); // doesn't exist, just used to trigger different chargup behavior
+			m_pPlayer->SetAnimation(PLAYER_COCK_WEAPON);
+		}
+		else {
+			m_pPlayer->SetAnimation(PLAYER_COCK_WEAPON);
+			strcpy_safe(m_pPlayer->m_szAnimAction, "hold", 32);
+		}
+	}
+
+	if (m_pPlayer->m_playerModelAnimSet == PMODEL_ANIMS_HALF_LIFE && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0) {
+		// reset the cocking animation if interrupted 
+		if (m_pPlayer->m_Activity == ACT_WALK) {
+			m_pPlayer->SetAnimation(PLAYER_COCK_WEAPON);
+			m_pPlayer->pev->frame = 1; // last frame estimate
+			m_pPlayer->SetAnimation(PLAYER_WALK); // find the actual last frame
+		}
 	}
 }
 
@@ -186,7 +209,15 @@ void CHandGrenade::WeaponIdle( void )
 		}
 
 		// player "shoot" animation
+		if (m_pPlayer->m_playerModelAnimSet == PMODEL_ANIMS_HALF_LIFE)
+			strcpy_safe(m_pPlayer->m_szAnimExtention, "crowbar", 32);
+
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
+
+		if (m_pPlayer->m_playerModelAnimSet == PMODEL_ANIMS_HALF_LIFE)
+			strcpy_safe(m_pPlayer->m_szAnimExtention, "squeak", 32);
+		else
+			strcpy_safe(m_pPlayer->m_szAnimAction, "aim", 32);
 
 		m_flReleaseThrow = 0;
 		m_flStartThrow = 0;
