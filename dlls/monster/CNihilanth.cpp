@@ -1182,7 +1182,7 @@ int CNihilanth :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, f
 	PainSound( );
 
 	pev->health -= flDamage;
-	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+	return 0;
 }
 
 
