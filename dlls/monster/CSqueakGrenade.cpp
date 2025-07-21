@@ -356,6 +356,7 @@ void CSqueakGrenade::SuperBounceTouch( CBaseEntity *pOther )
 				float dmg = GetDamage(gSkillData.sk_snark_dmg_bite);
 				pev->owner = oldOwner;
 
+
 				// ALERT( at_console, "hit enemy\n");
 				ClearMultiDamage( );
 				pOther->TraceAttack(pev, dmg, gpGlobals->v_forward, &tr, DMG_SLASH );

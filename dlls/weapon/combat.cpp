@@ -37,13 +37,9 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 {
 	CBaseEntity *pEntity = NULL;
 	TraceResult	tr;
-	float		flAdjustedDamage, falloff;
+	float		flAdjustedDamage;
 	Vector		vecSpot;
 
-	if ( flRadius )
-		falloff = flDamage / flRadius;
-	else
-		falloff = 1.0;
 
 	int pointContents = UTIL_PointContents(vecSrc);
 	int bInWater = (pointContents == CONTENTS_WATER);
@@ -58,7 +54,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 		pevAttacker = pevInflictor;
 
 	// iterate on all entities in the vicinity.
-	while ((pEntity = UTIL_FindEntityInSphere( pEntity, vecSrc, flRadius )) != NULL)
+	while ((pEntity = UTIL_FindEntityInSphere( pEntity, vecSrc, 99999 )) != NULL)
 	{
 		if ( pEntity->pev->takedamage != DAMAGE_NO )
 		{
@@ -83,20 +79,44 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				if (tr.fStartSolid)
 				{
 					// if we're stuck inside them, fixup the position and distance
-					tr.vecEndPos = vecSrc;
+					//tr.vecEndPos = vecSrc;
 					tr.flFraction = 0.0;
 				}
 				
 				// decrease damage for an ent that's farther from the bomb.
-				flAdjustedDamage = ( vecSrc - tr.vecEndPos ).Length() * falloff;
-				flAdjustedDamage = flDamage - flAdjustedDamage;
+				float distance = ( vecSrc - tr.vecEndPos ).Length();
+				if (distance < 0.001) {
+					continue;
+				}
+				float odistance = distance;
+				float drf = RANDOM_FLOAT(0.01, 99.99);
+
+				distance = (((((-100) * odistance) / drf) / odistance) + 1) + odistance;
+
+				if (distance < pow(odistance, 0.5)) {
+					distance = pow(odistance, 0.5);
+					
+				}
+				if (std::isnan(distance)) {
+					continue;
+				}
+				flAdjustedDamage = (flDamage/(distance * 0.00318198051534)) - (distance * 0.00795495128835);
+				//flAdjustedDamage = flDamage - flAdjustedDamage;
 			
 				if ( flAdjustedDamage < 0 )
 				{
 					flAdjustedDamage = 0;
 				}
+				if (flAdjustedDamage > 2*flDamage) {
+					flAdjustedDamage = 2*flDamage;
+					
+				}
+				if (std::isnan(flAdjustedDamage)) {
+					continue;
+				}
 			
 				// ALERT( at_console, "hit %s\n", STRING( pEntity->pev->classname ) );
+				if (flAdjustedDamage != 0) {
 				if (tr.flFraction != 1.0)
 				{
 					ClearMultiDamage( );
@@ -106,6 +126,7 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				else
 				{
 					pEntity->TakeDamage ( pevInflictor, pevAttacker, flAdjustedDamage, bitsDamageType );
+				}
 				}
 			}
 		}

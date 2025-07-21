@@ -898,6 +898,14 @@ int PM_FlyMove (void)
 		// See if we can make it from origin to end point.
 		trace = pmove->PM_PlayerTrace (pmove->origin, end, PM_NORMAL, -1 );
 
+		if (trace.fraction == 0.0)
+		{
+			// Move end point to a thousandth fraction of the unit vector away from the wall and try to move again
+			for (i = 0; i < 3; i++)
+				end[i] += trace.plane.normal[i] * 0.001;
+			trace = pmove->PM_PlayerTrace(pmove->origin, end, PM_NORMAL, -1);
+		}
+
 		allFraction += trace.fraction;
 		// If we started in a solid object, or we were in solid space
 		//  the whole way, zero out our velocity and return that we

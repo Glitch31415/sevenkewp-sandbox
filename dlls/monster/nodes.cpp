@@ -808,7 +808,7 @@ void inline CalcBounds(int &Lower, int &Upper, int Goal, int Best)
     }
 }
 
-// Convert from [-8192,8192] to [0, 255]
+// Convert from [-131072,8192] to [0, 255]
 //
 inline int CALC_RANGE(int x, int lower, int upper)
 {

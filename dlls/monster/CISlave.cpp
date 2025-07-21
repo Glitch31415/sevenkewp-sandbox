@@ -281,10 +281,11 @@ void CISlave::CantFollowSound() {
 //=========================================================
 int CISlave :: ISoundMask ( void) 
 {
-	return	bits_SOUND_WORLD	|
-			bits_SOUND_COMBAT	|
-			bits_SOUND_DANGER	|
-			bits_SOUND_PLAYER;
+	//return	bits_SOUND_WORLD	|
+			//bits_SOUND_COMBAT	|
+			//bits_SOUND_DANGER	|
+			//bits_SOUND_PLAYER;
+	return bits_ALL_SOUNDS;
 }
 
 

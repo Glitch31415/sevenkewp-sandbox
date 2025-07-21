@@ -347,9 +347,9 @@ void CBodyGuard::Precache()
 	case 6:
 		m_iEquipment |= MEQUIP_SNIPER;
 		m_cClipSize = SNIPER_CLIP_SIZE;
-		m_flDistTooFar = 4096.0;
+		m_flDistTooFar = 131072.0;
 		m_flDistLook = 4096.0;
-		maxShootDist = 4096.0;
+		maxShootDist = 131072.0;
 		break;
 	case 7:
 		m_iEquipment |= MEQUIP_MINIGUN;
@@ -404,7 +404,7 @@ void CBodyGuard::InitAiFlags() {
 	waitForEnemyFire = false;
 	runFromHeavyDamage = false;
 	canCallMedic = false;
-	maxShootDist = 2048;
+	maxShootDist = 131072.0;
 }
 
 DEFINE_CUSTOM_SCHEDULES(CBodyGuard)
@@ -598,13 +598,14 @@ const char* CBodyGuard::DisplayName() {
 
 int CBodyGuard::ISoundMask(void)
 {
-	return	bits_SOUND_WORLD |
-		bits_SOUND_COMBAT |
-		bits_SOUND_PLAYER |
-		bits_SOUND_DANGER |
-		bits_SOUND_CARCASS |
-		bits_SOUND_MEAT |
-		bits_SOUND_GARBAGE;
+	//return	bits_SOUND_WORLD |
+		//bits_SOUND_COMBAT |
+		//bits_SOUND_PLAYER |
+		//bits_SOUND_DANGER |
+		//bits_SOUND_CARCASS |
+		//bits_SOUND_MEAT |
+		//bits_SOUND_GARBAGE;
+	return bits_ALL_SOUNDS;
 }
 
 void CBodyGuard::AlertSound()

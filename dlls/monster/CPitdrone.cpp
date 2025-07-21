@@ -456,12 +456,13 @@ BOOL CPitdrone :: FValidateHintType ( short sHint )
 //=========================================================
 int CPitdrone :: ISoundMask ( void )
 {
-	return	bits_SOUND_WORLD	|
-			bits_SOUND_COMBAT	|
-			bits_SOUND_CARCASS	|
-			bits_SOUND_MEAT		|
-			bits_SOUND_GARBAGE	|
-			bits_SOUND_PLAYER;
+	//return	bits_SOUND_WORLD	|
+			//bits_SOUND_COMBAT	|
+			//bits_SOUND_CARCASS	|
+			//bits_SOUND_MEAT		|
+			//bits_SOUND_GARBAGE	|
+			//bits_SOUND_PLAYER;
+	return bits_ALL_SOUNDS;
 }
 
 //=========================================================

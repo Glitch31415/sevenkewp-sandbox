@@ -39,6 +39,8 @@
 #define	OTIS_BODY_GUNDRAWN		1
 #define OTIS_BODY_GUNGONE			2
 
+
+
 namespace OtisBodyGroup
 {
 enum OtisBodyGroup
@@ -116,6 +118,7 @@ public:
 	BOOL	m_fGunDrawn;
 	float	m_painTime;
 	float	m_checkAttackTime;
+	float   m_timefinishcheck;
 	BOOL	m_lastAttackCheck;
 
 	//These were originally used to store off the setting AND track state,
@@ -419,7 +422,24 @@ IMPLEMENT_CUSTOM_SCHEDULES( COtis, CTalkSquadMonster )
 
 void COtis :: StartTask( Task_t *pTask )
 {
-	CTalkSquadMonster::StartTask( pTask );	
+	m_iTaskStatus = TASKSTATUS_RUNNING;
+
+	switch ( pTask->iTask )
+	{
+	
+	case TASK_WAIT_FACE_ENEMY:
+	{
+		// need to override this to get the dynamic aiming time to work
+		m_flWaitFinished = gpGlobals->time + reactiontim;
+		break;
+	}
+
+	default:
+		CTalkSquadMonster::StartTask( pTask );	
+		break;
+	
+	}
+
 }
 
 void COtis :: RunTask( Task_t *pTask )
@@ -448,13 +468,14 @@ void COtis :: RunTask( Task_t *pTask )
 //=========================================================
 int COtis :: ISoundMask ( void) 
 {
-	return	bits_SOUND_WORLD	|
-			bits_SOUND_COMBAT	|
-			bits_SOUND_CARCASS	|
-			bits_SOUND_MEAT		|
-			bits_SOUND_GARBAGE	|
-			bits_SOUND_DANGER	|
-			bits_SOUND_PLAYER;
+	//return	bits_SOUND_WORLD	|
+			//bits_SOUND_COMBAT	|
+			//bits_SOUND_CARCASS	|
+			//bits_SOUND_MEAT		|
+			//bits_SOUND_GARBAGE	|
+			//bits_SOUND_DANGER	|
+			//bits_SOUND_PLAYER;
+	return bits_ALL_SOUNDS;
 }
 
 //=========================================================
@@ -523,7 +544,8 @@ void COtis :: SetYawSpeed ( void )
 //=========================================================
 BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 {
-	if ( flDist <= 1024 && flDot >= 0.5 )
+	distfactor = flDist / 2000;
+	if (flDot >= 0.5 )
 	{
 		if ( gpGlobals->time > m_checkAttackTime )
 		{
@@ -536,12 +558,15 @@ BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 				shootTarget = pEnemy->Center();
 			}
 
-			UTIL_TraceLine( shootOrigin, shootTarget, dont_ignore_monsters, ENT(pev), &tr );
+			UTIL_TraceLine( shootOrigin, shootTarget, dont_ignore_monsters, ignore_glass, ENT(pev), &tr );
 			m_checkAttackTime = gpGlobals->time + 1;
-			if ( tr.flFraction == 1.0 || (tr.pHit != NULL && CBaseEntity::Instance(tr.pHit) == pEnemy) )
+			if ( tr.flFraction == 1.0 || (tr.pHit != NULL && CBaseEntity::Instance(tr.pHit) == pEnemy) or CBaseEntity::Instance(tr.pHit)->pev->rendermode != kRenderNormal ) {
 				m_lastAttackCheck = TRUE;
-			else
+				m_timefinishcheck = gpGlobals->time;
+			}
+			else {
 				m_lastAttackCheck = FALSE;
+			}
 			m_checkAttackTime = gpGlobals->time + 1.5;
 		}
 		return m_lastAttackCheck;
@@ -556,6 +581,8 @@ BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 //=========================================================
 void COtis :: OtisFirePistol ( void )
 {
+	reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+	if (gpGlobals->time >= (m_timefinishcheck+reactiontim)) {
 	Vector vecShootOrigin;
 
 	UTIL_MakeVectors(pev->angles);
@@ -566,7 +593,7 @@ void COtis :: OtisFirePistol ( void )
 	SetBlending( 0, angDir.x );
 	pev->effects = EF_MUZZLEFLASH;
 
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 1024, gSkillData.sk_otis_bullet );
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_05DEGREES, 131072, gSkillData.sk_otis_bullet );
 	
 	int pitchShift = RANDOM_LONG( 0, 20 );
 	
@@ -581,6 +608,7 @@ void COtis :: OtisFirePistol ( void )
 
 	// UNDONE: Reload?
 	m_cAmmoLoaded--;// take away a bullet!
+	}
 }
 		
 //=========================================================
@@ -1012,6 +1040,12 @@ Schedule_t* COtis :: GetScheduleOfType ( int Type )
 		}
 		else
 			return psched;	
+	case SCHED_RANGE_ATTACK1:
+		reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+		return &slRangeAttack1[0];
+	case SCHED_RANGE_ATTACK2:
+		reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+		return &slRangeAttack2[0];
 	}
 
 	return CTalkSquadMonster::GetScheduleOfType( Type );
@@ -1099,7 +1133,7 @@ Schedule_t *COtis :: GetSchedule ( void )
 		break;
 	}
 	
-	return CTalkSquadMonster::GetSchedule();
+	return CBaseMonster::GetSchedule();
 }
 
 MONSTERSTATE COtis :: GetIdealState ( void )

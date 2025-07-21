@@ -778,10 +778,11 @@ int CScientist :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 //=========================================================
 int CScientist :: ISoundMask ( void )
 {
-	return	bits_SOUND_WORLD	|
-			bits_SOUND_COMBAT	|
-			bits_SOUND_DANGER	|
-			bits_SOUND_PLAYER;
+	//return	bits_SOUND_WORLD	|
+			//bits_SOUND_COMBAT	|
+			//bits_SOUND_DANGER	|
+			//bits_SOUND_PLAYER;
+	return bits_ALL_SOUNDS;
 }
 	
 //=========================================================
@@ -998,7 +999,7 @@ Schedule_t *CScientist :: GetSchedule ( void )
 		break;
 	}
 	
-	return CTalkSquadMonster::GetSchedule();
+	return CBaseMonster::GetSchedule();
 }
 
 const char* CScientist::GetTaskName(int taskIdx) {

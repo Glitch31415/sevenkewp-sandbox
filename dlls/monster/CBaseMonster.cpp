@@ -193,6 +193,7 @@ void CBaseMonster::BarnacleVictimReleased(void)
 //=========================================================
 void CBaseMonster::Listen(void)
 {
+	
 	int		iSound;
 	int		iMySounds;
 	float	hearingSensitivity;
@@ -238,6 +239,7 @@ void CBaseMonster::Listen(void)
 			{
 				// this is an audible sound.
 				SetConditions(bits_COND_HEAR_SOUND);
+				
 			}
 			else
 			{
@@ -317,7 +319,7 @@ void CBaseMonster::Look(int iDistance)
 		const int maxLookEnts = 1024;
 		static CBaseEntity* pList[maxLookEnts];
 
-		Vector delta = Vector(iDistance, iDistance, iDistance);
+		Vector delta = Vector(4096, 4096, 4096);
 
 		// Find only monsters/clients in box, NOT limited to PVS
 		int count = UTIL_EntitiesInBox(pList, maxLookEnts, pev->origin - delta, pev->origin + delta, FL_CLIENT | FL_MONSTER | FL_POSSIBLE_TARGET, false);
@@ -407,9 +409,10 @@ void CBaseMonster::Look(int iDistance)
 //=========================================================
 int CBaseMonster::ISoundMask(void)
 {
-	return	bits_SOUND_WORLD |
-		bits_SOUND_COMBAT |
-		bits_SOUND_PLAYER;
+	//return	bits_SOUND_WORLD |
+		//bits_SOUND_COMBAT |
+		//bits_SOUND_PLAYER;
+	return bits_ALL_SOUNDS;
 }
 
 //=========================================================
@@ -2209,10 +2212,8 @@ void CBaseMonster::MonsterInit(void)
 
 	m_hEnemy = NULL;
 
-	if (m_flDistLook == 0) {
-		m_flDistTooFar = 1024.0;
-		m_flDistLook = 2048.0;
-	}
+	m_flDistTooFar = 131072.0;
+	m_flDistLook = 4096.0;
 
 	if (m_flinchChance == 0) {
 		m_flinchChance = 100;
@@ -4500,6 +4501,7 @@ void CBaseMonster::BecomeDead(void)
 
 	// make the corpse fly away from the attack vector
 	pev->movetype = MOVETYPE_TOSS;
+	pev->solid = SOLID_NOT;
 
 	m_killedTime = gpGlobals->time;
 
@@ -4722,10 +4724,32 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 	// if this is a player, move him around!
 	if ((!FNullEnt(pevInflictor)) && (pev->movetype == MOVETYPE_WALK) && (!pevAttacker || pevAttacker->solid != SOLID_TRIGGER))
 	{
-		pev->velocity = pev->velocity + vecDir * -DamageForce(flDamage);
+		//pev->velocity = pev->velocity + vecDir * -DamageForce(flDamage);
+	}
+	//if (flTake > 2520) { // maximum damage from a double shotgun headshot
+		//flTake = 2520;
+	//} test
+	if (flTake < 0) {
+		flTake = 0;
+	}
+	if (pevAttacker != pev) {
+		GiveScorePoints(pevAttacker, flTake);
+	}
+	pev->frags -= flTake/100;
+	if (std::isnan(pev->frags) || pev->frags < -30000) {
+		pev->frags = -30000;
 	}
 
-	GiveScorePoints(pevAttacker, flTake);
+	if (V_min(pev->max_health, pev->health - flTake) <= 0) {
+		// double score changes if kill
+		if (pevAttacker != pev) {
+			GiveScorePoints(pevAttacker, flTake);
+		}
+		pev->frags -= flTake/100;
+		if (std::isnan(pev->frags) || pev->frags < -30000) {
+			pev->frags = -30000;
+		}
+	}
 
 	// do the damage
 	pev->health = pev->health - flTake;
@@ -4739,6 +4763,10 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 
 	if (pev->health < 1) // not 0 because players enter a semi-dead state when between 0 and 1
 	{
+
+
+
+
 		g_pevLastInflictor = pevInflictor;
 
 		if (bitsDamageType & DMG_ALWAYSGIB)
@@ -4751,7 +4779,8 @@ int CBaseMonster::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, fl
 		}
 		else
 		{
-			Killed(pevAttacker, GIB_NORMAL);
+			//Killed(pevAttacker, GIB_NORMAL);
+			Killed(pevAttacker, GIB_NEVER);
 		}
 
 		g_pGameRules->DeathNotice(this, pevAttacker, pevInflictor);
@@ -4993,20 +5022,50 @@ void CBaseMonster::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector ve
 				break;
 			case HITGROUP_HEAD:
 				flDamage *= gSkillData.sk_monster_head;
+				if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_monster_head*pev->max_health))) {
+					flDamage = (pev->health - (pev->max_health - (gSkillData.sk_monster_head*pev->max_health))); // damage cap
+					if (flDamage < 1) {
+						flDamage = 1;
+					}
+				}
 				break;
 			case HITGROUP_CHEST:
 				flDamage *= gSkillData.sk_monster_chest;
+				if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_monster_chest*pev->max_health))) {
+					flDamage = (pev->health - (pev->max_health - (gSkillData.sk_monster_chest*pev->max_health))); // damage cap
+					if (flDamage < 1) {
+						flDamage = 1;
+					}
+				}
 				break;
 			case HITGROUP_STOMACH:
 				flDamage *= gSkillData.sk_monster_stomach;
+				if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_monster_stomach*pev->max_health))) {
+					flDamage = (pev->health - (pev->max_health - (gSkillData.sk_monster_stomach*pev->max_health))); // damage cap
+					if (flDamage < 1) {
+						flDamage = 1;
+					}
+				}
 				break;
 			case HITGROUP_LEFTARM:
 			case HITGROUP_RIGHTARM:
 				flDamage *= gSkillData.sk_monster_arm;
+				if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_monster_arm*pev->max_health))) {
+					flDamage = (pev->health - (pev->max_health - (gSkillData.sk_monster_arm*pev->max_health))); // damage cap
+					if (flDamage < 1) {
+						flDamage = 1;
+					}
+				}
 				break;
 			case HITGROUP_LEFTLEG:
 			case HITGROUP_RIGHTLEG:
 				flDamage *= gSkillData.sk_monster_leg;
+				if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_monster_leg*pev->max_health))) {
+					flDamage = (pev->health - (pev->max_health - (gSkillData.sk_monster_leg*pev->max_health))); // damage cap
+					if (flDamage < 1) {
+						flDamage = 1;
+					}
+				}
 				break;
 			default:
 				break;
@@ -5147,8 +5206,8 @@ void CBaseMonster::RunAI(void)
 		// things will happen before the player gets there!
 		// UPDATE: We now let COMBAT state monsters think and act fully outside of player PVS. This allows the player to leave 
 		// an area where monsters are fighting, and the fight will continue.
-		if (UTIL_IsClientInPVS(edict()) || (m_MonsterState == MONSTERSTATE_COMBAT))
-		{
+		//if (UTIL_IsClientInPVS(edict()) || (m_MonsterState == MONSTERSTATE_COMBAT))
+		//{
 			Look(m_flDistLook);
 			Listen();// check for audible sounds. 
 
@@ -5156,7 +5215,7 @@ void CBaseMonster::RunAI(void)
 			ClearConditions(IgnoreConditions());
 
 			GetEnemy();
-		}
+		//}
 
 		// do these calculations if monster has an enemy.
 		if (m_hEnemy != NULL)
@@ -5229,7 +5288,7 @@ MONSTERSTATE CBaseMonster::GetIdealState(void)
 			if (pSound)
 			{
 				MakeIdealYaw(pSound->m_vecOrigin);
-				if (pSound->m_iType & (bits_SOUND_COMBAT | bits_SOUND_DANGER))
+				if (pSound->m_iType & (bits_SOUND_COMBAT | bits_SOUND_DANGER | bits_SOUND_PLAYER))
 					m_IdealMonsterState = MONSTERSTATE_ALERT;
 			}
 		}

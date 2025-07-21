@@ -346,7 +346,7 @@ void UTIL_ParametricRocket( entvars_t *pev, Vector vecOrigin, Vector vecAngles, 
 	// Trace out line to end pos
 	TraceResult tr;
 	UTIL_MakeVectors( vecAngles );
-	UTIL_TraceLine( pev->startpos, pev->startpos + gpGlobals->v_forward * 8192, ignore_monsters, owner, &tr);
+	UTIL_TraceLine( pev->startpos, pev->startpos + gpGlobals->v_forward * 131072, ignore_monsters, owner, &tr);
 	pev->endpos = tr.vecEndPos;
 
 	// Now compute how long it will take based on current velocity

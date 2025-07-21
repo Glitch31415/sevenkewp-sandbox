@@ -587,7 +587,7 @@ BOOL CHalfLifeMultiplay :: AllowAutoTargetCrosshair( void )
 //=========================================================
 int CHalfLifeMultiplay :: IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKilled )
 {
-	return 1;
+	return 0;
 }
 
 
@@ -604,22 +604,12 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 	if ( ktmp && ktmp->IsPlayer() )
 		peKiller = (CBasePlayer*)ktmp;
 
-	if ( pVictim->pev == pKiller )  
-	{  // killed self, only penalize if PvP is enabled (npcs don't care that you stole their point)
-		if (mp_score_mode.value == 0 || friendlyfire.value == 1)
-			pKiller->frags -= 1;
-	}
 	else if ( ktmp && ktmp->IsPlayer() )
 	{
 		// if a player dies in a deathmatch game and the killer is a client, award the killer some points
-		pKiller->frags += IPointsForKill( peKiller, pVictim );
+		// pKiller->frags += IPointsForKill( peKiller, pVictim );
 		
 		FireTargets( "game_playerkill", ktmp, ktmp, USE_TOGGLE, 0 );
-	}
-	else
-	{  // killed by the world
-		if (mp_score_mode.value == 0 || friendlyfire.value == 1)
-			pKiller->frags -= 1;
 	}
 
 	// update the scores
@@ -879,13 +869,15 @@ void CHalfLifeMultiplay::DeathNotice( CBaseMonster *pVictim, entvars_t *pKiller,
 							killerName[cutoff] = '\0';
 						}
 
-						plr->Rename(UTIL_VarArgs("%s + %s", killerName, otherAttacker), true);
+						//plr->Rename(UTIL_VarArgs("%s + %s", killerName, otherAttacker), true);
+						plr->Rename(UTIL_VarArgs("%s", killerName), true);
 					}
 					else {
 						killerName[19] = '\0'; // leave room for the player count
 
-						plr->Rename(UTIL_VarArgs("%s + %d players", killerName, attackerCount-1), true);
-					}
+						//plr->Rename(UTIL_VarArgs("%s + %d players", killerName, attackerCount-1), true);
+						plr->Rename(UTIL_VarArgs("%s", killerName), true);
+					} // removed assists completely until i find how to make them work for all types of kills
 				}
 
 				hackedPlayer1->Rename(pVictim->DisplayName(), true);
@@ -1309,7 +1301,7 @@ BOOL CHalfLifeMultiplay :: PlayFootstepSounds( CBasePlayer *pl, float fvol )
 	if ( g_footsteps && g_footsteps->value == 0 )
 		return FALSE;
 
-	if ( pl->IsOnLadder() || pl->pev->velocity.Length2D() > 220 )
+	if ( pl->IsOnLadder() || pl->pev->velocity.Length2D() > 40 )
 		return TRUE;  // only make step sounds in multiplayer if the player is moving fast enough
 
 	return FALSE;

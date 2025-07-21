@@ -84,6 +84,7 @@ void CEnvExplosion::Spawn(void)
 
 void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
+
 	TraceResult tr;
 
 	pev->model = iStringNull;//invisible
@@ -118,6 +119,7 @@ void CEnvExplosion::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	if (mp_explosionbug.value) {
 		pev->origin = m_effectOrigin;
 	}
+	//pev->origin.z = pev->origin.z-1;
 
 	// draw decal
 	if (!(pev->spawnflags & SF_ENVEXPLOSION_NODECAL))

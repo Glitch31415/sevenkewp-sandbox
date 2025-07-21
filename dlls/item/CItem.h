@@ -21,7 +21,7 @@
 #define ITEM_SECURITY		3
 #define ITEM_BATTERY		4
 
-#define MAX_NORMAL_BATTERY	100
+#define MAX_NORMAL_BATTERY	999
 
 class EXPORT CItem : public CBaseAnimating
 {

@@ -67,7 +67,8 @@ LINK_ENTITY_TO_CLASS( monster_cockroach, CRoach )
 //=========================================================
 int CRoach :: ISoundMask ( void )
 {
-	return	bits_SOUND_CARCASS | bits_SOUND_MEAT;
+	//return	bits_SOUND_CARCASS | bits_SOUND_MEAT;
+	return bits_ALL_SOUNDS;
 }
 
 //=========================================================
@@ -429,7 +430,7 @@ void CRoach :: Look ( int iDistance )
 	// Does sphere also limit itself to PVS?
 	// Examine all entities within a reasonable radius
 	// !!!PERFORMANCE - let's trivially reject the ent list before radius searching!
-	while ((pSightEnt = UTIL_FindEntityInSphere( pSightEnt, pev->origin, iDistance )) != NULL)
+	while ((pSightEnt = UTIL_FindEntityInSphere( pSightEnt, pev->origin, 4096 )) != NULL)
 	{
 		// only consider ents that can be damaged. !!!temporarily only considering other monsters and clients
 		if (  pSightEnt->IsPlayer() || FBitSet ( pSightEnt->pev->flags, FL_MONSTER ) )

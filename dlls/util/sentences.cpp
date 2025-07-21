@@ -4,6 +4,7 @@
 #include "CBaseToggle.h"
 #include "wav.h"
 #include "eng_wrappers.h"
+#include <cstdint>
 
 CustomSentences g_customSentencesMod;
 CustomSentences g_customSentencesMap;

@@ -185,7 +185,7 @@ void CCrossbowBolt::ExplodeThink( void )
 	int iContents = UTIL_PointContents ( pev->origin );
 	int iScale;
 	
-	pev->dmg = 40;
+	pev->dmg = 25;
 	iScale = 10;
 
 	int spr = iContents != CONTENTS_WATER ? g_sModelIndexFireball : g_sModelIndexWExplosion;
@@ -274,7 +274,7 @@ int CCrossbow::GetItemInfo(ItemInfo *p)
 	p->iMaxAmmo1 = gSkillData.sk_ammo_max_bolts;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
-	p->iMaxClip = CROSSBOW_MAX_CLIP;
+	p->iMaxClip = 1;
 	p->iSlot = 2;
 	p->iPosition = 2;
 	p->iId = WEAPON_CROSSBOW;
@@ -372,7 +372,7 @@ void CCrossbow::FireSniperBolt()
 	Vector vecDir = gpGlobals->v_forward;
 
 	lagcomp_begin(m_pPlayer);
-	UTIL_TraceLine(vecSrc, vecSrc + vecDir * 8192, dont_ignore_monsters, m_pPlayer->edict(), &tr);
+	UTIL_TraceLine(vecSrc, vecSrc + vecDir * 131072, dont_ignore_monsters, m_pPlayer->edict(), &tr);
 	lagcomp_end();
 
 #ifndef CLIENT_DLL
@@ -431,13 +431,13 @@ void CCrossbow::FireBolt()
 
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
-		pBolt->pev->velocity = vecDir * BOLT_WATER_VELOCITY;
-		pBolt->pev->speed = BOLT_WATER_VELOCITY;
+		pBolt->pev->velocity = (vecDir * BOLT_WATER_VELOCITY)+m_pPlayer->pev->velocity;
+		pBolt->pev->speed = BOLT_WATER_VELOCITY+sqrt(pow(m_pPlayer->pev->velocity.x, 2)+pow(m_pPlayer->pev->velocity.y, 2)+pow(m_pPlayer->pev->velocity.z, 2));
 	}
 	else
 	{
-		pBolt->pev->velocity = vecDir * BOLT_AIR_VELOCITY;
-		pBolt->pev->speed = BOLT_AIR_VELOCITY;
+		pBolt->pev->velocity = vecDir * (BOLT_AIR_VELOCITY)+m_pPlayer->pev->velocity;
+		pBolt->pev->speed = BOLT_AIR_VELOCITY+sqrt(pow(m_pPlayer->pev->velocity.x, 2)+pow(m_pPlayer->pev->velocity.y, 2)+pow(m_pPlayer->pev->velocity.z, 2));
 	}
 	pBolt->pev->avelocity.z = 10;
 #endif
@@ -468,9 +468,9 @@ void CCrossbow::SecondaryAttack()
 		m_pPlayer->pev->fov = m_pPlayer->m_iFOV = 0; // 0 means reset to default fov
 		m_fInZoom = 0;
 	}
-	else if ( m_pPlayer->pev->fov != 20 )
+	else if ( m_pPlayer->pev->fov != 5 )
 	{
-		m_pPlayer->pev->fov = m_pPlayer->m_iFOV = 20;
+		m_pPlayer->pev->fov = m_pPlayer->m_iFOV = 5;
 		m_fInZoom = 1;
 	}
 

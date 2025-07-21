@@ -51,7 +51,7 @@ void CMiniTurret::Precache()
 void CMiniTurret::Shoot(Vector& vecSrc, Vector& vecDirToEnemy)
 {
 	float bulletRange = V_max(m_flSightRange, TURRET_RANGE);
-	FireBullets(1, vecSrc, vecDirToEnemy, TURRET_SPREAD, bulletRange, BULLET_MONSTER_9MM, 1);
+	FireBullets(1, vecSrc, vecDirToEnemy, Vector( 0.01745, 0.01745, 0.01745 ), 131072, BULLET_MONSTER_9MM, 1);
 
 	switch (RANDOM_LONG(0, 2))
 	{

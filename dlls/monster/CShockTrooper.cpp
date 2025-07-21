@@ -372,10 +372,11 @@ void CShockTrooper::GibMonster()
 //=========================================================
 int CShockTrooper::ISoundMask()
 {
-	return bits_SOUND_WORLD |
-		bits_SOUND_COMBAT |
-		bits_SOUND_PLAYER |
-		bits_SOUND_DANGER;
+	//return bits_SOUND_WORLD |
+		//bits_SOUND_COMBAT |
+		//bits_SOUND_PLAYER |
+		//bits_SOUND_DANGER;
+	return bits_ALL_SOUNDS;
 }
 
 //=========================================================
@@ -586,7 +587,7 @@ BOOL CShockTrooper::CheckRangeAttack2(float flDot, float flDist)
 	// are any of my squad members near the intended grenade impact area?
 	if (InSquad())
 	{
-		if (SquadMemberInRange(vecTarget, 256))
+		if (SquadMemberInRange(vecTarget, 1024))
 		{
 			// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
@@ -594,7 +595,7 @@ BOOL CShockTrooper::CheckRangeAttack2(float flDot, float flDist)
 		}
 	}
 
-	if ((vecTarget - pev->origin).Length2D() <= 256)
+	if ((vecTarget - pev->origin).Length2D() <= 1024)
 	{
 		// crap, I don't want to blow myself up
 		m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
@@ -2146,7 +2147,7 @@ Schedule_t* CShockTrooper::GetSchedule()
 	}
 
 	// no special cases here, call the base class
-	return CTalkSquadMonster::GetSchedule();
+	return CBaseMonster::GetSchedule();
 }
 
 //=========================================================

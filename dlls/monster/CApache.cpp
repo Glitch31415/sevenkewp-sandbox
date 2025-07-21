@@ -750,13 +750,13 @@ BOOL CApache :: FireGun( )
 	if (DotProduct( vecGun, vecTarget ) > 0.98)
 	{
 #if 1
-		FireBullets( 1, posGun, vecGun, VECTOR_CONE_4DEGREES, 8192, BULLET_MONSTER_12MM, 1 );
+		FireBullets( 1, posGun, vecGun, VECTOR_CONE_1DEGREES*3, 131072, BULLET_MONSTER_12MM, 1 );
 		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "turret/tu_fire1.wav", 1, 0.3);
 		PLAY_DISTANT_SOUND(edict(), DISTANT_357);
 #else
 		static float flNext;
 		TraceResult tr;
-		UTIL_TraceLine( posGun, posGun + vecGun * 8192, dont_ignore_monsters, ENT( pev ), &tr );
+		UTIL_TraceLine( posGun, posGun + vecGun * 131072, dont_ignore_monsters, ENT( pev ), &tr );
 
 		if (!m_pBeam)
 		{
@@ -836,7 +836,7 @@ int CApache :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 		//Maybe somebody healed us somehow (trigger_hurt with negative damage?), clear this.
 		ClearConditions(bits_COND_LIGHT_DAMAGE);
 	}
-	return CBaseEntity::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
 
 
