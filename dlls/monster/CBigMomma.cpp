@@ -730,8 +730,6 @@ void CBigMomma :: Spawn()
 	m_flFieldOfView		= 0.3;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 
-	m_mapHasMommaPath = UTIL_FindEntityByClassname(NULL, "info_bigmomma") != NULL;
-
 	MonsterInit();
 }
 
@@ -773,6 +771,8 @@ void CBigMomma :: Precache()
 
 void CBigMomma::Activate( void )
 {
+	m_mapHasMommaPath = UTIL_FindEntityByClassname(NULL, "info_bigmomma") != NULL;
+
 	if ( m_hTargetEnt == NULL )
 		Remember( bits_MEMORY_ADVANCE_NODE );	// Start 'er up
 }
