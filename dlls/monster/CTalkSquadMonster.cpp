@@ -869,8 +869,7 @@ int CTalkSquadMonster :: FIdleStare( void )
 int CTalkSquadMonster :: FIdleHello( void )
 {
 	// if this is first time scientist has seen player, greet him
-	m_lastTalkFail = 0;
-	if (FOkToSpeak() && !FBitSet(m_bitsSaid, bit_saidHelloPlayer))
+	if (!FBitSet(m_bitsSaid, bit_saidHelloPlayer))
 	{
 		// get a player
 		CBaseEntity *pPlayer = FindNearestFriend(TRUE);

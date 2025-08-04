@@ -525,7 +525,7 @@ public:
 
 	virtual void SetClassification(int newClass) override;
 
-	// temporarily make players non-solid for scripted movements and player following
+	// temporarily make players non-solid for scripted movements
 	void UnblockScriptedMove(bool moveBeginNotEnd);
 };
 

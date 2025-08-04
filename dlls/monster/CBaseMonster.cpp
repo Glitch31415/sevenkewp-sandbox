@@ -2247,7 +2247,7 @@ void CBaseMonster::MonsterInit(void)
 void CBaseMonster::UnstuckSpawnPosition() {
 	// unstuck monsters if spawned inside the floor/ceiling
 	// (unless it's a barnacle/turret or smth that doesn't move)
-	if (pev->movetype == MOVETYPE_STEP && !(pev->spawnflags & SF_MONSTER_PRISONER)) {
+	if (pev->movetype == MOVETYPE_STEP) {
 		edict_t* pent = edict();
 		TraceResult tr;
 		
@@ -3203,12 +3203,6 @@ BOOL CBaseMonster::FGetNodeRoute(Vector vecDest)
 	// find shortest path
 	int iNodeHull = WorldGraph.HullIndex(this); // make this a monster virtual function
 	iResult = WorldGraph.FindShortestPath(iPath, iSrcNode, iDestNode, iNodeHull, m_afCapability);
-
-	if (!iResult) {
-		// try again with door opening abilities. There's a chance the door is already open.
-		int caps = m_afCapability | bits_CAP_DOORS_GROUP;
-		iResult = WorldGraph.FindShortestPath(iPath, iSrcNode, iDestNode, iNodeHull, caps);
-	}
 
 	if (!iResult)
 	{
@@ -8333,11 +8327,8 @@ void CBaseMonster::SetClassification(int newClass) {
 void CBaseMonster::UnblockScriptedMove(bool moveBeginNotEnd) {
 	static int oldPlayerSolidStates[33];
 
-	bool isInScript = m_MonsterState == MONSTERSTATE_SCRIPT;
-	bool isFollowing = m_hTargetEnt && m_hTargetEnt->IsPlayer();
-
-	if (!isInScript && !isFollowing) {
-		return;
+	if (m_MonsterState != MONSTERSTATE_SCRIPT) {
+		return; // not in a script
 	}
 
 	// don't let players block monsters in a script and softlock the map

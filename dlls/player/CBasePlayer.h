@@ -149,9 +149,6 @@ struct client_info_t {
 	int max_packet_entities;
 };
 
-// debug flags
-#define DF_NODES 1 // display nearby nodes and connections
-
 class EXPORT CBasePlayer : public CBaseMonster
 {
 public:
@@ -319,9 +316,6 @@ public:
 	PLAYER_MODEL_ANIM_SET m_playerModelAnimSet;
 
 	bool m_isBarnacleFood; // player is being eaten after being pulled up to the barnacle
-
-	uint32_t m_debugFlags; // misc flags for developers and mappers
-	float m_lastNodeUpdate;
 
 	virtual void Spawn( void );
 
@@ -528,16 +522,15 @@ public:
 
 	// if death=true, only drop items that are not marked to keep on death
 	// if respawn=true, only drop items that are not marked to keep on respawn
-	// if forceDrop=true, force drop all items ignoring any "can't drop" rules
 	// returns false if not all inventory items were dropped due to restrictions
-	bool DropAllInventoryItems(bool deathDrop = false, bool respawnDrop = false, bool forceDrop = false);
+	bool DropAllInventoryItems(bool deathDrop = false, bool respawnDrop = false);
 
 	virtual void Revive();
 
 	float GetDamage(float defaultDamage);
 
 	// accounts for active cameras and view offset
-	Vector GetViewPosition() { return !IsFirstPerson() ? m_hViewEntity->pev->origin : GetGunPosition(); }
+	Vector GetViewPosition() { return m_hViewEntity ? m_hViewEntity->pev->origin : GetGunPosition(); }
 
 	// for scoring
 	void PenalizeDeath();
@@ -600,8 +593,6 @@ public:
 
 	// send current userinfo to all players (name, model, etc.)
 	void BroadcastUserInfo();
-
-	void DebugThink();
 
 	// for sven-style monster info
 	//void UpdateMonsterInfo();

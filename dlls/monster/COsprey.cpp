@@ -160,12 +160,10 @@ void COsprey :: Spawn( void )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-	float zofs = 134;
-
 	InitModel();
-	SetSize(Vector( -480, -480, -100 + zofs), Vector(480, 480, 64 + zofs));
+	SetSize(Vector( -480, -480, -100), Vector(480, 480, 64));
 
-	Vector offset = Vector(0, 0, -zofs); // so what you see in the editor matches the game
+	Vector offset = Vector(0, 0, -134); // so what you see in the editor matches the game
 	UTIL_SetOrigin( pev, pev->origin + offset );
 
 	pev->flags |= FL_MONSTER;
@@ -682,7 +680,7 @@ void COsprey :: Killed( entvars_t *pevAttacker, int iGib )
 void COsprey::CrashTouch( CBaseEntity *pOther )
 {
 	// only crash if we hit something solid
-	if ( pOther->pev->solid > SOLID_TRIGGER)
+	if ( pOther->pev->solid == SOLID_BSP) 
 	{
 		SetTouch( NULL );
 		m_startTime = gpGlobals->time;

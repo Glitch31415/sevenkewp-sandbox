@@ -106,11 +106,11 @@ void CGrappleTip::Spawn()
 {
 	Precache();
 
-	pev->solid = SOLID_TRIGGER;
+	pev->solid = SOLID_BBOX;
 
 	// FLY movetype but with client interpolation
 	// not using parametric because it causes the tongue beam to sometimes point to the world origin
-	pev->movetype = MOVETYPE_BOUNCE;
+	pev->movetype = MOVETYPE_FLY;
 	pev->gravity = FLT_MIN;
 	pev->friction = 1.0f;
 
@@ -133,7 +133,7 @@ void CGrappleTip::Spawn()
 
 	pev->gravity = 1;
 
-	pev->nextthink = gpGlobals->time + 0.02f;
+	pev->nextthink = gpGlobals->time + 0.02;
 
 	m_bIsStuck = false;
 	m_bMissed = false;
@@ -158,7 +158,7 @@ void CGrappleTip::FlyThink()
 		pev->velocity = pev->velocity.Normalize() * maxSpeed;
 	}
 
-	pev->nextthink = gpGlobals->time + 0.02f;
+	pev->nextthink = gpGlobals->time + 0.02;
 }
 
 void CGrappleTip::OffsetThink()
@@ -168,10 +168,6 @@ void CGrappleTip::OffsetThink()
 
 void CGrappleTip::TongueTouch(CBaseEntity* pOther)
 {
-	if (pOther->edict() == pev->owner || pOther->pev->solid == SOLID_TRIGGER) {
-		return;
-	}
-
 	TargetClass targetClass;
 
 	if (!pOther)
