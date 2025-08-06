@@ -172,7 +172,7 @@ public:
 	float	m_lastObserverSwitch;
 	bool m_wantToExitObserver; // set to true if the player should spawn as soon as a spawn point is available
 	int		IsObserver() { return m_isObserver; };
-	BOOL	IsFirstPerson() { return m_hViewEntity.GetEdict() == edict(); }
+	BOOL	IsFirstPerson() { return !m_hViewEntity || m_hViewEntity.GetEdict() == edict(); }
 	BOOL	IsBot() { return pev->flags & FL_FAKECLIENT; }
 	virtual	BOOL IsNormalMonster(void) { return FALSE; }
 
@@ -483,7 +483,6 @@ public:
 	void UpdateTeamInfo(int color=-1, int msg_mode=MSG_ALL, edict_t* dst=NULL);
 
 	float m_lastSpawnMessage;
-	float m_lastKillTime;
 	bool m_deathMessageSent;
 	bool m_allowFriendlyFire; // true if this player allows incoming friendly fire
 
@@ -537,7 +536,7 @@ public:
 	float GetDamage(float defaultDamage);
 
 	// accounts for active cameras and view offset
-	Vector GetViewPosition() { return !IsFirstPerson() ? m_hViewEntity->pev->origin : GetGunPosition(); }
+	Vector GetViewPosition() { return m_hViewEntity && !IsFirstPerson() ? m_hViewEntity->pev->origin : GetGunPosition(); }
 
 	// for scoring
 	void PenalizeDeath();
