@@ -234,6 +234,8 @@ protected:
 
 	// an array of colors...one color for each line
 	float *m_pflNameColors[MAX_STATUSBAR_LINES];
+
+	struct cvar_s* m_HUD_centerid;
 };
 
 struct extra_player_info_t 
@@ -313,12 +315,14 @@ public:
 	int MsgFunc_SayText( const char *pszName, int iSize, void *pbuf );
 	void SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex = -1 );
 	void EnsureTextFitsInOneLineAndWrapIfHaveTo( int line );
+	int MaxLines(); // max lines client wants to see
 friend class CHudSpectator;
 
 private:
 
 	struct cvar_s *	m_HUD_saytext;
 	struct cvar_s *	m_HUD_saytext_time;
+	struct cvar_s *	m_HUD_saytext_lines;
 };
 
 //

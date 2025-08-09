@@ -1702,6 +1702,7 @@ int GetCustomWeaponBody(int id);
 void EV_FireCustom(event_args_t* args) {
 	int wepid = args->iparam1;
 	int evtidx = args->iparam2;
+	int idx = args->entindex;
 	CustomWeaponParams* params = GetCustomWeaponParams(wepid);
 
 	if (!params) {
@@ -1713,8 +1714,16 @@ void EV_FireCustom(event_args_t* args) {
 
 	WepEvt& evt = params->events[evtidx];
 
-	gEngfuncs.Con_Printf("Hello wep event %d\n", (int)evt.evtType);
-	int idx = args->entindex;
+	if (!EV_IsLocal(args->entindex)) {
+		switch (evt.evtType) {
+		case WC_EVT_PUNCH_SET:
+		case WC_EVT_PUNCH_RANDOM:
+		case WC_EVT_SET_BODY:
+		case WC_EVT_WEP_ANIM:
+		case WC_EVT_KICKBACK:
+			return;
+		}
+	}
 
 	vec3_t origin;
 	vec3_t angles;
@@ -1735,7 +1744,8 @@ void EV_FireCustom(event_args_t* args) {
 		const char* soundPath = GetWeaponCustomSound(evt.playSound.sound);
 		float vol = evt.playSound.volume / 255.0f;
 		int pitch = gEngfuncs.pfnRandomLong(evt.playSound.pitchMin, evt.playSound.pitchMax);
-		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, CHAN_WEAPON, soundPath, vol, ATTN_NORM, 0, pitch);
+		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, evt.playSound.channel, soundPath, vol,
+			evt.playSound.attn / 64.0f, 0, pitch);
 		break;
 	}
 	case WC_EVT_EJECT_SHELL: {
@@ -1771,13 +1781,11 @@ void EV_FireCustom(event_args_t* args) {
 	}
 	case WC_EVT_SET_BODY:
 		break;
-	case WC_EVT_WEP_ANIM:
-		if (EV_IsLocal(idx))
-		{
-			int anim = gEngfuncs.pfnRandomLong(evt.anim.animMin, evt.anim.animMax);
-			gEngfuncs.pEventAPI->EV_WeaponAnimation(anim, GetCustomWeaponBody(wepid));
-		}
+	case WC_EVT_WEP_ANIM: {
+		int anim = gEngfuncs.pfnRandomLong(evt.anim.animMin, evt.anim.animMax);
+		gEngfuncs.pEventAPI->EV_WeaponAnimation(anim, GetCustomWeaponBody(wepid));
 		break;
+	}
 	case WC_EVT_BULLETS:
 		EV_GetGunPosition(args, vecSrc, origin);
 		EV_HLDM_FireBullets(idx, forward, right, up, evt.bullets.count, vecSrc, forward, 8192,

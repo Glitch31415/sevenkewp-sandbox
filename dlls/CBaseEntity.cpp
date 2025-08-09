@@ -1032,7 +1032,9 @@ EHANDLE g_debugCycler;
 #include "basemonster.h"
 */
 
-Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t* pevAttacker, int shared_rand)
+Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDirShooting,
+	Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage,
+	entvars_t* pevAttacker, int shared_rand, Vector* vecEndOut, bool sevenkewpEvent)
 {
 	TraceResult tr;
 	Vector vecRight = gpGlobals->v_right;
@@ -1063,6 +1065,15 @@ Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDir
 		bool ahs = false;
 		while (ahs == false) {
 UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
+
+		if (vecEndOut) {
+			*vecEndOut = tr.vecEndPos;
+		}
+
+		if (mp_debug_tracers.value > 0) {
+			UTIL_BeamPoints(vecSrc, tr.vecEndPos, MODEL_INDEX("sprites/laserbeam.spr"),
+				0, 0, 10 * mp_debug_tracers.value, 1, 0, RGB(255, 0, 0), 0);
+		}
 
 		// do damage, paint decals
 		if (tr.flFraction != 1.0 && (CBaseEntity::Instance(tr.pHit)->pev->rendermode == kRenderNormal or CBaseEntity::Instance(tr.pHit)->IsBreakable()))
@@ -1125,8 +1136,7 @@ UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr
 			if (iDamage)
 			{
 				pEntity->TraceAttack(pevAttacker, iDamage, vecDir, &tr, DMG_BULLET | ((iDamage > 16) ? DMG_ALWAYSGIB : DMG_NEVERGIB));
-
-				DecalGunshot(&tr, iBulletType, true, vecSrc, vecEnd);
+				DecalGunshot(&tr, iBulletType, true, vecSrc, vecEnd, sevenkewpEvent ? edict() : NULL);
 			}
 			else switch (iBulletType)
 			{

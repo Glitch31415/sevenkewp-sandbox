@@ -1,8 +1,8 @@
 #pragma once
 #include "CWeaponCustom.h"
 
-#define M249_DEFAULT_GIVE 50
-#define M249_MAX_CLIP 50
+#define M249_DEFAULT_GIVE 100
+#define M249_MAX_CLIP 100
 
 enum M249Anim
 {
@@ -25,4 +25,5 @@ public:
 	void PrecacheEvents() override;
 	int GetItemInfo(ItemInfo* p);
 	void GetAmmoDropInfo(bool secondary, const char*& ammoEntName, int& dropAmount);
+	const char* DisplayName() override { return "M249"; }
 };
