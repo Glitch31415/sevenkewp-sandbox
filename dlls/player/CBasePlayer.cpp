@@ -72,6 +72,13 @@ extern float g_flWeaponCheat;
 // how long the use key can be held before cancelling the use for antiblock or momentary buttons
 #define MAX_USE_HOLD_TIME 0.3f
 
+#define CVAR_REQ_SEVENKEWP			0	// SevenKewp test
+#define CVAR_REQ_BUGFIXEDHL			1	// BugfixedHL test
+#define CVAR_REQ_ADRENALINE_GAMER	2	// Adrenaline Gamer test
+#define CVAR_REQ_HL25				3	// HL25 test
+#define CVAR_REQ_OPENGL				4	// OpenGL test
+#define CVAR_REQ_LINUX				5	// Linux test
+
 BOOL gInitHUD = TRUE;
 
 extern void respawn(entvars_t *pev, BOOL fCopyCorpse);
@@ -3848,7 +3855,8 @@ void CBasePlayer::Spawn( void )
 		SET_VIEW(edict(), edict());
 	}
 	
-	g_pGameRules->PlayerSpawn(this);
+	if (m_clientSystem != CLIENT_SYSTEM_NOT_CHECKED)
+		g_pGameRules->PlayerSpawn(this);
 
 	if (FNullEnt(pentSpawnSpot)) {
 		edict_t* anySpawnPoint = EntSelectSpawnPoint(this, true);
@@ -4576,11 +4584,10 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_crowbar" );
 		GiveNamedItem( "weapon_knife" );
 		GiveNamedItem( "weapon_9mmhandgun" );
-		GiveNamedItem( "ammo_9mmclip" );
 		GiveNamedItem( "weapon_shotgun" );
 		GiveNamedItem( "ammo_buckshot" );
 		GiveNamedItem( "weapon_9mmAR" );
-		GiveNamedItem( "ammo_9mmAR" );
+		GiveNamedItem( "ammo_9mmbox" );
 		GiveNamedItem( "ammo_ARgrenades" );
 		GiveNamedItem( "weapon_handgrenade" );
 		GiveNamedItem( "weapon_tripmine" );
@@ -4603,6 +4610,10 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_sporelauncher" );
 		GiveNamedItem( "weapon_medkit" );
 		GiveNamedItem("item_longjump");
+		if (IsSevenKewpClient()) {
+			GiveNamedItem("weapon_m249");
+			GiveNamedItem("ammo_556");
+		}
 		gEvilImpulse101 = FALSE;
 		break;
 
@@ -5250,26 +5261,6 @@ void CBasePlayer :: UpdateClientData( void )
 			WRITE_BYTE(II->iFlags);					// byte		Flags
 			MESSAGE_END();
 		}
-		
-		int soundCount = 0;
-		for (int i = 0; i < MAX_PRECACHE_SOUND; i++) {
-			if (g_customWeaponSounds[i]) {
-				soundCount++;
-			}
-		}
-
-		int soundListBytes = 0;
-		MESSAGE_BEGIN(MSG_ONE, gmsgSoundIdx, NULL, pev);
-		WRITE_SHORT(soundCount); soundListBytes += 1;
-		for (int i = 0; i < MAX_PRECACHE_SOUND; i++) {
-			if (g_customWeaponSounds[i]) {
-				const char* path = INDEX_SOUND(i);
-				WRITE_SHORT(i); soundListBytes += 2;
-				WRITE_STRING(path); soundListBytes += strlen(path) + 1;
-			}
-		}
-		MESSAGE_END();
-		ALERT(at_console, "Sent %d sound list bytes\n", soundListBytes);
 	}
 
 	SendAmmoUpdate();
@@ -6505,54 +6496,98 @@ void CBasePlayer::QueryClientType() {
 		return;
 	}
 
-	// first check for custom clients, next step depends on the output of this
-	g_engfuncs.pfnQueryClientCvarValue2(edict(), "aghl_version", 0); // BugfixedHL cvar
+	m_sevenkewpVersion = 0;
+	memset(m_queryResults, 0, sizeof(string_t) * 6);
+
+	g_engfuncs.pfnQueryClientCvarValue2(edict(), "hlcoop_version", CVAR_REQ_SEVENKEWP);
+	g_engfuncs.pfnQueryClientCvarValue2(edict(), "aghl_version", CVAR_REQ_BUGFIXEDHL);
+	g_engfuncs.pfnQueryClientCvarValue2(edict(), "cl_autorecord", CVAR_REQ_ADRENALINE_GAMER);
+	g_engfuncs.pfnQueryClientCvarValue2(edict(), "sv_allow_shaders", CVAR_REQ_HL25);
+	g_engfuncs.pfnQueryClientCvarValue2(edict(), "gl_fog", CVAR_REQ_OPENGL);
+	g_engfuncs.pfnQueryClientCvarValue2(edict(), "m_mousethread_sleep", CVAR_REQ_LINUX);
 }
 
 void CBasePlayer::HandleClientCvarResponse(int requestID, const char* pszCvarName, const char* pszValue) {
 	bool hasCvar = strstr(pszValue, "Bad CVAR request") == NULL;
 	
-	if (requestID == 0) {
-		if (hasCvar) {
-			m_clientModVersion = CLIENT_MOD_HLBUGFIXED;
-			m_clientModVersionString = ALLOC_STRING((std::string("HLBugFixed ") + pszValue).c_str());
+	if (requestID >= 0 && requestID < 6) {
+		m_queryResults[requestID] = ALLOC_STRING(pszValue);
+
+		bool hasCvar[6];
+		for (int i = 0; i < 6; i++) {
+			if (!m_queryResults[i]) {
+				return;
+			}
+			hasCvar[i] = strstr(STRING(m_queryResults[i]), "Bad CVAR request") == NULL;
 		}
 
-		// Adrenaline Gamer test
-		g_engfuncs.pfnQueryClientCvarValue2(edict(), "cl_autorecord", 1);
-	}
-	else if (requestID == 1) {
-		if (hasCvar) {
-			if (m_clientModVersion != CLIENT_MOD_NOT_CHECKED) {
-				ALERT(at_error, "Client detection error. Client has both HLBugFixed and AG cvars.\n");
-			}
+		// all queries finished
+
+		if (hasCvar[CVAR_REQ_SEVENKEWP] + hasCvar[CVAR_REQ_BUGFIXEDHL] + hasCvar[CVAR_REQ_ADRENALINE_GAMER] > 1) {
+			std::string clientStr;
+			if (hasCvar[CVAR_REQ_SEVENKEWP])
+				clientStr += "SevenKewp. ";
+			if (hasCvar[CVAR_REQ_BUGFIXEDHL])
+				clientStr += "BHL, ";
+			if (hasCvar[CVAR_REQ_ADRENALINE_GAMER])
+				clientStr += "AG, ";
+			clientStr = clientStr.substr(0, clientStr.size() - 2);
+			ALERT(at_error, "Client detection error. Client has cvars from multiple clients: %s\n", clientStr.c_str());
+		}
+		else if (hasCvar[CVAR_REQ_SEVENKEWP]) {
+			m_sevenkewpVersion = atoi(STRING(m_queryResults[CVAR_REQ_SEVENKEWP]));
+			m_clientModVersion = CLIENT_MOD_SEVENKEWP;
+			m_clientModVersionString = ALLOC_STRING(UTIL_SevenKewpClientString(m_sevenkewpVersion));
+		}
+		else if (hasCvar[CVAR_REQ_BUGFIXEDHL]) {
+			m_clientModVersion = CLIENT_MOD_HLBUGFIXED;
+			m_clientModVersionString = ALLOC_STRING(UTIL_VarArgs("BugfixedHL %s", STRING(m_queryResults[CVAR_REQ_BUGFIXEDHL])));
+		}
+		else if (hasCvar[CVAR_REQ_ADRENALINE_GAMER]) {
 			m_clientModVersion = CLIENT_MOD_ADRENALINE;
 			m_clientModVersionString = ALLOC_STRING("Adrenaline Gamer");
 		}
-		else if (m_clientModVersion == CLIENT_MOD_NOT_CHECKED) {
+		else {
 			// could also be using an unknown custom client, no way to know...
 			m_clientModVersion = CLIENT_MOD_HL;
 			m_clientModVersionString = MAKE_STRING("Half-Life");
 		}
 
-		// sv_allow_shaders was added to HL 25, so if it's missing, then it must be the legacy client
-		g_engfuncs.pfnQueryClientCvarValue2(edict(), "sv_allow_shaders", 2);
-	}
-	else if (requestID == 2) {
-		m_clientEngineVersion = hasCvar ? CLIENT_ENGINE_HL_LATEST : CLIENT_ENGINE_HL_LEGACY;
-
-		g_engfuncs.pfnQueryClientCvarValue2(edict(), "gl_fog", 3);
-	}
-	else if (requestID == 3) {
-		m_clientRenderer = hasCvar ? CLIENT_RENDERER_OPENGL : CLIENT_RENDERER_SOFTWARE;
-
-		g_engfuncs.pfnQueryClientCvarValue2(edict(), "m_mousethread_sleep", 4);
-	}
-	else if (requestID == 4) {
-		m_clientSystem = hasCvar ? CLIENT_SYSTEM_WINDOWS : CLIENT_SYSTEM_LINUX;
-
+		m_clientEngineVersion = hasCvar[CVAR_REQ_HL25] ? CLIENT_ENGINE_HL_LATEST : CLIENT_ENGINE_HL_LEGACY;
+		m_clientRenderer = hasCvar[CVAR_REQ_OPENGL] ? CLIENT_RENDERER_OPENGL : CLIENT_RENDERER_SOFTWARE;
+		m_clientSystem = hasCvar[CVAR_REQ_LINUX] ? CLIENT_SYSTEM_WINDOWS : CLIENT_SYSTEM_LINUX;
+		
 		UTIL_LogPlayerEvent(edict(), "Client version: %s\n", GetClientVersionString());
+		QueryClientTypeFinished();
 	}
+}
+
+void CBasePlayer::QueryClientTypeFinished() {
+	if (IsSevenKewpClient()) {
+		// send over the sound index mapping
+		int soundCount = 0;
+		for (int i = 0; i < MAX_PRECACHE_SOUND; i++) {
+			if (g_customWeaponSounds[i]) {
+				soundCount++;
+			}
+		}
+
+		int soundListBytes = 0;
+		MESSAGE_BEGIN(MSG_ONE, gmsgSoundIdx, NULL, pev);
+		WRITE_SHORT(soundCount); soundListBytes += 1;
+		for (int i = 0; i < MAX_PRECACHE_SOUND; i++) {
+			if (g_customWeaponSounds[i]) {
+				const char* path = INDEX_SOUND(i);
+				WRITE_SHORT(i); soundListBytes += 2;
+				WRITE_STRING(path); soundListBytes += strlen(path) + 1;
+			}
+		}
+		MESSAGE_END();
+		ALERT(at_console, "Sent %d sound list bytes\n", soundListBytes);
+	}
+
+	// equip the player now that we know which weapons they can use
+	g_pGameRules->PlayerSpawn(this);
 }
 
 client_info_t CBasePlayer::GetClientInfo() {
@@ -6592,6 +6627,18 @@ void CBasePlayer::SendLegacyClientWarning() {
 	UTIL_ClientPrint(this, print_console, "-------------------------------------------------------------------------\n\n");
 
 	UTIL_LogPlayerEvent(edict(), "was sent the steam_legacy client warning\n");
+}
+
+void CBasePlayer::SendSevenKewpClientNotice() {
+	std::string clientReq = UTIL_SevenKewpClientString(MIN_SEVENKEWP_VERSION);
+	UTIL_ClientPrint(this, print_console, "\n-------------------------------------------------------------------------\n");
+	UTIL_ClientPrint(this, print_console, UTIL_VarArgs("This server requires the \"%s\" client to use certain weapons.\n", clientReq.c_str()));
+	UTIL_ClientPrint(this, print_console, "Download the latest SevenKewp client here:\n\n");
+	UTIL_ClientPrint(this, print_console, "https://github.com/wootguy/SevenKewp/releases/latest\n\n");
+	UTIL_ClientPrint(this, print_console, "The server detected that you are using this client:\n");
+	UTIL_ClientPrint(this, print_console, STRING(m_clientModVersionString));
+	UTIL_ClientPrint(this, print_console, "\n-------------------------------------------------------------------------\n\n");
+	m_sentSevenKewpNotice = true;
 }
 
 const char* CBasePlayer::GetClientVersionString() {
@@ -7355,4 +7402,9 @@ void CBasePlayer::DebugThink() {
 			UTIL_BeamPoints(closestPos, closestPos + Vector(0, 0, 32), modelIdx, 0, 0, lif, w, 0, RGB(255, 255, 255), 0, MSG_ONE_UNRELIABLE, 0, edict());
 		}
 	}
+}
+
+bool CBasePlayer::IsSevenKewpClient() {
+	//return true;
+	return m_sevenkewpVersion >= MIN_SEVENKEWP_VERSION;
 }

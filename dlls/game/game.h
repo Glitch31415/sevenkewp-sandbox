@@ -85,6 +85,8 @@ EXPORT extern cvar_t	mp_max_pvs_corpses; // limit number of corpses in a VIS zon
 EXPORT extern cvar_t	mp_weaponhands; // set default weapon model hands (hl, op4, bshift)
 EXPORT extern cvar_t	mp_chat_interval; // suppress player chats faster than this (seconds)
 EXPORT extern cvar_t	mp_perf; // enables performance logging
+EXPORT extern cvar_t	mp_debug_tracers; // compare your client predicted tracers with the server tracers
+EXPORT extern cvar_t	mp_sevenkewp_client_notice; // tell players where to download the sevenkewp client so they can use all the weapons
 
 // Enables classic func_pushable physics (which is horribly broken, but fun)
 // The higher your FPS, the faster you can boost pushables. You also get boosted.
@@ -167,7 +169,9 @@ EXPORT extern StringMap g_soundReplacementsMod; // sound replacements for this m
 EXPORT extern StringMap g_soundReplacements; // combined sound replacements
 
 EXPORT extern StringSet g_mapWeapons; // weapons which should be precached (don't use aliases here)
-EXPORT extern StringMap g_itemNameRemap;
+EXPORT extern StringMap g_itemNameRemap; // item names remapped for everyone
+EXPORT extern StringMap g_itemNameRemapHL; // item names remapped for HL players only
+
 
 // map for each entity, containing custom keyvalues
 // using a global vector instead of a class member because the map is not POD
