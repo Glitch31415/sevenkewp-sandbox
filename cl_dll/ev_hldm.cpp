@@ -1372,11 +1372,26 @@ enum EGON_FIREMODE { FIRE_NARROW, FIRE_WIDE};
 #define EGON_SOUND_OFF			"weapons/egon_off1.wav"
 #define EGON_SOUND_RUN			"weapons/egon_run3.wav"
 #define EGON_SOUND_STARTUP		"weapons/egon_windup2.wav"
+#define RPG_BEAM_SPRITE			"sprites/laserbeam.spr"
+#define LASER_DOT_SPRITE		"sprites/laserdot.spr"
 
 #define ARRAYSIZE(p)		(sizeof(p)/sizeof(p[0]))
 
 BEAM *pBeam;
 BEAM *pBeam2;
+TEMPENTITY* pFlare; //Egon beam flare
+TEMPENTITY* pLaserDot; // RPG laser dot
+
+void EV_EgonFlareCallback(struct tempent_s* ent, float frametime, float currenttime)
+{
+	float delta = currenttime - ent->tentOffset.z; // time past since the last scale
+	if (delta >= ent->tentOffset.y)
+	{
+		ent->entity.curstate.scale += ent->tentOffset.x * delta;
+		ent->tentOffset.z = currenttime;
+	}
+}
+
 
 void EV_EgonFire( event_args_t *args )
 {
@@ -1451,6 +1466,13 @@ void EV_EgonFire( event_args_t *args )
 				g /= 100.0f;
 			}
 				
+			// Egon beam flare
+			pFlare = gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, vec3_origin, 1.0, gEngfuncs.pEventAPI->EV_FindModelIndex(EGON_FLARE_SPRITE), kRenderGlow, kRenderFxNoDissipation, 1.0, 99999, FTENT_SPRCYCLE | FTENT_PERSIST);
+
+			if (pFlare) // Store the last mode for EV_EgonStop()
+			{
+				pFlare->tentOffset.x = (iFireMode == FIRE_WIDE) ? 1.0f : 0.0f;
+			}
 		
 			pBeam = gEngfuncs.pEfxAPI->R_BeamEntPoint ( idx | 0x1000, tr.endpos, iBeamModelIndex, 99999, 3.5, 0.2, 0.7, 55, 0, 0, r, g, b );
 
@@ -1490,10 +1512,92 @@ void EV_EgonStop( event_args_t *args )
 			pBeam2 = NULL;
 		}
 	}
+
+	if (pFlare) // Vit_amiN: egon beam flare
+	{
+		pFlare->die = gEngfuncs.GetClientTime();
+
+		if (gEngfuncs.GetMaxClients() == 1 || !(pFlare->flags & FTENT_NOMODEL))
+		{
+			if (pFlare->tentOffset.x != 0.0f)	// true for iFireMode == FIRE_WIDE
+			{
+				pFlare->callback = &EV_EgonFlareCallback;
+				pFlare->fadeSpeed = 2.0;			// fade out will take 0.5 sec
+				pFlare->tentOffset.x = 10.0;		// scaling speed per second
+				pFlare->tentOffset.y = 0.1;			// min time between two scales
+				pFlare->tentOffset.z = pFlare->die;	// the last callback run time
+				pFlare->flags = FTENT_FADEOUT | FTENT_CLIENTCUSTOM;
+			}
+		}
+
+		pFlare = NULL;
+	}
 }
 //======================
 //	    EGON END 
 //======================
+
+extern int g_runfuncs;
+
+// Not really an event but the laser dot is special and needs server-side entity which has to
+// be networked to HL players anyway.
+void EV_RpgLaserOn() {
+	cl_entity_t* player = GetLocalPlayer();
+	Vector origin = player->origin;
+	int idx = player->index;
+
+	if (!pBeam && cl_lw->value) //Adrian: Added the cl_lw check for those lital people that hate weapon prediction.
+	{
+		vec3_t vecSrc, vecEnd, origin, forward, right, up;
+		pmtrace_t tr;
+
+		cl_entity_t* pl = gEngfuncs.GetEntityByIndex(idx);
+
+		if (pl)
+		{
+			AngleVectors(gHUD.m_vecAngles, forward, right, up);
+
+			EV_GetGunPosition(idx, player->curstate.usehull == 1, vecSrc, pl->origin);
+
+			VectorMA(vecSrc, 2048, forward, vecEnd);
+
+			//gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
+			//gEngfuncs.pEventAPI->EV_PushPMStates();
+			//gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
+			//gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+			gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_NORMAL, -1, &tr);
+			//gEngfuncs.pEventAPI->EV_PopPMStates();
+
+			float a = 0.1875f;
+			float r = 1.0f * a;
+			float g = 0.125f * a;
+			float b = 0.125f * a;
+
+			pLaserDot = gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, vec3_origin, 1.0,
+				gEngfuncs.pEventAPI->EV_FindModelIndex(LASER_DOT_SPRITE),
+				kRenderGlow, kRenderFxNoDissipation, 1.0, 99999, FTENT_PERSIST);
+
+			pBeam = gEngfuncs.pEfxAPI->R_BeamEntPoint(idx | 0x1000, tr.endpos,
+				gEngfuncs.pEventAPI->EV_FindModelIndex(RPG_BEAM_SPRITE),
+				99999, 0.1f, 0, 0.7, 55, 0, 0, r, g, b);
+		}
+	}
+}
+
+void EV_RpgLaserOff()
+{
+	if (pBeam)
+	{
+		pBeam->die = 0.0;
+		pBeam = NULL;
+	}
+
+	if (pLaserDot)
+	{
+		pLaserDot->die = 0.0;
+		pLaserDot = NULL;
+	}
+}
 
 //======================
 //	   HORNET START
@@ -1709,7 +1813,7 @@ void EV_FireCustom(event_args_t* args) {
 		return;
 	}
 
-	if (evtidx < 0 && evtidx >= MAX_CUSTOM_WEAPON_EVENTS)
+	if (evtidx < 0 && evtidx >= MAX_WC_EVENTS)
 		return;
 
 	WepEvt& evt = params->events[evtidx];
@@ -1741,7 +1845,8 @@ void EV_FireCustom(event_args_t* args) {
 
 	switch (evt.evtType) {
 	case WC_EVT_PLAY_SOUND: {
-		const char* soundPath = GetWeaponCustomSound(evt.playSound.sound);
+		int soundIdx = args->fparam1;
+		const char* soundPath = GetWeaponCustomSound(soundIdx);
 		float vol = evt.playSound.volume / 255.0f;
 		int pitch = gEngfuncs.pfnRandomLong(evt.playSound.pitchMin, evt.playSound.pitchMax);
 		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, evt.playSound.channel, soundPath, vol,
@@ -1791,12 +1896,14 @@ void EV_FireCustom(event_args_t* args) {
 		EV_HLDM_FireBullets(idx, forward, right, up, evt.bullets.count, vecSrc, forward, 8192,
 			evt.bullets.btype, evt.bullets.tracerFreq, &tracerCount[idx - 1], args->fparam1, args->fparam2);
 
-		if (EV_IsLocal(idx) && evt.bullets.flags & FL_WC_BULLETS_MUZZLE_FLASH)
+		if (EV_IsLocal(idx) && evt.bullets.flashSz)
 			EV_MuzzleFlash();
 		break;
 	case WC_EVT_KICKBACK:
 		g_irunninggausspred = 1;
 		g_flApplyVel = evt.kickback.pushForce / 5.0f;
+		break;
+	case WC_EVT_TOGGLE_ZOOM:
 		break;
 	default:
 		gEngfuncs.Con_Printf("Bad custom weapon event type playback %d\n", (int)evt.evtType);

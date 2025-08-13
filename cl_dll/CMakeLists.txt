@@ -55,10 +55,12 @@ set(HUD_SRC
 	menu.cpp
 	message.cpp
 	saytext.cpp
+	clientstats.cpp
 	status_icons.cpp
 	statusbar.cpp
 	text_message.cpp
 	train.cpp
+	fog.cpp
 )
 
 set(VGUI_HDR
@@ -112,6 +114,7 @@ set(MISC_HDR
 set(UTIL_HDR
 	cl_util.h
 	interpolation.h
+	engine_pv.h
 	util_vector.h
 	../common/parsemsg.h
 	../pm_shared/pm_debug.h
@@ -120,10 +123,13 @@ set(UTIL_HDR
 	../pm_shared/pm_materials.h
 	../pm_shared/pm_movevars.h
 	../pm_shared/pm_shared.h
+	../game_shared/shared_util.h
+	../game_shared/md5.h
 )
 set(UTIL_SRC
 	cdll_int.cpp
 	interpolation.cpp
+	engine_pv.cpp
 	util.cpp
 	../dlls/util/HashMap.cpp
 	../common/parsemsg.cpp
@@ -132,6 +138,7 @@ set(UTIL_SRC
 	../pm_shared/pm_shared.cpp
 	../public/interface.cpp
 	../game_shared/shared_util.cpp
+	../game_shared/md5.cpp
 )
 
 set(GAME_HDR
@@ -244,6 +251,7 @@ elseif(MSVC)
 		${CMAKE_CURRENT_SOURCE_DIR}/../utils/vgui/lib/win32_vc6/vgui.lib
 		wsock32
 		${CMAKE_CURRENT_SOURCE_DIR}/../lib/public/sdl2.lib
+		opengl32
 	)
 
 	set_target_properties(${CLIENT_DLL_NAME} PROPERTIES

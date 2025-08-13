@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 EXPORT extern int giPrecacheGrunt;
 EXPORT extern int gmsgShake;
@@ -10,6 +11,7 @@ EXPORT extern int gmsgResetHUD;
 EXPORT extern int gmsgInitHUD;
 EXPORT extern int gmsgShowGameTitle;
 EXPORT extern int gmsgCurWeapon;
+EXPORT extern int gmsgCurWeaponX; // Larger clip size
 EXPORT extern int gmsgHealth;
 EXPORT extern int gmsgDamage;
 EXPORT extern int gmsgBattery;
@@ -17,6 +19,7 @@ EXPORT extern int gmsgTrain;
 EXPORT extern int gmsgLogo;
 EXPORT extern int gmsgWeaponList;
 EXPORT extern int gmsgAmmoX;
+EXPORT extern int gmsgAmmoXX; // Extra-Extra-Large ammo count <:)
 EXPORT extern int gmsgHudText;
 EXPORT extern int gmsgDeathMsg;
 EXPORT extern int gmsgScoreInfo;
@@ -40,9 +43,12 @@ EXPORT extern int gmsgTeamNames;
 EXPORT extern int gmsgStatusText;
 EXPORT extern int gmsgStatusValue;
 
-EXPORT extern int gmsgCustomWeapon;
-EXPORT extern int gmsgSoundIdx;
-EXPORT extern int gmsgToxicCloud;
+EXPORT extern int gmsgCustomWeapon; // custom weapon prediction parameters
+EXPORT extern int gmsgSoundIdx; // mapping of sound indexes to file paths
+EXPORT extern int gmsgNextMap; // next map name
+EXPORT extern int gmsgTimeLeft; // seconds left before map ends (0 = infinite)
+EXPORT extern int gmsgFog; // fog rendering parameters
+EXPORT extern int gmsgToxicCloud; // chumtoad attack
 
 // Note: also update msgTypeStr() in util.cpp when adding new messages
 

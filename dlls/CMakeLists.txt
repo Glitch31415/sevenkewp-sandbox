@@ -121,6 +121,7 @@ set(ENV_HDR
 	env/CAmbientGeneric.h
 	env/CBeam.h
 	env/CBloodSplat.h
+	env/CEnvWeather.h
 	env/CGibShooter.h
 	env/CLaser.h
 	env/CLight.h
@@ -379,6 +380,8 @@ set(WEAPON_HDR
 	weapon/CWeaponInventory.h
 	weapon/CKnife.h
 	weapon/CM249.h
+	weapon/CSniperRifle.h
+	weapon/CUzi.h
 	weapon/CWeaponCustom.h
 	weapon/weapons.h
 )
@@ -416,6 +419,8 @@ set(WEAPON_SRC
 	weapon/CWeaponInventory.cpp
 	weapon/CKnife.cpp
 	weapon/CM249.cpp
+	weapon/CSniperRifle.cpp
+	weapon/CUzi.cpp
 	weapon/CWeaponCustom.cpp
 	weapon/combat.cpp
 )
@@ -426,6 +431,7 @@ set(AMMO_HDR
 set(AMMO_SRC
 	weapon/CBasePlayerAmmo.cpp
 	weapon/CAmmo556.cpp
+	weapon/CAmmo762.cpp
 	weapon/CCrossbowAmmo.cpp
 	weapon/CGaussAmmo.cpp
 	weapon/CGlockAmmo.cpp
@@ -433,6 +439,7 @@ set(AMMO_SRC
 	weapon/CMP5AmmoBox.cpp
 	weapon/CMP5AmmoClip.cpp
 	weapon/CMP5AmmoGrenade.cpp
+	weapon/CUziClip.cpp
 	weapon/CPythonAmmo.cpp
 	weapon/CRpgAmmo.cpp
 	weapon/CShotgunAmmo.cpp
@@ -462,8 +469,8 @@ set(UTIL_HDR
 	util/wav.h
 	util/HashMap.h
 	util/StringPool.h
-	util/md5.h
 	../game_shared/shared_util.h
+	../game_shared/md5.h
 )
 set(UTIL_SRC
 	util/animation.cpp
@@ -487,8 +494,8 @@ set(UTIL_SRC
 	util/wav.cpp
 	util/HashMap.cpp
 	util/StringPool.cpp
-	util/md5.cpp
 	../game_shared/shared_util.cpp
+	../game_shared/md5.cpp
 )
 set(PLAYER_HDR
 	../pm_shared/pm_debug.h

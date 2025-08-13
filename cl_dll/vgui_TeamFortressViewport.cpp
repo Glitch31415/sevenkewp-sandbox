@@ -2305,6 +2305,13 @@ int	TeamFortressViewport::KeyInput( int down, int keynum, const char *pszCurrent
 		}
 	}
 
+	bool mouseWheeled = keynum == K_MWHEELDOWN || keynum == K_MWHEELUP;
+	if (mouseWheeled && g_camAdjustState) {
+		CAM_MouseWheeled(keynum == K_MWHEELUP);
+		return 0;
+	}
+	
+
 	return 1;
 }
 
@@ -2449,6 +2456,20 @@ int TeamFortressViewport::MsgFunc_ServerName( const char *pszName, int iSize, vo
 	strncpy( m_szServerName, READ_STRING(), sizeof(m_szServerName) );
 	m_szServerName[sizeof(m_szServerName) - 1] = 0;
 
+	return 1;
+}
+
+int TeamFortressViewport::MsgFunc_NextMap(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+	safe_strcpy(m_szNextMap, READ_STRING(), sizeof(m_szNextMap));
+	return 1;
+}
+
+int TeamFortressViewport::MsgFunc_TimeLeft(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+	m_timeLeft = READ_LONG();
 	return 1;
 }
 

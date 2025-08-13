@@ -7,24 +7,33 @@
 #define FLOAT_TO_SPREAD(val) (clamp((int)(val * 65535), 0, UINT16_MAX))
 #define SPREAD_TO_FLOAT(val) (val / 65535.0f)
 
-#define MAX_CUSTOM_WEAPON_EVENTS 64
+#define MAX_WC_EVENTS 64
+#define MAX_WC_RANDOM_SELECTION 8
 
 #define FL_WC_WEP_HAS_PRIMARY 1
 #define FL_WC_WEP_HAS_SECONDARY 2
 #define FL_WC_WEP_SHOTGUN_RELOAD 4 // start animation + load animation (repeated) + finish animation
+#define FL_WC_WEP_UNLINK_COOLDOWNS 8 // primary and secondary attacks cooldown independently
 
 #define FL_WC_SHOOT_UNDERWATER 1
+#define FL_WC_SHOOT_NO_ATTACK 2 // don't run standard weapon attack logic (shoot animations, clicking)
 
-#define FL_WC_BULLETS_MUZZLE_FLASH 1
-#define FL_WC_BULLETS_DYNAMIC_SPREAD 2 // spread widens while moving and tightens while crouching
+#define FL_WC_BULLETS_DYNAMIC_SPREAD 1 // spread widens while moving and tightens while crouching
+
+#define FL_WC_COOLDOWN_PRIMARY 1
+#define FL_WC_COOLDOWN_SECONDARY 2
+#define FL_WC_COOLDOWN_IDLE 4
 
 enum WeaponCustomEventTriggers {
 	WC_TRIG_SHOOT_PRIMARY,
 	WC_TRIG_SHOOT_SECONDARY,
 	WC_TRIG_SHOOT_PRIMARY_CLIPSIZE, // trigger arg is the clip size to trigger on
-	WC_TRIG_SHOOT_PRIMARY_ODD, // on odd clip sizes after firing
-	WC_TRIG_SHOOT_PRIMARY_EVEN, // on even clip sizes after firing
-	WC_TRIG_RELOAD,
+	WC_TRIG_SHOOT_PRIMARY_ODD, // triggers on odd clip sizes after firing
+	WC_TRIG_SHOOT_PRIMARY_EVEN, // triggers on even clip sizes after firing
+	WC_TRIG_SHOOT_PRIMARY_NOT_EMPTY, // triggers on non-empty clip size after firing
+	WC_TRIG_RELOAD, // triggers when a reload begins
+	WC_TRIG_RELOAD_EMPTY, // triggers when an empty clip reload begins
+	WC_TRIG_RELOAD_NOT_EMPTY, // triggers when a non-empty clip reload begins
 	WC_TRIG_DEPLOY,
 };
 
@@ -38,6 +47,23 @@ enum WeaponCustomEventType {
 	WC_EVT_BULLETS,
 	WC_EVT_KICKBACK,
 	WC_EVT_MUZZLE_FLASH,
+	WC_EVT_TOGGLE_ZOOM,
+	WC_EVT_COOLDOWN, // adjust cooldowns (by default every action is cooled down after an attack)
+};
+
+// how loud the sound is for AI (reaction distance) (0 = silent)
+enum WeaponCustomAiVol {
+	WC_AIVOL_SILENT,
+	WC_AIVOL_QUIET,
+	WC_AIVOL_NORMAL,
+	WC_AIVOL_LOUD,
+};
+
+enum WeaponCustomFlashSz {
+	WC_FLASH_NONE,
+	WC_FLASH_DIM,
+	WC_FLASH_NORMAL,
+	WC_FLASH_BRIGHT,
 };
 
 struct WepEvt {
@@ -49,13 +75,20 @@ struct WepEvt {
 	// event arguments
 	union {
 		struct {
-			uint16_t sound;
-			uint8_t channel;
+			uint16_t sound : 9;
+			uint16_t channel : 3;
+			uint16_t aiVol : 2; // WeaponCustomAiVol
+			uint8_t reserved : 2;
 			uint8_t volume;
 			uint8_t attn;
 			uint8_t pitchMin;
 			uint8_t pitchMax;
-			uint8_t distantSound;
+
+			// add more sounds for random selection
+			uint8_t numAdditionalSounds;
+			uint16_t additionalSounds[MAX_WC_RANDOM_SELECTION];
+
+			uint8_t distantSound; // not for prediction
 		} playSound;
 
 		struct {
@@ -87,12 +120,22 @@ struct WepEvt {
 			uint16_t spreadY; // accuracy (0 = perfect, 1 = 180 degrees). 65535 = 1.0f
 			uint8_t btype; // BULLET_PLAYER_* (affects impact sounds and decals)
 			uint8_t tracerFreq; // how often to display a tracer (0 = never, 1 = always, 2 = every other shot)
-			uint8_t flags; // FL_WC_BULLETS_*
+			uint8_t flashSz : 4; // WeaponCustomFlashSz
+			uint8_t flags : 4; // FL_WC_BULLETS_*
 		} bullets;
 
 		struct {
 			int16_t pushForce; // Push force applied to player in opposite direction of aim
 		} kickback;
+
+		struct {
+			uint8_t zoomFov;
+		} zoomToggle;
+
+		struct {
+			uint16_t millis;
+			uint8_t targets; // FL_WC_COOLDOWN_*
+		} cooldown;
 	};
 
 #ifndef CLIENT_DLL
@@ -116,15 +159,33 @@ struct WepEvt {
 		return *this;
 	}
 
-	WepEvt PlaySound(int sound, uint8_t channel, float volume, float attn, int pitchMin, int pitchMax, uint8_t distantSound) {
+	WepEvt PlaySound(int sound, uint8_t channel, float volume, float attn, int pitchMin, int pitchMax,
+		uint8_t distantSound, uint8_t aiVol) {
 		evtType = WC_EVT_PLAY_SOUND;
 		playSound.sound = sound;
 		playSound.channel = channel;
+		playSound.aiVol = aiVol;
 		playSound.volume = (int)(volume * 255.5f);
 		playSound.attn = clampf(attn * 64, 0, 255.0f);
 		playSound.pitchMin = pitchMin;
 		playSound.pitchMax = pitchMax;
 		playSound.distantSound = distantSound;
+		return *this;
+	}
+
+	// add an additional sound to an existing PlaySound event, for random selection
+	WepEvt AddSound(int sound) {
+		if (evtType == WC_EVT_PLAY_SOUND) {
+			if (playSound.numAdditionalSounds < MAX_WC_RANDOM_SELECTION) {
+				playSound.additionalSounds[playSound.numAdditionalSounds++] = sound;
+			}
+			else {
+				ALERT(at_error, "AddSound exceeded max random sounds\n");
+			}
+		}
+		else {
+			ALERT(at_error, "AddSound can be called on PlaySound events only\n");
+		}
 		return *this;
 	}
 
@@ -173,7 +234,8 @@ struct WepEvt {
 		return *this;
 	}
 
-	WepEvt Bullets(uint8_t count, uint16_t damage, float spreadX, float spreadY, uint8_t bulletType, uint8_t tracerFreq = 1, uint8_t flags=FL_WC_BULLETS_MUZZLE_FLASH) {
+	WepEvt Bullets(uint8_t count, uint16_t damage, float spreadX, float spreadY, uint8_t bulletType,
+		uint8_t tracerFreq = 1, uint8_t flasSz=WC_FLASH_NORMAL, uint8_t flags=0) {
 		evtType = WC_EVT_BULLETS;
 		bullets.count = count;
 		bullets.damage = damage;
@@ -188,6 +250,19 @@ struct WepEvt {
 	WepEvt Kickback(int16_t pushForce) {
 		evtType = WC_EVT_KICKBACK;
 		kickback.pushForce = pushForce;
+		return *this;
+	}
+
+	WepEvt ToggleZoom(uint8_t zoomFov) {
+		evtType = WC_EVT_TOGGLE_ZOOM;
+		zoomToggle.zoomFov = zoomFov;
+		return *this;
+	}
+
+	WepEvt Cooldown(uint16_t millis, uint8_t targets) {
+		evtType = WC_EVT_COOLDOWN;
+		cooldown.millis = millis;
+		cooldown.targets = targets;
 		return *this;
 	}
 #endif
@@ -217,8 +292,9 @@ struct CustomWeaponParams {
 	uint16_t deployAnim;
 	uint16_t deployTime;
 
-	// 0 = simple reload animation or starting animation for shotgun reload mode
-	// 1 = shotgun reload middle animation (shell insertion)
+	// stage 0 and 1 usage depends on weapon flags:
+	// 0 = simple reload animation OR starting animation for shotgun reload mode
+	// 1 = simple reload animation (empty clip) OR shotgun reload middle animation (shell insertion)
 	// 2 = shotgun reload finish animation (cocking)
 	WeaponCustomReload reloadStage[3];
 
@@ -227,5 +303,5 @@ struct CustomWeaponParams {
 	CustomWeaponShootOpts shootOpts[2]; // primary and secondary fire
 	
 	uint8_t numEvents;
-	WepEvt events[MAX_CUSTOM_WEAPON_EVENTS];
+	WepEvt events[MAX_WC_EVENTS];
 };

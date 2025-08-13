@@ -26,6 +26,8 @@
 #include <stdio.h> // for safe_sprintf()
 #include <stdarg.h>  // "
 #include <string.h> // for strncpy()
+#include "rgb.h"
+#include "shared_util.h"
 
 // Macros to hook function calls into the HUD object
 #define HOOK_MESSAGE(x) gEngfuncs.pfnHookUserMsg(#x, __MsgFunc_##x );
@@ -42,7 +44,11 @@
 								gHUD.y.UserCmd_##x( ); \
 							}
 
+#define PRINTF(msg, ...) gEngfuncs.Con_Printf(msg, __VA_ARGS__)
+
 inline float CVAR_GET_FLOAT( const char *x ) {	return gEngfuncs.pfnGetCvarFloat( (char*)x ); }
+inline struct cvar_s* CVAR_GET_PTR( const char *x ) { return gEngfuncs.pfnGetCvarPointer( (char*)x ); }
+inline void CVAR_SET_FLOAT( const char *x, float val ) { gEngfuncs.Cvar_SetValue( (char*)x, val ); }
 inline char* CVAR_GET_STRING( const char *x ) {	return gEngfuncs.pfnGetCvarString( (char*)x ); }
 inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int flags ) {	return gEngfuncs.pfnRegisterVariable( (char*)cv, (char*)val, flags ); }
 
@@ -89,6 +95,12 @@ inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int fl
 #define SetCrosshair (*gEngfuncs.pfnSetCrosshair)
 #define AngleVectors (*gEngfuncs.pfnAngleVectors)
 
+// prevent crashes when map is not loaded
+inline cl_entity_t* GetLocalPlayer() {
+	static cl_entity_t dummyPlayer;
+	return gHUD.m_is_map_loaded ? gEngfuncs.GetLocalPlayer() : &dummyPlayer;
+}
+
 
 // Gets the height & width of a sprite,  at the specified frame
 inline int SPR_Height( HSPRITE x, int f )	{ return gEngfuncs.pfnSPR_Height(x, f); }
@@ -98,6 +110,17 @@ inline 	client_textmessage_t	*TextMessageGet( const char *pName ) { return gEngf
 inline 	int						TextMessageDrawChar( int x, int y, int number, int r, int g, int b ) 
 { 
 	return gEngfuncs.pfnDrawCharacter( x, y, number, r, g, b ); 
+}
+
+inline void SetConsoleTextColor(int r, int g, int b)
+{
+	gEngfuncs.pfnDrawSetTextColor(r / 255.0f, g / 255.0f, b / 255.0f);
+}
+
+inline int DrawConsoleString(int x, int y, const char* string, RGB color)
+{
+	gEngfuncs.pfnDrawSetTextColor(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f);
+	return gEngfuncs.pfnDrawConsoleString(x, y, (char*)string);
 }
 
 inline int DrawConsoleString( int x, int y, const char *string )
@@ -195,3 +218,13 @@ inline void UnpackRGB(int &r, int &g, int &b, unsigned long ulRGB)\
 }
 
 HSPRITE LoadSprite(const char *pszName);
+
+// not relative to a game dir
+bool fileExists(const char* path);
+
+// returns a static buffer (don't nest calls or free the result)
+char* UTIL_VarArgs(const char* format, ...);
+
+// searches game directories in priority order
+// returns NULL if file is not found
+const char* FindGameFile(const char* path);
