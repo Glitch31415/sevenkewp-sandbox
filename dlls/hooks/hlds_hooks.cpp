@@ -741,7 +741,6 @@ void MarkWeaponSlotConflicts() {
 
 void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 {
-<<<<<<< HEAD
 	int				i;
 	CBaseEntity		*pClass;
 
@@ -853,13 +852,11 @@ UTIL_PrecacheOther("monster_gman");
 UTIL_PrecacheOther("monster_stukabat");
 UTIL_PrecacheOther("monster_kingpin");
 }
-=======
 	std::string clientDataFilesHash = UTIL_HashClientDataFiles();
 	char* serverinfo = (char*)g_engfuncs.pfnGetInfoKeyBuffer(g_engfuncs.pfnPEntityOfEntIndex(0));
 	g_engfuncs.pfnSetKeyValue(serverinfo, "skv", UTIL_VarArgs("%d", MIN_SEVENKEWP_VERSION));
 	g_engfuncs.pfnSetKeyValue(serverinfo, "skmd5", clientDataFilesHash.c_str());
 
->>>>>>> f84d9f6b5d998c3a74daf2d350acdda8b92fffbb
 	// reset player inventories
 	if (g_clearInventoriesNextMap) {
 		g_playerInventory.clear();
