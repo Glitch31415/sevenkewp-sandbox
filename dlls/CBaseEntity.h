@@ -15,6 +15,8 @@ class CItemInventory;
 class CTriggerCamera;
 class CLight;
 class CFuncTank;
+class CEnvWeather;
+class CWeaponCustom;
 
 void* GET_PRIVATE(const edict_t* pent);
 
@@ -236,6 +238,8 @@ public:
 	virtual CTriggerCamera* MyCameraPointer(void) { return NULL; }
 	virtual CFuncTank* MyTankPointer(void) { return NULL; }
 	virtual CLight* MyLightPointer(void) { return NULL; }
+	virtual CEnvWeather* MyWeatherPointer(void) { return NULL; }
+	virtual CWeaponCustom* MyWeaponCustomPtr(void) { return NULL; }
 	virtual	int		GetToggleState(void) { return TS_AT_TOP; }
 	virtual void	AddPoints(int score, BOOL bAllowNegativeScore) {}
 	virtual void	AddPointsToTeam(int score, BOOL bAllowNegativeScore) {}
@@ -268,6 +272,7 @@ public:
 	virtual BOOL	IsBeam(void) { return FALSE; };
 	virtual BOOL	IsButton() { return FALSE; }
 	virtual BOOL	IsTank() { return FALSE; }
+	virtual BOOL	IsWeaponCustom() { return FALSE; }
 	virtual const char* TeamID(void) { return ""; }
 	virtual const char* DisplayName();
 	virtual const char* GetDeathNoticeWeapon() { return STRING(pev->classname); };

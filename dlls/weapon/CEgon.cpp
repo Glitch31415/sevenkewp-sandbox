@@ -302,14 +302,19 @@ void CEgon::Fire( const Vector &vecOrigSrc, const Vector &vecDir )
 	if (pEntity == NULL)
 		return;
 
-	if ( g_pGameRules->IsMultiplayer() )
+	CSprite* m_pSprite = (CSprite*)m_hSprite.GetEntity();
+
+	if ( g_pGameRules->IsMultiplayer() && m_pSprite)
 	{
-		CSprite* m_pSprite = (CSprite*)m_hSprite.GetEntity();
-		if ( m_pSprite && pEntity->pev->takedamage )
+		// don't send flare to sevenkewp client that's predicting it
+		if (m_pPlayer->IsSevenKewpClient())
+			m_pSprite->m_hidePlayers |= PLRBIT(m_pPlayer->edict());
+
+		if (pEntity->pev->takedamage)
 		{
 			m_pSprite->pev->effects &= ~EF_NODRAW;
 		}
-		else if ( m_pSprite )
+		else
 		{
 			m_pSprite->pev->effects |= EF_NODRAW;
 		}
@@ -548,9 +553,13 @@ void CEgon::WeaponIdle( void )
 	if (!m_pPlayer)
 		return;
 
+	if (!(m_pPlayer->m_afButtonPressed & IN_ATTACK2) && (m_pPlayer->pev->button & IN_ATTACK)) {
+		return;
+	}
+
 	ResetEmptySound( );
 
-	if ( m_flTimeWeaponIdle > gpGlobals->time )
+	if ( m_flTimeWeaponIdle > UTIL_WeaponTimeBase())
 		return;
 
 	if ( m_fireState != FIRE_OFF )

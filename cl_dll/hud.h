@@ -32,6 +32,7 @@
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
+#include "rgb.h"
 
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2
@@ -76,7 +77,7 @@ public:
 	virtual void Think(void) {return;}
 	virtual void Reset(void) {return;}
 	virtual void InitHUDData( void ) {}		// called every time a server is connected to
-
+	virtual const char* HudName() { return "CHudBase"; } // for debugging
 };
 
 struct HUDLIST {
@@ -104,12 +105,17 @@ public:
 	int Draw(float flTime);
 	void Think(void);
 	void Reset(void);
+	virtual const char* HudName() { return "CHudAmmo"; }
 	int DrawWList(float flTime);
+	void UpdateZoomCrosshair(int id, bool zoom, bool autoaimOnTarget);
+	int CurWeapon(int iState, int iId, int iClip);
 	int MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_CurWeaponX(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_CustomWep(const char* pszName, int iSize, void* pbuf);
 	int MsgFunc_SoundIdx(const char* pszName, int iSize, void* pbuf);
 	int MsgFunc_AmmoX(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_AmmoXX(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_AmmoPickup( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_WeapPickup( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_ItemPickup( const char *pszName, int iSize, void *pbuf );
@@ -147,9 +153,9 @@ class CHudAmmoSecondary: public CHudBase
 {
 public:
 	int Init( void );
-	int VidInit( void );
 	void Reset( void );
 	int Draw(float flTime);
+	virtual const char* HudName() { return "CHudAmmoSecondary"; }
 
 	int MsgFunc_SecAmmoVal( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_SecAmmoIcon( const char *pszName, int iSize, void *pbuf );
@@ -178,9 +184,9 @@ class CHudGeiger: public CHudBase
 {
 public:
 	int Init( void );
-	int VidInit( void );
 	int Draw(float flTime);
 	int MsgFunc_Geiger(const char *pszName, int iSize, void *pbuf);
+	virtual const char* HudName() { return "CHudGeiger"; }
 	
 private:
 	int m_iGeigerRange;
@@ -197,6 +203,7 @@ public:
 	int VidInit( void );
 	int Draw(float flTime);
 	int MsgFunc_Train(const char *pszName, int iSize, void *pbuf);
+	virtual const char* HudName() { return "CHudTrain"; }
 
 private:
 	HSPRITE m_hSprite;
@@ -211,10 +218,10 @@ class CHudStatusBar : public CHudBase
 {
 public:
 	int Init( void );
-	int VidInit( void );
 	int Draw( float flTime );
 	void Reset( void );
 	void ParseStatusString( int line_num );
+	virtual const char* HudName() { return "CHudStatusBar"; }
 
 	int MsgFunc_StatusText( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_StatusValue( const char *pszName, int iSize, void *pbuf );
@@ -242,7 +249,7 @@ struct extra_player_info_t
 {
 	short frags;
 	short deaths;
-	short playerclass;
+	uint16_t playerclass;
 	short health; // UNUSED currently, spectator UI would like this
 	bool dead; // UNUSED currently, spectator UI would like this
 	short teamnumber;
@@ -261,6 +268,7 @@ struct team_info_t
 	int already_drawn;
 	int scores_overriden;
 	int teamnumber;
+	int activePercent; // percent of players active (alive and not idle)
 };
 
 #include "player_info.h"
@@ -276,6 +284,7 @@ public:
 	int VidInit( void );
 	int Draw( float flTime );
 	int MsgFunc_DeathMsg( const char *pszName, int iSize, void *pbuf );
+	virtual const char* HudName() { return "CHudDeathNotice"; }
 
 private:
 	int m_HUD_d_skull;  // sprite index of skull icon
@@ -289,10 +298,10 @@ class CHudMenu : public CHudBase
 public:
 	int Init( void );
 	void InitHUDData( void );
-	int VidInit( void );
 	void Reset( void );
 	int Draw( float flTime );
 	int MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf );
+	virtual const char* HudName() { return "CHudMenu"; }
 
 	void SelectMenuItem( int menu_item );
 
@@ -310,12 +319,12 @@ class CHudSayText : public CHudBase
 public:
 	int Init( void );
 	void InitHUDData( void );
-	int VidInit( void );
 	int Draw( float flTime );
 	int MsgFunc_SayText( const char *pszName, int iSize, void *pbuf );
 	void SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex = -1 );
 	void EnsureTextFitsInOneLineAndWrapIfHaveTo( int line );
 	int MaxLines(); // max lines client wants to see
+	virtual const char* HudName() { return "CHudSayText"; }
 friend class CHudSpectator;
 
 private:
@@ -323,6 +332,24 @@ private:
 	struct cvar_s *	m_HUD_saytext;
 	struct cvar_s *	m_HUD_saytext_time;
 	struct cvar_s *	m_HUD_saytext_lines;
+};
+
+class CHudClientStats : public CHudBase
+{
+public:
+	int Init(void);
+	int VidInit(void) { return 1; }
+	int Draw(float flTime);
+	virtual const char* HudName() { return "CHudClientStats"; }
+
+private:
+	struct cvar_s* m_HUD_rspeeds;
+
+	// for spacing stat elements
+	int m_msMaxLen;
+	int m_wpolyMaxLen;
+	int m_epolyMaxLen;
+	RGB m_textColor;
 };
 
 //
@@ -335,6 +362,7 @@ public:
 	int VidInit( void );
 	int Draw(float flTime);
 	int MsgFunc_Battery(const char *pszName,  int iSize, void *pbuf );
+	virtual const char* HudName() { return "CHudBattery"; }
 	
 private:
 	HSPRITE m_hSprite1;
@@ -360,6 +388,7 @@ public:
 	void Reset( void );
 	int MsgFunc_Flashlight(const char *pszName,  int iSize, void *pbuf );
 	int MsgFunc_FlashBat(const char *pszName,  int iSize, void *pbuf );
+	virtual const char* HudName() { return "CHudFlashlight"; }
 	
 private:
 	HSPRITE m_hSprite1;
@@ -408,6 +437,7 @@ public:
 	static char *BufferedLocaliseTextString( const char *msg );
 	char *LookupString( const char *msg_name, int *msg_dest = NULL );
 	int MsgFunc_TextMsg(const char *pszName, int iSize, void *pbuf);
+	virtual const char* HudName() { return "CHudTextMessage"; }
 };
 
 //
@@ -434,6 +464,7 @@ public:
 	void MessageScanStart( void );
 	void MessageScanNextChar( void );
 	void Reset( void );
+	virtual const char* HudName() { return "CHudMessage"; }
 
 private:
 	client_textmessage_t		*m_pMessages[maxHUDMessages];
@@ -460,6 +491,7 @@ public:
 	void Reset( void );
 	int Draw(float flTime);
 	int MsgFunc_StatusIcon(const char *pszName, int iSize, void *pbuf);
+	virtual const char* HudName() { return "CHudStatusIcons"; }
 
 	enum { 
 		MAX_ICONSPRITENAME_LENGTH = MAX_SPRITE_NAME_LENGTH,
@@ -495,6 +527,7 @@ public:
 	int Init( void );
 	int VidInit( void );
 	int Draw( float flTime );
+	virtual const char* HudName() { return "CHudBenchmark"; }
 
 	void SetScore( float score );
 
@@ -540,6 +573,22 @@ private:
 	int 	m_nCompositeScore;
 };
 
+class CFog : public CHudBase
+{
+public:
+	int Init(void);
+	int VidInit(void) { return 1; }
+	int MsgFunc_Fog(const char* pszName, int iSize, void* pbuf);
+	void SetupFog();
+	virtual const char* HudName() { return "CFog"; }
+
+private:
+	bool enabled;
+	Vector color;
+	float startDist;
+	float endDist;
+};
+
 //
 //-----------------------------------------------------
 //
@@ -572,6 +621,8 @@ public:
 	int		m_iRes;
 	cvar_t  *m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
+	int m_sevenkewpVersion;
+	bool m_is_map_loaded;
 
 	int m_iFontHeight;
 	int DrawHudNumber(int x, int y, int iFlags, int iNumber, int r, int g, int b );
@@ -579,6 +630,9 @@ public:
 	int DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b );
 	int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
 	int GetNumWidth(int iNumber, int iFlags);
+
+	// for disabling features that could be used to cheat on vanilla servers
+	inline bool IsSevenKewpServer() { return m_sevenkewpVersion > 0; }
 
 private:
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
@@ -604,7 +658,7 @@ public:
 
 	CHudAmmo		m_Ammo;
 	CHudHealth		m_Health;
-	CHudSpectator		m_Spectator;
+	CHudSpectator	m_Spectator;
 	CHudGeiger		m_Geiger;
 	CHudBattery		m_Battery;
 	CHudTrain		m_Train;
@@ -618,9 +672,14 @@ public:
 	CHudTextMessage m_TextMessage;
 	CHudStatusIcons m_StatusIcons;
 	CHudBenchmark	m_Benchmark;
+	CHudClientStats	m_ClientStats;
+	CFog			m_Fog;
 
 	void Init( void );
-	void VidInit( void );
+	void VidInit( void ); // called on server connection or video mode change
+	void LoadHudSprites( void );
+	void ParseServerInfo( void ); // parse sevenkewp-specific server data
+	void WorldInit( void ); // called when world is laoded and we're about to spawn
 	void Think(void);
 	int Redraw( float flTime, int intermission );
 	int UpdateClientData( client_data_t *cdata, float time );
@@ -638,6 +697,8 @@ public:
 	int _cdecl MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf);
 	int  _cdecl MsgFunc_Concuss( const char *pszName, int iSize, void *pbuf );
 
+	int  _cdecl MsgFunc_NextMap( const char *pszName, int iSize, void *pbuf );
+	int  _cdecl MsgFunc_TimeLeft( const char *pszName, int iSize, void *pbuf );
 	int  _cdecl MsgFunc_ToxicCloud( const char *pszName, int iSize, void *pbuf );
 
 	// Screen information

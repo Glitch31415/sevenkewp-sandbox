@@ -59,6 +59,7 @@
 #include "CGib.h"
 #include "bodyque.h"
 #include "CWeaponCustom.h"
+#include "CEnvWeather.h"
 
 // #define DUCKFIX
 
@@ -4612,7 +4613,9 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem("item_longjump");
 		if (IsSevenKewpClient()) {
 			GiveNamedItem("weapon_m249");
+			GiveNamedItem("weapon_sniperrifle");
 			GiveNamedItem("ammo_556");
+			GiveNamedItem("ammo_762");
 		}
 		gEvilImpulse101 = FALSE;
 		break;
@@ -5000,22 +5003,34 @@ void CBasePlayer::SendAmmoUpdate(void)
 		{
 			m_rgAmmoLast[i] = m_rgAmmo[i];
 
-			ASSERT( m_rgAmmo[i] >= 0 );
-			ASSERT( m_rgAmmo[i] < 255 );
+			if (IsSevenKewpClient()) {
+				uint16_t ammoVal = V_max(0, m_rgAmmo[i]);
 
-			uint8_t ammoVal = V_max(0, m_rgAmmo[i]);
+				// can't update max ammo counter without a client update
+				// this will at least show the client that ammo is being spent
+				if (m_rgAmmo[i] > 999) {
+					ammoVal = 990 + (m_rgAmmo[i] % 10);
+				}
 
-			// can't update max ammo counter without a client update
-			// this will at least show the client that ammo is being spent
-			if (m_rgAmmo[i] > 255) {
-				ammoVal = 250 + (m_rgAmmo[i] % 6);
+				MESSAGE_BEGIN(MSG_ONE, gmsgAmmoXX, NULL, pev);
+				WRITE_BYTE(i);
+				WRITE_SHORT(ammoVal);
+				MESSAGE_END();
 			}
+			else {
+				uint8_t ammoVal = V_max(0, m_rgAmmo[i]);
 
-			// send "Ammo" update message
-			MESSAGE_BEGIN( MSG_ONE, gmsgAmmoX, NULL, pev );
-				WRITE_BYTE( i );
+				// can't update max ammo counter without a client update
+				// this will at least show the client that ammo is being spent
+				if (m_rgAmmo[i] > 255) {
+					ammoVal = 250 + (m_rgAmmo[i] % 6);
+				}
+
+				MESSAGE_BEGIN(MSG_ONE, gmsgAmmoX, NULL, pev);
+				WRITE_BYTE(i);
 				WRITE_BYTE(ammoVal);
-			MESSAGE_END();
+				MESSAGE_END();
+			}
 		}
 	}
 }
@@ -6425,7 +6440,30 @@ void CBasePlayer::UpdateMonsterInfo() {
 */
 
 void CBasePlayer::UpdateScore() {
-	if (m_lastScore == (int)pev->frags || g_engfuncs.pfnTime() - m_lastScoreUpdate < 0.1f) {
+	int idleTime = g_engfuncs.pfnTime() - m_lastUserInput;
+	bool statusChanged = GetScoreboardStatus() != m_lastScoreStatus;
+	bool scoreChanged = m_lastScore != (int)pev->frags;
+
+	if (IsSevenKewpClient()) {
+		float now = g_engfuncs.pfnTime();
+		if (now - m_lastTimeLeftUpdate > 0.9f) { // a little fast so seconds aren't skipped
+			int timeleft = timelimit.value*60 - gpGlobals->time;
+			MESSAGE_BEGIN(MSG_ONE_UNRELIABLE, gmsgTimeLeft, 0, edict());
+			WRITE_LONG(timelimit.value > 0 ? timeleft : -1);
+			MESSAGE_END();
+
+			const char* nextmap = CVAR_GET_STRING("mp_nextmap");
+			if (m_lastTimeLeftUpdate == 0 || strcmp(m_lastNextMap, nextmap)) {
+				strcpy_safe(m_lastNextMap, nextmap, sizeof(m_lastNextMap));
+				MESSAGE_BEGIN(MSG_ONE_UNRELIABLE, gmsgNextMap, 0, edict());
+				WRITE_STRING(nextmap);
+				MESSAGE_END();
+			}
+			m_lastTimeLeftUpdate = now;
+		}
+	}	
+
+	if ((!statusChanged && !scoreChanged) || g_engfuncs.pfnTime() - m_lastScoreUpdate < 0.1f) {
 		return;
 	}
 	m_lastScoreUpdate = g_engfuncs.pfnTime();
@@ -6447,15 +6485,33 @@ void CBasePlayer::UpdateScore() {
 	else {
 		UpdateTeamInfo();
 	}
-	
+}
+
+uint16_t CBasePlayer::GetScoreboardStatus() {
+	uint16_t status = 0;
+	float idleTime = g_engfuncs.pfnTime() - m_lastUserInput;
+	if (idleTime >= PLR_IDLE_STATE_TIME3)
+		status = 5;
+	else if (idleTime >= PLR_IDLE_STATE_TIME2)
+		status = 4;
+	else if (idleTime >= PLR_IDLE_STATE_TIME)
+		status = 3;
+	else if (IsAlive())
+		status = 1;
+	else if (IsObserver())
+		status = 2;
+
+	return status;
 }
 
 void CBasePlayer::UpdateTeamInfo(int color, int msg_mode, edict_t* dst) {
+	m_lastScoreStatus = GetScoreboardStatus();
+
 	MESSAGE_BEGIN(msg_mode, gmsgScoreInfo, 0, dst);
 	WRITE_BYTE(entindex());	// client number
 	WRITE_SHORT(clampf(pev->frags, INT16_MIN, INT16_MAX));
 	WRITE_SHORT(m_iDeaths);
-	WRITE_SHORT(0);
+	WRITE_SHORT(m_lastScoreStatus); // playerclass, overridden to mean status
 	WRITE_SHORT(color == -1 ? GetNameColor() : color);
 	MESSAGE_END();
 
@@ -6564,26 +6620,19 @@ void CBasePlayer::HandleClientCvarResponse(int requestID, const char* pszCvarNam
 
 void CBasePlayer::QueryClientTypeFinished() {
 	if (IsSevenKewpClient()) {
-		// send over the sound index mapping
-		int soundCount = 0;
-		for (int i = 0; i < MAX_PRECACHE_SOUND; i++) {
-			if (g_customWeaponSounds[i]) {
-				soundCount++;
-			}
-		}
+		CWeaponCustom::SendSoundMapping(this);
 
-		int soundListBytes = 0;
-		MESSAGE_BEGIN(MSG_ONE, gmsgSoundIdx, NULL, pev);
-		WRITE_SHORT(soundCount); soundListBytes += 1;
-		for (int i = 0; i < MAX_PRECACHE_SOUND; i++) {
-			if (g_customWeaponSounds[i]) {
-				const char* path = INDEX_SOUND(i);
-				WRITE_SHORT(i); soundListBytes += 2;
-				WRITE_STRING(path); soundListBytes += strlen(path) + 1;
+		// activate fog
+		if (g_fog_enabled) {
+			CBaseEntity* ent = NULL;
+			while ((ent = UTIL_FindEntityByClassname(ent, "env_*"))) {
+				CEnvWeather* weather = ent->MyWeatherPointer();
+				if (weather && weather->m_useFog && weather->m_isActive) {
+					weather->SendFogMessage(this);
+					break;
+				}
 			}
 		}
-		MESSAGE_END();
-		ALERT(at_console, "Sent %d sound list bytes\n", soundListBytes);
 	}
 
 	// equip the player now that we know which weapons they can use

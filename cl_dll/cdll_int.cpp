@@ -24,6 +24,7 @@
 #undef INTERFACE_H
 #include "../public/interface_hlsdk.h"
 //#include "vgui_schememanager.h"
+#include "engine_pv.h"
 
 #include "pm_shared.h"
 
@@ -51,6 +52,9 @@ TeamFortressViewport *gViewPort = NULL;
 #include "particleman.h"
 CSysModule *g_hParticleManModule = NULL;
 IParticleMan *g_pParticleMan = NULL;
+
+bool is_steam_legacy_engine;
+bool is_software_renderer;
 
 void CL_LoadParticleMan( void );
 void CL_UnloadParticleMan( void );
@@ -168,12 +172,20 @@ so the HUD can reinitialize itself.
 ==========================
 */
 
+int g_connection_phase;
+
 int CL_DLLEXPORT HUD_VidInit( void )
 {
 //	RecClHudVidInit();
 	gHUD.VidInit();
 
 	VGui_Startup();
+
+	is_steam_legacy_engine = CVAR_GET_PTR("sv_allow_shaders") == NULL;
+	is_software_renderer = CVAR_GET_PTR("gl_fog") == NULL;
+	InitEnginePv();
+
+	g_connection_phase = 0;
 
 	return 1;
 }
@@ -238,6 +250,7 @@ int CL_DLLEXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime )
 	if (mouse_uncenter_phase == 2) {
 		UndoOrCaptureMouse();
 	}
+	gHUD.m_is_map_loaded = true;
 
 	IN_Commands();
 
@@ -281,6 +294,33 @@ void CL_DLLEXPORT HUD_Frame( double time )
 
 	if (mouse_uncenter_phase == 2) {
 		SaveMouseUndoPos();
+	}
+
+	// using the world entity state to detect when all resources have downloaded and the player is
+	// preparing to spawn. A good time to load other resources that depend on downloaded files.
+	if (g_connection_phase == 0) {
+		cl_entity_t* world = gEngfuncs.GetEntityByIndex(0);
+
+		if (world) {
+			world->curstate.scale = 1337;
+			gHUD.ParseServerInfo();
+			g_connection_phase = 1;
+		}
+	}
+	else if (g_connection_phase == 1) {
+		cl_entity_t* world = gEngfuncs.GetEntityByIndex(0);
+
+		if (world && world->curstate.scale != 1337) {
+			gHUD.WorldInit();
+			g_connection_phase = 2;
+		}
+	} else if (g_connection_phase == 2) {
+		cl_entity_t* world = gEngfuncs.GetEntityByIndex(0);
+		if (!world) {
+			// disconnected or retried connection
+			g_connection_phase = 0;
+			gHUD.m_is_map_loaded = false;
+		}
 	}
 }
 

@@ -57,11 +57,11 @@ void CM249::Precache()
 	primary.cooldown = 67;
 
 	float spread = VECTOR_CONE_6DEGREES.x;
-	int bulletf = FL_WC_BULLETS_MUZZLE_FLASH | FL_WC_BULLETS_DYNAMIC_SPREAD;
+	int bulletf = FL_WC_BULLETS_DYNAMIC_SPREAD;
 	int btype = BULLET_PLAYER_9MM;
 
 	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY).WepAnim(M249_SHOOT1, M249_SHOOT1 + 2));
-	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY).PlaySound(shootSnd, CHAN_WEAPON, 1.0f, ATTN_NORM, 94, 109, DISTANT_556));
+	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY).PlaySound(shootSnd, CHAN_WEAPON, 1.0f, ATTN_NORM, 94, 109, DISTANT_556, WC_AIVOL_LOUD));
 	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY).PunchRandom(2, 1));
 	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY).Kickback(35));
 	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY).Bullets(1, gSkillData.sk_plr_556_bullet, spread, spread, btype, 1, bulletf));
@@ -98,9 +98,9 @@ int CM249::GetItemInfo(ItemInfo* p)
 	p->pszName = MOD_SPRITE_FOLDER "weapon_m249";
 	p->pszAmmo1 = "556";
 	p->iMaxClip = M249_MAX_CLIP;
-	p->iMaxAmmo1 = 200;
-	p->iSlot = 2;
-	p->iPosition = 4;
+	p->iMaxAmmo1 = 600;
+	p->iSlot = 5;
+	p->iPosition = 0;
 	p->iId = WEAPON_M249;
 	p->iWeight = M249_WEIGHT;
 	return true;

@@ -53,6 +53,7 @@
 #include "animation.h"
 #include "bodyque.h"
 #include "CWeaponCustom.h"
+#include "CEnvWeather.h"
 
 #if !defined ( _WIN32 )
 #include <ctype.h>
@@ -568,7 +569,7 @@ void ServerDeactivate( void )
 	memset(g_indexModels, 0, sizeof(g_indexModels));
 	memset(g_indexSounds, 0, sizeof(g_indexSounds));
 	memset(g_hudMsgHistory, 0, sizeof(g_hudMsgHistory));
-	memset(g_customWeaponSounds, 0, sizeof(g_customWeaponSounds));
+	memset(CWeaponCustom::m_customWeaponSounds, 0, sizeof(CWeaponCustom::m_customWeaponSounds));
 
 	// in case the next map doesn't configure a sky or light_environment
 	CVAR_SET_STRING("sv_skyname", "");
@@ -740,6 +741,7 @@ void MarkWeaponSlotConflicts() {
 
 void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 {
+<<<<<<< HEAD
 	int				i;
 	CBaseEntity		*pClass;
 
@@ -851,6 +853,13 @@ UTIL_PrecacheOther("monster_gman");
 UTIL_PrecacheOther("monster_stukabat");
 UTIL_PrecacheOther("monster_kingpin");
 }
+=======
+	std::string clientDataFilesHash = UTIL_HashClientDataFiles();
+	char* serverinfo = (char*)g_engfuncs.pfnGetInfoKeyBuffer(g_engfuncs.pfnPEntityOfEntIndex(0));
+	g_engfuncs.pfnSetKeyValue(serverinfo, "skv", UTIL_VarArgs("%d", MIN_SEVENKEWP_VERSION));
+	g_engfuncs.pfnSetKeyValue(serverinfo, "skmd5", clientDataFilesHash.c_str());
+
+>>>>>>> f84d9f6b5d998c3a74daf2d350acdda8b92fffbb
 	// reset player inventories
 	if (g_clearInventoriesNextMap) {
 		g_playerInventory.clear();

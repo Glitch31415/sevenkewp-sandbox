@@ -112,6 +112,13 @@ const char* GetWeaponCustomSound(int idx) {
 	return "";
 }
 
+void ResetCustomWeaponStates() {
+	for (int i = 0; i < MAX_WEAPONS; i++) {
+		g_customWeapon[i].m_lastZoomToggle = 0;
+		g_customWeapon[i].m_lastDeploy = 0;
+	}
+}
+
 /*
 ======================
 AlertMessage
@@ -383,9 +390,16 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 
 	if ((m_fInReload) && (m_pPlayer->m_flNextAttack <= 0.0))
 	{
-#if 0 // FIXME, need ammo on client to make this work right
+#if 1 // FIXME, need ammo on client to make this work right
 		// complete the reload. 
-		int j = V_min( iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);	
+		// https://github.com/ValveSoftware/halflife/issues/2301#issuecomment-487010423
+		ItemInfo ii;
+
+		memset(&ii, 0, sizeof(ii));
+
+		GetItemInfo(&ii);
+
+		int j = V_min(ii.iMaxClip - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);
 
 		// Add them to the clip
 		m_iClip += j;
@@ -897,7 +911,14 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	player.pev->deadflag = from->client.deadflag;
 	player.pev->waterlevel = from->client.waterlevel;
 	player.pev->maxspeed    = from->client.maxspeed;
-	player.pev->fov = from->client.fov;
+	
+	// client only sets zoom state once per click, so don't let the server and client states
+	// fight each other until the state is likely synced
+	CWeaponCustom* wc = pWeapon->MyWeaponCustomPtr();
+	if (wc && gpGlobals->time - wc->m_lastZoomToggle > 0.5f) {
+		player.pev->fov = from->client.fov;
+	}
+	
 	player.pev->weaponanim = from->client.weaponanim;
 	player.pev->viewmodel = from->client.viewmodel;
 	player.m_flNextAttack = from->client.m_flNextAttack;
@@ -922,11 +943,19 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	{
 		player.m_pActiveItem = g_pWpns[ from->client.m_iId ];
 	}
+	else {
+		player.m_pActiveItem = NULL;
+	}
 
 	if (player.m_pActiveItem && player.m_pActiveItem->m_iId == WEAPON_RPG )
 	{
-		 ( ( CRpg * )player.m_pActiveItem)->m_fSpotActive = (int)from->client.vuser2[ 1 ];
-		 ( ( CRpg * )player.m_pActiveItem)->m_cActiveRockets = (int)from->client.vuser2[ 2 ];
+		CRpg* rpg = (CRpg*)player.m_pActiveItem;
+	
+		// only sync when laser hasn't been togglered recently to prevent flickering
+		if (rpg->m_lastBeamUpdate - gEngfuncs.GetClientTime() > 0.5f)
+			rpg->m_fSpotActive = (int)from->client.vuser2[ 1 ];
+
+		rpg->m_cActiveRockets = (int)from->client.vuser2[ 2 ];
 	}
 	
 	// Don't go firing anything if we have died or are spectating
@@ -943,6 +972,9 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	// Assume that we are not going to switch weapons
 	to->client.m_iId					= from->client.m_iId;
 
+	// prevents spammed deployment events while waiting for new server wep id to match client's
+	static float lastClientWeaponSwitch = 0;
+
 	// Now see if we issued a changeweapon command ( and we're not dead )
 	if ( cmd->weaponselect && ( player.pev->deadflag != ( DEAD_DISCARDBODY + 1 ) ) )
 	{
@@ -952,9 +984,12 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 			CBasePlayerWeapon *pNew = g_pWpns[ cmd->weaponselect ];
 			if ( pNew && ( pNew != pWeapon ) )
 			{
+				lastClientWeaponSwitch = gpGlobals->time;
+
 				// Put away old weapon
-				if (player.m_pActiveItem)
-					player.m_pActiveItem->Holster( );
+				if (player.m_pActiveItem) {
+					player.m_pActiveItem->Holster();
+				}
 				
 				player.m_pLastItem = player.m_pActiveItem;
 				player.m_pActiveItem = pNew;
@@ -966,6 +1001,10 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 					g_runfuncs = 1; // force the animation to play
 					player.m_pActiveItem->Deploy( );
 					g_runfuncs = oldRunfuncs;
+
+					CWeaponCustom* wcNew = pNew->MyWeaponCustomPtr();
+					if (g_runfuncs && wcNew)
+						wcNew->m_lastDeploy = gpGlobals->time;
 				}
 
 				// Update weapon id so we can predict things correctly.
@@ -974,11 +1013,16 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 		}
 	}
 
-	if (serverWeaponChanged) {
+	if (serverWeaponChanged && gpGlobals->time - lastClientWeaponSwitch > 0.5f) {
 		// weapon changed via server logic
 		// Put away old weapon
-		if (oldActiveItem)
+		if (oldActiveItem) {
 			oldActiveItem->Holster();
+
+			CWeaponCustom* wcOld = oldActiveItem->MyWeaponCustomPtr();
+			if (g_runfuncs && wcOld)
+				wcOld->m_lastDeploy = gpGlobals->time;
+		}
 
 		player.m_pLastItem = oldActiveItem;
 
