@@ -497,7 +497,6 @@ while (flDamage > 1 && loops < 25)
 
 			// if you hurt yourself clear the headshot bit
 
-<<<<<<< HEAD
 			float prevmaxhealth = pEntity->pev->max_health;
 			float flpDamage = prevmaxhealth;
 			float angcheck = sin(UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0, M_PI_2));
@@ -508,6 +507,7 @@ switch ((&tr)->iHitgroup)
 {
 case 0:
 	//assume glass
+	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 	flpDamage = prevmaxhealth * angcheck;
@@ -515,6 +515,7 @@ case 0:
 	break;
 case 1:
 	//head
+	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 	flpDamage = 0.6 * prevmaxhealth * angcheck;
@@ -522,6 +523,7 @@ case 1:
 	break;
 case 2:
 	//chest
+	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 	flpDamage = 1.125 * prevmaxhealth * angcheck;
@@ -529,6 +531,7 @@ case 2:
 	break;
 case 3:
 	//stomach
+	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 	flpDamage = 0.75 * prevmaxhealth * angcheck;
@@ -537,6 +540,7 @@ case 3:
 case 4:
 case 5:
 	//left + right arm
+	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 	flpDamage = 0.45 * prevmaxhealth * angcheck;
@@ -545,6 +549,7 @@ case 5:
 case 6:
 case 7:
 	//left + right leg
+	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 	flpDamage = 0.9 * prevmaxhealth * angcheck;
@@ -553,12 +558,14 @@ case 7:
 case 10:
 case 11:
 	//armor, don't know what type, fuck
+	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 	flpDamage = 70 * angcheck;
 	flDamage = flDamage - flpDamage;
 	break;
 default:
+	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
 	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
 	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 	flpDamage = 0.75 * prevmaxhealth * angcheck;
@@ -585,11 +592,6 @@ default:
 			sdm = false;
 			vecSrc = tr.vecEndPos + vecDir;
 			pentIgnore = ENT( pEntity->pev );
-=======
-			DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
-			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
->>>>>>> 20e0e1816c70522a7608928dbc1b01e746d36ed6
 		}
 		else {
 		//if ( pEntity->ReflectGauss() )

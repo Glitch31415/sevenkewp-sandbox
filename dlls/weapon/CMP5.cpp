@@ -210,47 +210,9 @@ void CMP5::PrimaryAttack()
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-<<<<<<< HEAD
 	//Vector vecSrc	 = m_pPlayer->GetGunPosition( );
 	//Vector vecDir = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 	  int flags;
-=======
-	Vector vecSrc	 = m_pPlayer->GetGunPosition( );
-	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
-	Vector vecDir;
-
-	lagcomp_begin(m_pPlayer);
-
-#ifdef CLIENT_DLL
-	bool isMultiPlayer = bIsMultiplayer();
-	bool isSevenKewp = false;
-#else
-	bool isMultiPlayer = g_pGameRules->IsMultiplayer();
-	bool isSevenKewp = false;
-#endif
-
-	if (isMultiPlayer)
-	{
-		if (isSevenKewp) {
-			// accuracy increase to give it an advantage over the uzi
-			// TODO: actually do this. Needs a client update.
-			vecDir = m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, VECTOR_CONE_4DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
-		}
-		else {
-			// optimized multiplayer. Widened to make it easier to hit a moving player
-			vecDir = m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, VECTOR_CONE_6DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed);
-		}
-	}
-	else
-	{
-		// single player spread
-		vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
-	}
-
-	lagcomp_end();
-
-  int flags;
->>>>>>> 20e0e1816c70522a7608928dbc1b01e746d36ed6
 #if defined( CLIENT_WEAPONS )
 	flags = FEV_NOTHOST;
 #else
