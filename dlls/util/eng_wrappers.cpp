@@ -20,7 +20,7 @@ StringSet g_tryPrecacheEvents;
 StringSet g_precachedSpr;
 StringSet g_precachedMdl;
 
-string_t g_indexModels[MAX_PRECACHE]; // maps an index to a model name
+string_t g_indexModels[MAX_MODELS_REHLDS]; // maps an index to a model name
 string_t g_indexSounds[MAX_PRECACHE]; // maps an index to a model name
 
 HashMap<string_t> g_allocedStrings;
@@ -246,7 +246,12 @@ int PRECACHE_SOUND_ENT(CBaseEntity* ent, const char* path) {
 		string_t spath = ALLOC_STRING(path);
 		int soundIdx = g_engfuncs.pfnPrecacheSound(STRING(spath));
 		g_precachedSounds.put(path, soundIdx);
-		g_indexSounds[soundIdx] = spath;
+
+		if (soundIdx < MAX_PRECACHE)
+			g_indexSounds[soundIdx] = spath;
+		else
+			ALERT(at_error, "Overflowed g_indexSounds!\n");
+
 		return soundIdx;
 	}
 	else {
@@ -472,7 +477,13 @@ int PRECACHE_MODEL_ENT(CBaseEntity* ent, const char* path) {
 		g_precachedModels.put(path);
 		string_t spath = ALLOC_STRING(path);
 		int modelIdx = g_engfuncs.pfnPrecacheModel(STRING(spath));
-		g_indexModels[modelIdx] = spath;
+
+		if (modelIdx < MAX_MODELS_REHLDS) {
+			g_indexModels[modelIdx] = spath;
+		}
+		else {
+			ALERT(at_error, "Overflowed g_indexModels!\n");
+		}
 
 		std::string pathstr = std::string(path);
 		if (pathstr.size() && pathstr.find(".mdl") == pathstr.size() - 4) {
@@ -496,14 +507,9 @@ int PRECACHE_REPLACEMENT_MODEL_ENT(CBaseEntity* ent, const char* path) {
 	std::string lowerPath = toLowerCase(path);
 	path = lowerPath.c_str();
 
-	const char* mapReplacement = g_modelReplacements.get(path);
-	const char* modReplacement = g_modelReplacementsMod.get(path);
-	if (!mapReplacement) mapReplacement = "";
-	if (!modReplacement) modReplacement = "";
-
 	// only precache the model if the model is replaced with something
 	// the mod doesn't already replace it with.
-	if (!mp_mergemodels.value || strcmp(mapReplacement, modReplacement)) {
+	if (!mp_mergemodels.value || UTIL_MapReplacesModel(path)) {
 		return PRECACHE_MODEL_ENT(ent, path);
 	}
 
@@ -572,7 +578,7 @@ bool SET_MODEL(edict_t* edict, const char* model) {
 	if (!g_precachedModels.hasKey(model)) {
 		model = NOT_PRECACHED_MODEL;
 
-		const char* replacement = g_modelReplacements.get(model);
+		replacement = g_modelReplacements.get(model);
 		if (replacement) {
 			model = replacement;
 		}
@@ -588,11 +594,14 @@ bool SET_MODEL(edict_t* edict, const char* model) {
 }
 
 bool SET_MODEL_MERGED(edict_t* edict, const char* model, int mergeId) {
-	if ((!strcmp(model, MERGED_ITEMS_MODEL) || !SET_MODEL(edict, model)) && mp_mergemodels.value) {
+	if (mp_mergemodels.value && (!strcmp(model, MERGED_ITEMS_MODEL) || !UTIL_MapReplacesModel(model))) {
 		// save on model slots by using the merged model that contains many different submodels
 		SET_MODEL(edict, MERGED_ITEMS_MODEL);
 		edict->v.body = mergeId;
 		return false;
+	}
+	else {
+		SET_MODEL(edict, model);
 	}
 
 	return true;
@@ -637,7 +646,7 @@ int MODEL_INDEX(const char* model) {
 }
 
 const char* INDEX_MODEL(int modelIdx) {
-	if (modelIdx >= 0 && modelIdx < MAX_PRECACHE) {
+	if (modelIdx >= 0 && modelIdx < MAX_MODELS_REHLDS) {
 		return STRING(g_indexModels[modelIdx]);
 	}
 

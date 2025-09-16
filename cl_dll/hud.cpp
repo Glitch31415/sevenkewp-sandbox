@@ -1,4 +1,4 @@
-/***
+﻿/***
 *
 *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
@@ -33,8 +33,6 @@
 
 hud_player_info_t	 g_PlayerInfoList[MAX_PLAYERS+1];	   // player info from the engine
 extra_player_info_t  g_PlayerExtraInfo[MAX_PLAYERS+1];   // additional player info sent directly to the client dll
-
-#define HLCOOP_VERSION "1"
 
 extern int mouse_uncenter_phase;
 
@@ -144,14 +142,6 @@ void __CmdFunc_OpenCommandMenu(void)
 	}
 }
 
-// TFC "special" command
-void __CmdFunc_InputPlayerSpecial(void)
-{
-	if ( gViewPort )
-	{
-		gViewPort->InputPlayerSpecial();
-	}
-}
 
 void __CmdFunc_CloseCommandMenu(void)
 {
@@ -262,6 +252,20 @@ int __MsgFunc_ScoreInfo(const char *pszName, int iSize, void *pbuf)
 	return 0;
 }
 
+int __MsgFunc_TagInfo(const char* pszName, int iSize, void* pbuf)
+{
+	if (gViewPort)
+		return gViewPort->MsgFunc_TagInfo(pszName, iSize, pbuf);
+	return 0;
+}
+
+int __MsgFunc_PlayerPos(const char* pszName, int iSize, void* pbuf)
+{
+	if (gViewPort)
+		return gViewPort->MsgFunc_PlayerPos(pszName, iSize, pbuf);
+	return 0;
+}
+
 int __MsgFunc_TeamScore(const char *pszName, int iSize, void *pbuf)
 {
 	if (gViewPort)
@@ -320,7 +324,6 @@ void CHud :: Init( void )
 	HOOK_COMMAND( "+commandmenu", OpenCommandMenu );
 	HOOK_COMMAND( "-commandmenu", CloseCommandMenu );
 	HOOK_COMMAND( "ForceCloseCommandMenu", ForceCloseCommandMenu );
-	HOOK_COMMAND( "special", InputPlayerSpecial );
 	HOOK_COMMAND( "togglebrowser", ToggleServerBrowser );
 
 	HOOK_MESSAGE( ValClass );
@@ -334,6 +337,8 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( NextMap );
 	HOOK_MESSAGE( TimeLeft );
 	HOOK_MESSAGE( ScoreInfo );
+	HOOK_MESSAGE( TagInfo );
+	HOOK_MESSAGE( PlayerPos );
 	HOOK_MESSAGE( TeamScore );
 	HOOK_MESSAGE( TeamInfo );
 
@@ -352,10 +357,11 @@ void CHud :: Init( void )
 
 	m_iLogo = 0;
 	m_iFOV = 0;
-
+	
+	std::string versionString = UTIL_VarArgs("%d", SEVENKEWP_VERSION);
 	CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_autowepswitch", "1", FCVAR_USERINFO|FCVAR_ARCHIVE );
-	CVAR_CREATE( "hlcoop_version", HLCOOP_VERSION, 0);
+	CVAR_CREATE( "hlcoop_version", versionString.c_str(), 0);
 	default_fov = CVAR_CREATE( "default_fov", "90", FCVAR_ARCHIVE );
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
@@ -395,6 +401,8 @@ void CHud :: Init( void )
 	m_StatusIcons.Init();
 	m_ClientStats.Init();
 	m_Fog.Init();
+	m_ClientUpdater.Init();
+	m_Nametags.Init();
 	GetClientVoiceMgr()->Init(&g_VoiceStatusHelper, (vgui::Panel**)&gViewPort);
 
 	m_Menu.Init();
@@ -488,6 +496,7 @@ void CHud :: VidInit( void )
 	EngineClientCmd("bind 0 slot10\n");
 
 	GetClientVoiceMgr()->VidInit();
+	m_Fog.VidInit();
 }
 
 void CHud::LoadHudSprites(void) {
@@ -562,24 +571,25 @@ void CHud::ParseServerInfo() {
 	const char* sevenkewpVersion = gEngfuncs.ServerInfo_ValueForKey("skv");
 	m_sevenkewpVersion = atoi(sevenkewpVersion);
 	if (sevenkewpVersion[0] && m_sevenkewpVersion > 0) {
-		int major = m_sevenkewpVersion / 100;
-		int minor = m_sevenkewpVersion % 100;
-		gEngfuncs.Con_Printf("SevenKewp server version %d.%02d\n", major, minor);
+		gEngfuncs.Con_Printf("SevenKewp server version %s\n", UTIL_SevenKewpClientString(m_sevenkewpVersion, false));
 	}
 	else {
 		gEngfuncs.Con_Printf("This is not a SevenKewp server. Some client features will be disabled.\n");
 		m_sevenkewpVersion = 0;
 	}
 
-	const char* serverHash = gEngfuncs.ServerInfo_ValueForKey("skmd5");
-	const char* myHash = UTIL_HashClientDataFiles();
+	if (IsSevenKewpServer()) {
+		const char* serverHash = gEngfuncs.ServerInfo_ValueForKey("skmd5");
+		const char* myHash = UTIL_HashClientDataFiles();
 
-	if (strcmp(serverHash, myHash)) {
-		PRINTF("Preparing SevenKewp data update (%s != %s)\n", serverHash, myHash);
-		UTIL_DeleteClientDataFiles();
-	}
-	else {
-		PRINTF("SevenKewp data is up-to-date (%s)\n", serverHash);
+		if (strcmp(serverHash, myHash)) {
+			PRINTF("Preparing SevenKewp data update (%s != %s)\n", serverHash, myHash);
+			UTIL_DeleteClientDataFiles();
+			m_sevenkewpDataUpdating = true;
+		}
+		else {
+			PRINTF("SevenKewp data is up-to-date (%s)\n", serverHash);
+		}
 	}
 }
 
@@ -599,6 +609,11 @@ void CHud::WorldInit(void) {
 	m_Flash.VidInit();
 	m_Message.VidInit();
 	m_DeathNotice.VidInit();
+
+	if (m_sevenkewpDataUpdating) {
+		m_sevenkewpDataUpdating = false;
+		gViewPort->ReloadCommandMenu();
+	}
 }
 
 int CHud::MsgFunc_Logo(const char *pszName,  int iSize, void *pbuf)

@@ -48,7 +48,8 @@ StringMap g_soundReplacements;
 
 void EMIT_SOUND_DYN(edict_t *entity, int channel, const char *sample, float volume, float attenuation, int flags, int pitch) { }
 void UTIL_ClientPrint(CBaseEntity* client, PRINT_TYPE print_type, const char* msg) {}
-const char* UTIL_SevenKewpClientString(int version) { return ""; }
+void AddPrecacheWeapon(std::string wepName) {}
+bool UTIL_MapReplacesModel(const char* path) { return false; }
 
 // CBaseEntity Stubs
 int CBaseEntity :: TakeHealth( float flHealth, int bitsDamageType, float healthcap) { return 1; }
@@ -75,6 +76,7 @@ bool CBaseEntity::BreakableUse(CBaseEntity* pActivator, CBaseEntity* pCaller, US
 void CBaseEntity::BreakableDie(CBaseEntity* pActivator) { }
 void CBaseEntity::BreakableDamageSound() { }
 bool CBaseEntity::IsDelaySpawned() { return 0; }
+void CBaseEntity::ItemBounceTouch(CBaseEntity* pOther) {}
 Vector CBaseEntity::GetLookDirection() { return g_vecZero; }
 Vector CBasePlayer::GetLookDirection() { return g_vecZero; }
 
@@ -289,6 +291,7 @@ int CBaseMonster::GetScheduleTableIdx() { return 0; }
 float CBaseMonster::GetDamageModifier() { return 0; }
 BOOL CBaseMonster::NoFriendlyFire() { return 0; }
 void CBaseMonster::SetClassification(int newclass) { }
+void CBaseMonster::ApplyEffects() { }
 
 int TrainSpeed(int iSpeed, int iMax) { 	return 0; }
 void CBasePlayer :: DeathSound( void ) { }
@@ -365,6 +368,8 @@ BOOL CBasePlayer::HasNamedPlayerItem(const char* pszItemName) { return FALSE; }
 void CBasePlayer::GiveNamedItem(const char* pszName) {}
 void CBasePlayer::SendSevenKewpClientNotice() {}
 bool CBasePlayer::IsSevenKewpClient() { return false; }
+void CBasePlayer::SetThirdPersonWeaponAnim(int anim, float fps) { }
+void CBasePlayer::SetJumpPower(int power) {}
 
 void ClearMultiDamage(void) { }
 void ApplyMultiDamage(entvars_t *pevInflictor, entvars_t *pevAttacker ) { }
@@ -414,6 +419,7 @@ int CBasePlayerWeapon::ExtractClipAmmo( CBasePlayerWeapon *pWeapon ) { return 0;
 void CBasePlayerWeapon::RetireWeapon(void) { }
 void CBasePlayerWeapon::KeyValue(KeyValueData* pkvd) {}
 void CBasePlayerWeapon::Precache() {}
+void CBasePlayerWeapon::SendWeaponAnimSpec(int iAnim) {}
 CBaseEntity* CBasePlayerWeapon::Respawn() { return NULL;  }
 const char* CBasePlayerWeapon::GetModelV(const char*) { return 0; }
 const char* CBasePlayerWeapon::GetModelP() { return 0; }

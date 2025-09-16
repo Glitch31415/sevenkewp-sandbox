@@ -33,6 +33,11 @@ typedef struct
 	int		iId;
 	int		iFlags;
 	int		iWeight;// this value used to determine this weapon's importance in autoselection.
+	int		iFlagsEx; // WEP_FLAG_*
+	float	fAccuracyDeg; // degrees of accuracy when standing motionless
+	float	fAccuracyDeg2; // degrees of accuracy when standing motionless (secondary)
+	float	fAccuracyDegY; // vertical degrees of accuracy
+	float	fAccuracyDegY2; // vertical degrees of accuracy (secondary)
 } ItemInfo;
 
 typedef struct
@@ -67,17 +72,22 @@ EXPORT void FindHullIntersection(const Vector& vecSrc, TraceResult& tr, float* m
 #define	WEAPON_INVENTORY		20
 #define	WEAPON_MEDKIT			21
 #define	WEAPON_KNIFE			22
-#define	WEAPON_M249				23
-#define	WEAPON_M40A1			24
-#define	WEAPON_UZI				25
 
-#define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
+// leaving a gap here for custom weapons that vanilla HL players can pick up (HL max weapons = 32)
 
 #define WEAPON_SUIT				31	// ?????
+#define	WEAPON_M249				32
+#define	WEAPON_M40A1			33
+#define	WEAPON_UZI				34
+#define	WEAPON_MINIGUN			35
+#define	WEAPON_EAGLE			36
+#define	WEAPON_M16				37
 
-#define MAX_WEAPONS			32
+#define WEAPON_ALLWEAPONS		(~(1ULL<<WEAPON_SUIT))
+
+#define MAX_WEAPONS			64
 #define MAX_WEAPON_SLOTS	6
-#define MAX_WEAPON_POSITIONS 5
+#define MAX_WEAPON_POSITIONS 8
 
 
 // weapon weight factors (for auto-switching)   (-1 = noswitch)
@@ -89,8 +99,11 @@ EXPORT void FindHullIntersection(const Vector& vecSrc, TraceResult& tr, float* m
 #define KNIFE_WEIGHT			0
 #define GLOCK_WEIGHT			10
 #define PYTHON_WEIGHT			15
+#define EAGLE_WEIGHT			15
 #define MP5_WEIGHT				15
+#define M16_WEIGHT				15
 #define M249_WEIGHT				20
+#define MINIGUN_WEIGHT			20
 #define M40A1_WEIGHT			20
 #define UZI_WEIGHT				15
 #define SHOTGUN_WEIGHT			15

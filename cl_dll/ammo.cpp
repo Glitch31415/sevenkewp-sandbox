@@ -29,8 +29,29 @@
 #include "ammohistory.h"
 #include "vgui_TeamFortressViewport.h"
 #include "custom_weapon.h"
+#include "ModPlayerState.h"
+#include "shared_util.h"
 
 CustomWeaponParams* GetCustomWeaponParams(int id);
+void GetCurrentCustomWeaponAccuracy(int id, float& accuracyX, float& accuracyY, float& accuracyX2, float& accuracyY2, bool& dynamicAccuracy);
+void GetCurrentCustomWeaponState(int id, int& akimboClip);
+bool CanWeaponAkimbo(int id);
+bool IsExclusiveWeapon(int id);
+void InitCustomWeapon(int id);
+
+extern int g_last_attack_mode;
+extern float g_last_attack_time;
+extern vec3_t v_punchangle;
+
+// for aborting an action while holding an exclusive weapon
+bool ExclusiveWeaponAbort() {
+	if (gHUD.m_Ammo.m_pWeapon && IsExclusiveWeapon(gHUD.m_Ammo.m_pWeapon->iId)) {
+		gEngfuncs.pfnCenterPrint("Drop this weapon to select another.");
+		return true;
+	}
+
+	return false;
+}
 
 WEAPON *gpActiveSel;	// NULL means off, 1 means just the menu bar, otherwise
 						// this points to the active weapon menu item
@@ -183,6 +204,26 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	else
 		pWeapon->hActive = 0;
 
+	p = GetSpriteList(pList, "akimbo", iRes, i);
+	if (p)
+	{
+		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		pWeapon->hAkimboInactive = SPR_Load(sz);
+		pWeapon->rcAkimboInactive = p->rc;
+	}
+	else
+		pWeapon->hAkimboInactive = 0;
+
+	p = GetSpriteList(pList, "akimbo_s", iRes, i);
+	if (p)
+	{
+		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		pWeapon->hAkimboActive = SPR_Load(sz);
+		pWeapon->rcAkimboActive = p->rc;
+	}
+	else
+		pWeapon->hAkimboActive = 0;
+
 	p = GetSpriteList(pList, "ammo", iRes, i);
 	if (p)
 	{
@@ -248,7 +289,11 @@ HSPRITE ghsprBuckets;					// Sprite for top row of weapons menu
 DECLARE_MESSAGE(m_Ammo, CurWeapon );	// Current weapon and clip
 DECLARE_MESSAGE(m_Ammo, CurWeaponX );	// Current weapon and clip (large clip)
 DECLARE_MESSAGE(m_Ammo, WeaponList);	// new weapon type
+DECLARE_MESSAGE(m_Ammo, WeaponListX);	// new weapon type (extra parameters)
 DECLARE_MESSAGE(m_Ammo, CustomWep);		// custom weapon parameters
+DECLARE_MESSAGE(m_Ammo, CustomWepEv);	// custom weapon parameters
+DECLARE_MESSAGE(m_Ammo, PmodelAnim);	// player model anim
+DECLARE_MESSAGE(m_Ammo, WeaponBits);	// currently held weapons
 DECLARE_MESSAGE(m_Ammo, SoundIdx);		// sound index to file path mapping
 DECLARE_MESSAGE(m_Ammo, AmmoX);			// update known ammo type's count
 DECLARE_MESSAGE(m_Ammo, AmmoXX);		// update known ammo type's count (higher max count)
@@ -279,6 +324,11 @@ DECLARE_COMMAND(m_Ammo, PrevWeapon);
 
 void ResetCustomWeaponStates();
 
+ModPlayerState& GetLocalPlayerState() {
+	int idx = GetLocalPlayer()->index;
+	return g_modPlayerStates[idx];
+}
+
 int CHudAmmo::Init(void)
 {
 	gHUD.AddHudElem(this);
@@ -286,7 +336,11 @@ int CHudAmmo::Init(void)
 	HOOK_MESSAGE(CurWeapon);
 	HOOK_MESSAGE(CurWeaponX);
 	HOOK_MESSAGE(WeaponList);
+	HOOK_MESSAGE(WeaponListX);
 	HOOK_MESSAGE(CustomWep);
+	HOOK_MESSAGE(CustomWepEv);
+	HOOK_MESSAGE(PmodelAnim);
+	HOOK_MESSAGE(WeaponBits);
 	HOOK_MESSAGE(SoundIdx);
 	HOOK_MESSAGE(AmmoPickup);
 	HOOK_MESSAGE(WeapPickup);
@@ -313,6 +367,11 @@ int CHudAmmo::Init(void)
 
 	CVAR_CREATE( "hud_drawhistory_time", HISTORY_DRAW_TIME, 0 );
 	CVAR_CREATE( "hud_fastswitch", "0", FCVAR_ARCHIVE );		// controls whether or not weapons can be selected in one keypress
+	
+	m_hud_crosshair_mode = gEngfuncs.pfnRegisterVariable("hud_crosshair_mode", "1", FCVAR_ARCHIVE);
+	m_hud_crosshair_length = gEngfuncs.pfnRegisterVariable("hud_crosshair_length", "15", FCVAR_ARCHIVE);
+	m_hud_crosshair_width = gEngfuncs.pfnRegisterVariable("hud_crosshair_width", "-1", FCVAR_ARCHIVE);
+	m_hud_crosshair_border = gEngfuncs.pfnRegisterVariable("hud_crosshair_border", "1", FCVAR_ARCHIVE);
 
 	m_iFlags |= HUD_ACTIVE; //!!!
 
@@ -388,7 +447,7 @@ void CHudAmmo::Think(void)
 
 			if ( p )
 			{
-				if ( gHUD.m_iWeaponBits & ( 1 << p->iId ) )
+				if ( gHUD.m_iWeaponBits & ( 1ULL << p->iId ) )
 					gWR.PickupWeapon( p );
 				else
 					gWR.DropWeapon( p );
@@ -404,8 +463,10 @@ void CHudAmmo::Think(void)
 	{
 		if (gpActiveSel != (WEAPON *)1)
 		{
-			ServerCmd(gpActiveSel->szName);
-			g_weaponselect = gpActiveSel->iId;
+			if (!ExclusiveWeaponAbort()) {
+				ServerCmd(gpActiveSel->szName);
+				g_weaponselect = gpActiveSel->iId;
+			}
 		}
 
 		gpLastSel = gpActiveSel;
@@ -415,6 +476,10 @@ void CHudAmmo::Think(void)
 		PlaySound("common/wpn_select.wav", 1);
 	}
 
+	if (ExclusiveWeaponAbort() && (gpActiveSel || (gHUD.m_iKeyBits & IN_ATTACK))) {
+		gpActiveSel = NULL;
+		gHUD.m_iKeyBits &= ~IN_ATTACK;
+	}
 }
 
 //
@@ -457,10 +522,10 @@ void WeaponsResource :: SelectSlot( int iSlot, int fAdvance, int iDirection )
 	if ( gHUD.m_fPlayerDead || gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_ALL ) )
 		return;
 
-	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
+	if (!(gHUD.m_iWeaponBits & (1ULL<<(WEAPON_SUIT)) ))
 		return;
 
-	if ( ! ( gHUD.m_iWeaponBits & ~(1<<(WEAPON_SUIT)) ))
+	if ( ! ( gHUD.m_iWeaponBits & ~(1ULL<<(WEAPON_SUIT)) ))
 		return;
 
 	WEAPON *p = NULL;
@@ -478,8 +543,10 @@ void WeaponsResource :: SelectSlot( int iSlot, int fAdvance, int iDirection )
 			WEAPON *p2 = GetNextActivePos( p->iSlot, p->iSlotPos );
 			if ( !p2 )
 			{	// only one active item in bucket, so change directly to weapon
-				ServerCmd( p->szName );
-				g_weaponselect = p->iId;
+				if (!ExclusiveWeaponAbort()) {
+					ServerCmd(p->szName);
+					g_weaponselect = p->iId;
+				}
 				return;
 			}
 		}
@@ -596,11 +663,9 @@ int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
-// 
-//  CurWeapon: Update hud state with the current weapon and clip count. Ammo
-//  counts are updated with AmmoX. Server assures that the Weapon ammo type 
-//  numbers match a real ammo type.
-//
+bool CHudAmmo::IsWeaponZoomed() {
+	return gHUD.m_iFOV < 90;
+}
 
 void CHudAmmo::UpdateZoomCrosshair(int id, bool zoom, bool autoaimOnTarget) {
 	if (id < 1)
@@ -632,6 +697,11 @@ void UpdateZoomCrosshair(int id, bool zoom) {
 	gHUD.m_Ammo.UpdateZoomCrosshair(id, zoom, true);
 }
 
+// 
+//  CurWeapon: Update hud state with the current weapon and clip count. Ammo
+//  counts are updated with AmmoX. Server assures that the Weapon ammo type 
+//  numbers match a real ammo type.
+//
 int CHudAmmo::CurWeapon(int iState, int iId, int iClip) {
 	static wrect_t nullrc;
 	int fOnTarget = FALSE;
@@ -676,7 +746,7 @@ int CHudAmmo::CurWeapon(int iState, int iId, int iClip) {
 
 	m_pWeapon = pWeapon;
 
-	UpdateZoomCrosshair(iId, gHUD.m_iFOV < 90, fOnTarget);
+	UpdateZoomCrosshair(iId, IsWeaponZoomed(), fOnTarget);
 
 	m_fFade = 200.0f; //!!!
 	m_iFlags |= HUD_ACTIVE;
@@ -760,6 +830,46 @@ int CHudAmmo::MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+int CHudAmmo::MsgFunc_WeaponListX(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	uint8_t id = READ_BYTE();
+	uint8_t flags = READ_BYTE();
+	float accuracy = READ_SHORT() * 0.01f;
+	float accuracy2 = READ_SHORT() * 0.01f;
+	float accuracyY = READ_SHORT() * 0.01f;
+	float accuracyY2 = READ_SHORT() * 0.01f;
+
+	if (id >= MAX_WEAPONS) {
+		PRINTF("WeaponListX: Invalid weapon ID %d\n", (int)id);
+		return 1;
+	}
+
+	WEAPON* pWeapon = gWR.GetWeapon(id);
+
+	if (!pWeapon)
+		return 1;
+
+	pWeapon->iFlagsEx = flags;
+	bool hasSecondaryAccuracy = pWeapon->iFlagsEx & WEP_FLAG_SECONDARY_ACCURACY;
+
+	pWeapon->accuracyX = accuracy;
+	pWeapon->accuracyX2 = hasSecondaryAccuracy ? accuracy2 : accuracy;
+	pWeapon->accuracyY = pWeapon->accuracyX;
+	pWeapon->accuracyY2 = pWeapon->accuracyX2;
+
+	if (flags & WEP_FLAG_VERTICAL_ACCURACY) {
+		pWeapon->accuracyY = accuracyY;
+
+		if (hasSecondaryAccuracy)
+			pWeapon->accuracyY2 = accuracyY2;
+	}
+
+	return 1;
+}
+
+
 // set up parameters for custom weapon prediction
 int CHudAmmo::MsgFunc_CustomWep(const char* pszName, int iSize, void* pbuf)
 {
@@ -770,14 +880,18 @@ int CHudAmmo::MsgFunc_CustomWep(const char* pszName, int iSize, void* pbuf)
 	if (weaponId < 0 || weaponId >= MAX_WEAPONS)
 		return 0;
 
+	
+	InitCustomWeapon(weaponId);
 	CustomWeaponParams& parms = *GetCustomWeaponParams(weaponId);
 	memset(&parms, 0, sizeof(CustomWeaponParams));
 
-	parms.flags = READ_BYTE();
+	parms.flags = READ_SHORT();
 	parms.maxClip = READ_SHORT();
 
 	parms.vmodel = READ_SHORT();
 	parms.deployAnim = READ_BYTE();
+	parms.deployTime = READ_SHORT();
+	parms.deployAnimTime = READ_SHORT();
 
 	for (int k = 0; k < 3; k++) {
 		WeaponCustomReload& reload = parms.reloadStage[k];
@@ -795,34 +909,103 @@ int CHudAmmo::MsgFunc_CustomWep(const char* pszName, int iSize, void* pbuf)
 		idle.time = READ_SHORT();
 	}
 
-	for (int i = 0; i < 2; i++) {
+	if (parms.flags & FL_WC_WEP_AKIMBO) {
+		for (int k = 0; k < 4; k++) {
+			WeaponCustomIdle& idle = parms.akimbo.idles[k];
+			idle.anim = READ_BYTE();
+			idle.weight = READ_BYTE();
+			idle.time = READ_SHORT();
+		}
+
+		parms.akimbo.reload.anim = READ_BYTE();
+		parms.akimbo.reload.time = READ_SHORT();
+
+		parms.akimbo.deployAnim = READ_BYTE();
+		parms.akimbo.deployTime = READ_SHORT();
+		parms.akimbo.akimboDeployAnim = READ_BYTE();
+		parms.akimbo.akimboDeployTime = READ_SHORT();
+		parms.akimbo.akimboDeployAnimTime = READ_SHORT();
+		parms.akimbo.holsterAnim = READ_BYTE();
+		parms.akimbo.holsterTime = READ_SHORT();
+		parms.akimbo.accuracyX = READ_SHORT();
+		parms.akimbo.accuracyY = READ_SHORT();
+	}
+
+	if (parms.flags & FL_WC_WEP_HAS_LASER) {
+		for (int k = 0; k < 4; k++) {
+			WeaponCustomIdle& idle = parms.laser.idles[k];
+			idle.anim = READ_BYTE();
+			idle.weight = READ_BYTE();
+			idle.time = READ_SHORT();
+		}
+
+		parms.laser.dotSprite = READ_SHORT();
+		parms.laser.beamSprite = READ_SHORT();
+		parms.laser.dotSz = READ_BYTE();
+		parms.laser.beamWidth = READ_BYTE();
+		parms.laser.attachment = READ_BYTE();
+	}
+
+	for (int i = 0; i < 4; i++) {
 		if (!(parms.flags & FL_WC_WEP_HAS_PRIMARY) && i == 0)
 			continue;
 		if (!(parms.flags & FL_WC_WEP_HAS_SECONDARY) && i == 1)
+			continue;
+		if (!(parms.flags & FL_WC_WEP_HAS_TERTIARY) && i == 2)
+			continue;
+		if (!(parms.flags & FL_WC_WEP_HAS_ALT_PRIMARY) && i == 3)
 			continue;
 
 		CustomWeaponShootOpts& opts = parms.shootOpts[i];
 		opts.flags = READ_BYTE();
 		opts.ammoCost = READ_BYTE();
 		opts.cooldown = READ_SHORT();
+		opts.cooldownFail = READ_SHORT();
+		opts.chargeTime = READ_SHORT();
+		opts.chargeCancelTime = READ_SHORT();
+		opts.accuracyX = READ_SHORT();
+		opts.accuracyY = READ_SHORT();
 	}
+
+	return 1;
+}
+
+int CHudAmmo::MsgFunc_CustomWepEv(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	int weaponId = READ_BYTE();
+
+	if (weaponId < 0 || weaponId >= MAX_WEAPONS)
+		return 0;
+
+	CustomWeaponParams& parms = *GetCustomWeaponParams(weaponId);
 
 	parms.numEvents = READ_BYTE();
 	if (parms.numEvents >= MAX_WC_EVENTS) {
 		return 0;
 	}
-	
+
 	for (int i = 0; i < parms.numEvents; i++) {
-		uint32_t packedHeader = READ_LONG();
+		uint16_t packedHeader = READ_SHORT();
 		WepEvt& evt = parms.events[i];
 		memset(&evt, 0, sizeof(WepEvt));
 
-		evt.evtType = packedHeader >> 28;
-		evt.trigger = (packedHeader >> 24) & 0xF;
-		evt.triggerArg = (packedHeader >> 14) & 0x3FF;
-		evt.delay = packedHeader & 0x3FFF;
+		evt.evtType = packedHeader & 0x1F;
+		evt.trigger = (packedHeader >> 5) & 0x1F;
+		evt.triggerArg = (packedHeader >> 10) & 0x1F;
+		evt.hasDelay = packedHeader >> 15;
+
+		if (evt.hasDelay)
+			evt.delay = READ_SHORT();
 
 		switch (evt.evtType) {
+		case WC_EVT_IDLE_SOUND: {
+			uint16_t packedFlags = READ_SHORT();
+			evt.idleSound.sound = packedFlags >> 7;
+			evt.idleSound.volume = packedFlags & 0x7F;
+			break;
+		}
 		case WC_EVT_PLAY_SOUND: {
 			uint16_t packedFlags = READ_SHORT();
 			evt.playSound.sound = packedFlags >> 5;
@@ -845,8 +1028,8 @@ int CHudAmmo::MsgFunc_CustomWep(const char* pszName, int iSize, void* pbuf)
 			evt.ejectShell.offsetUp = READ_SHORT();
 			evt.ejectShell.offsetRight = READ_SHORT();
 			break;
-		case WC_EVT_PUNCH_SET:
-		case WC_EVT_PUNCH_RANDOM:
+		case WC_EVT_PUNCH:
+			evt.punch.flags = READ_BYTE();
 			evt.punch.x = READ_SHORT();
 			evt.punch.y = READ_SHORT();
 			evt.punch.z = READ_SHORT();
@@ -854,18 +1037,24 @@ int CHudAmmo::MsgFunc_CustomWep(const char* pszName, int iSize, void* pbuf)
 		case WC_EVT_SET_BODY:
 			evt.setBody.newBody = READ_BYTE();
 			break;
-		case WC_EVT_WEP_ANIM:
-			evt.anim.animMin = READ_BYTE();
-			evt.anim.animMax = READ_BYTE();
+		case WC_EVT_WEP_ANIM: {
+			uint8_t packedHeader = READ_BYTE();
+			evt.anim.flags = packedHeader >> 6;
+			evt.anim.akimbo = (packedHeader >> 3) & 0x7;
+			evt.anim.numAnim = packedHeader & 0x7;
+			for (int k = 0; k < evt.anim.numAnim && k < MAX_WC_RANDOM_SELECTION; k++) {
+				evt.anim.anims[k] = READ_BYTE();
+			}
 			break;
+		}
 		case WC_EVT_BULLETS: {
 			evt.bullets.count = READ_BYTE();
+			evt.bullets.burstDelay = READ_SHORT();
 			//evt.bullets.damage = READ_SHORT();
 			evt.bullets.spreadX = READ_SHORT();
 			evt.bullets.spreadY = READ_SHORT();
-			evt.bullets.btype = READ_BYTE();
 			evt.bullets.tracerFreq = READ_BYTE();
-			
+
 			uint8_t packedFlags = READ_BYTE();
 			evt.bullets.flags = packedFlags >> 4;
 			evt.bullets.flashSz = packedFlags & 0xf;
@@ -877,15 +1066,51 @@ int CHudAmmo::MsgFunc_CustomWep(const char* pszName, int iSize, void* pbuf)
 		case WC_EVT_TOGGLE_ZOOM:
 			evt.zoomToggle.zoomFov = READ_BYTE();
 			break;
+		case WC_EVT_HIDE_LASER:
+			evt.laserHide.millis = READ_SHORT();
+			break;
 		case WC_EVT_COOLDOWN:
 			evt.cooldown.millis = READ_SHORT();
 			evt.cooldown.targets = READ_BYTE();
+			break;
+		case WC_EVT_TOGGLE_AKIMBO:
+		case WC_EVT_TOGGLE_LASER:
+		case WC_EVT_PROJECTILE:
 			break;
 		default:
 			gEngfuncs.Con_Printf("Bad custom weapon event type read %d\n", (int)evt.evtType);
 			break;
 		}
 	}
+
+	return 1;
+}
+
+int CHudAmmo::MsgFunc_PmodelAnim(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	int playeridx = READ_BYTE();
+
+	if (playeridx < 0 || playeridx > 32)
+		return 0;
+
+	ModPlayerState& state = g_modPlayerStates[playeridx];
+	state.pmodelanim = READ_BYTE();
+	state.pmodelAnimTime = gEngfuncs.GetClientTime();
+
+	return 1;
+}
+
+int CHudAmmo::MsgFunc_WeaponBits(const char* pszName, int iSize, void* pbuf)
+{
+	BEGIN_READ(pbuf, iSize);
+
+	uint64_t low = (uint32_t)READ_LONG();
+	uint64_t high = (uint32_t)READ_LONG();
+
+	ModPlayerState& state = GetLocalPlayerState();
+	state.weaponBits = (high << 32) | low;
 
 	return 1;
 }
@@ -914,6 +1139,10 @@ void CHudAmmo::SlotInput( int iSlot )
 {
 	if ( gViewPort && gViewPort->SlotInput( iSlot ) )
 		return;
+
+	if (ExclusiveWeaponAbort()) {
+		return;
+	}
 
 	gWR.SelectSlot(iSlot, FALSE, 1);
 }
@@ -1074,7 +1303,7 @@ int CHudAmmo::Draw(float flTime)
 	int a, x, y, r, g, b;
 	int AmmoWidth;
 
-	if (!(gHUD.m_iWeaponBits & (1<<(WEAPON_SUIT)) ))
+	if (!(gHUD.m_iWeaponBits & (1ULL<<(WEAPON_SUIT)) ))
 		return 1;
 
 	if ( (gHUD.m_iHideHUDDisplay & ( HIDEHUD_WEAPONS | HIDEHUD_ALL )) )
@@ -1093,6 +1322,8 @@ int CHudAmmo::Draw(float flTime)
 		return 0;
 
 	WEAPON *pw = m_pWeapon; // shorthand
+
+	DrawDynamicCrosshair();
 
 	// SPR_Draw Ammo
 	if ((pw->iAmmoType < 0) && (pw->iAmmo2Type < 0))
@@ -1115,17 +1346,22 @@ int CHudAmmo::Draw(float flTime)
 	y = ScreenHeight - gHUD.m_iFontHeight - gHUD.m_iFontHeight/2;
 	y += (int)(gHUD.m_iFontHeight * 0.2f);
 
+	int akimboClip = 0;
+	GetCurrentCustomWeaponState(pw->iId, akimboClip);
+
 	// Does weapon have any ammo at all?
 	if (m_pWeapon->iAmmoType > 0)
 	{
 		int iIconWidth = m_pWeapon->rcAmmo.right - m_pWeapon->rcAmmo.left;
 		
-		if (pw->iClip >= 0)
+		int clip = akimboClip >= 0 ? akimboClip : pw->iClip;
+
+		if (clip >= 0)
 		{
 			// room for the number and the '|' and the current ammo
 			
 			x = ScreenWidth - (8 * AmmoWidth) - iIconWidth;
-			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, pw->iClip, r, g, b);
+			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, clip, r, g, b);
 
 			wrect_t rc;
 			rc.top = 0;
@@ -1164,7 +1400,18 @@ int CHudAmmo::Draw(float flTime)
 	}
 
 	// Does weapon have seconday ammo?
-	if (pw->iAmmo2Type > 0) 
+	if (akimboClip >= 0) {
+		int iIconWidth = m_pWeapon->rcAmmo2.right - m_pWeapon->rcAmmo2.left;
+		y -= gHUD.m_iFontHeight + gHUD.m_iFontHeight / 4;
+		x = ScreenWidth - 4 * AmmoWidth - iIconWidth;
+		x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, pw->iClip, r, g, b);
+
+		// Draw the ammo Icon
+		SPR_Set(m_pWeapon->hAmmo, r, g, b);
+		int iOffset = (m_pWeapon->rcAmmo.bottom - m_pWeapon->rcAmmo.top) / 8;
+		SPR_DrawAdditive(0, x, y - iOffset, &m_pWeapon->rcAmmo);
+	}
+	else if (pw->iAmmo2Type > 0) 
 	{
 		int iIconWidth = m_pWeapon->rcAmmo2.right - m_pWeapon->rcAmmo2.left;
 
@@ -1181,7 +1428,178 @@ int CHudAmmo::Draw(float flTime)
 			SPR_DrawAdditive(0, x, y - iOffset, &m_pWeapon->rcAmmo2);
 		}
 	}
+
 	return 1;
+}
+
+// converts an accuracy in degrees to a pixel gap for the crosshair
+int CrosshairGapPixels(float accuracyDeg, bool isVertical) {
+	int screenW = ScreenWidth;
+	int screenH = ScreenHeight;
+
+	float aspect = (float)screenW / (float)screenH;
+	float baseAspect = 4.0f / 3.0f; // GoldSrc aspect used in FOV calculation
+
+	// convert GoldSrc fov to real FOV
+	float fovXRad43 = gHUD.m_iFOV * (M_PI / 180.0f);
+	float fovXRad = 2.0f * atan(tan(fovXRad43 * 0.5f) * (aspect / baseAspect));
+	float fovYRad = 2.0f * atan(tan(fovXRad * 0.5f) / aspect);
+
+	// accuracy angle in radians
+	float accRad = accuracyDeg * 0.5f * (M_PI / 180.0f);
+	float spread = tan(accRad); // for VECTOR_CONE_* math
+
+	if (isVertical) {
+		return (screenW * 0.5f) * (tan(accRad) / tan(fovXRad * 0.5f));
+	}
+	else {
+		return (screenH * 0.5f) * (tan(accRad) / tan(fovYRad * 0.5f));
+	}
+}
+
+void DrawCrossHair(float accuracyX, float accuracyY, int len, int thick, int border) {
+	int r, g, b, a;
+
+	int centerX = ScreenWidth / 2;
+	int centerY = ScreenHeight / 2;
+
+	int gapX = 10;
+	int gapY = 10;
+	int hthick = thick / 2;
+
+	int minGap = thick + border * 4;
+
+	gapX = V_max(CrosshairGapPixels(accuracyX, false), minGap);
+	gapY = V_max(CrosshairGapPixels(accuracyY, true), minGap);
+
+	if (gapX == minGap && gapY == minGap) {
+		//len *= 0.75f;
+	}
+	a = 200;
+	
+
+	if (border > 0) {
+		int blen = len + border * 2;
+		int bthick = thick + border * 2;
+		int bhthick = bthick / 2;
+		r = g = b = 0;
+
+		// horizontal
+		gEngfuncs.pfnFillRGBABlend(centerX - (gapX + blen - border), centerY - bhthick, blen, bthick, r, g, b, a);
+		gEngfuncs.pfnFillRGBABlend(centerX + gapX - border, centerY - bhthick, blen, bthick, r, g, b, a);
+
+		// vertical
+		gEngfuncs.pfnFillRGBABlend(centerX - bhthick, centerY - (gapY + blen - border), bthick, blen, r, g, b, a);
+		gEngfuncs.pfnFillRGBABlend(centerX - bhthick, centerY + gapY - border, bthick, blen, r, g, b, a);
+
+		// center dot
+		gEngfuncs.pfnFillRGBABlend(centerX - bhthick, centerY - bhthick, bthick, bthick, r, g, b, a);
+		gEngfuncs.pfnFillRGBABlend(centerX - bhthick, centerY - bhthick, bthick, bthick, r, g, b, a);
+	}
+
+	UnpackRGB(r, g, b, RGB_YELLOWISH);
+
+	// horizontal
+	gEngfuncs.pfnFillRGBABlend(centerX - (gapX + len), centerY - hthick, len, thick, r, g, b, a);
+	gEngfuncs.pfnFillRGBABlend(centerX + gapX, centerY - hthick, len, thick, r, g, b, a);
+
+	// vertical
+	gEngfuncs.pfnFillRGBABlend(centerX - hthick, centerY - (gapY + len), thick, len, r, g, b, a);
+	gEngfuncs.pfnFillRGBABlend(centerX - hthick, centerY + gapY, thick, len, r, g, b, a);
+
+	// center dot
+	gEngfuncs.pfnFillRGBABlend(centerX - hthick, centerY - hthick, thick, thick, r, g, b, a);
+	gEngfuncs.pfnFillRGBABlend(centerX - hthick, centerY - hthick, thick, thick, r, g, b, a);
+}
+
+void CHudAmmo::DrawDynamicCrosshair() {
+	if (!m_pWeapon || m_hud_crosshair_mode->value <= 0 || !gHUD.IsSevenKewpServer())
+		return;
+
+	WEAPON* pw = m_pWeapon; // shorthand
+
+	if (!pw->hCrosshair && m_hud_crosshair_mode->value != 2) {
+		return;
+	}
+
+	if (pw->hZoomedCrosshair && IsWeaponZoomed() && (pw->iFlagsEx & WEP_FLAG_USE_ZOOM_CROSSHAIR))
+		return;
+
+	if (g_crosshair_active) {
+		static wrect_t nullrc;
+		SetCrosshair(0, nullrc, 0, 0, 0);
+	}
+	
+	float accuracyX = pw->accuracyX;
+	float accuracyY = pw->accuracyY;
+	float accuracyX2 = pw->accuracyX2;
+	float accuracyY2 = pw->accuracyY2;
+	bool dynamicAccuracy = pw->iFlagsEx & WEP_FLAG_DYNAMIC_ACCURACY;
+
+	GetCurrentCustomWeaponAccuracy(pw->iId, accuracyX, accuracyY, accuracyX2, accuracyY2, dynamicAccuracy);
+
+	float now = gEngfuncs.GetClientTime();
+	if (g_last_attack_mode == 2 && (now - g_last_attack_time) < 2.0f) {
+		accuracyX = accuracyX2;
+		accuracyY = accuracyY2;
+	}
+
+	// lerp between accuracy changes
+	{
+		static int lastWeaponId;
+		static float lastAccuracyX;
+		static float lastAccuracyY;
+		static float nextAccuracyX;
+		static float nextAccuracyY;
+		static float lerpStart;
+
+		if (lastWeaponId != pw->iId) {
+			lastWeaponId = pw->iId;
+			lastAccuracyX = accuracyX;
+			lastAccuracyY = accuracyY;
+			nextAccuracyX = accuracyX;
+			nextAccuracyY = accuracyY;
+			lerpStart = now;
+		}
+
+		if (accuracyX != nextAccuracyX || accuracyY != nextAccuracyY) {
+			lastAccuracyX = nextAccuracyX;
+			lastAccuracyY = nextAccuracyY;
+			nextAccuracyX = accuracyX;
+			nextAccuracyY = accuracyY;
+			lerpStart = now;
+		}
+
+		float t = V_min(0.1f, (now - lerpStart)) / 0.1f;
+		accuracyX = lastAccuracyX + (nextAccuracyX - lastAccuracyX) * t;
+		accuracyY = lastAccuracyY + (nextAccuracyY - lastAccuracyY) * t;
+		accuracyX2 = accuracyX;
+		accuracyY2 = accuracyY;
+	}
+	
+
+	float punch = V_max(fabs(v_punchangle[0]), fabs(v_punchangle[1]));
+	if (punch > 0) {
+		punch = powf(punch, 0.5f);
+		accuracyX += punch;
+		accuracyY += punch;
+		accuracyX2 += punch;
+		accuracyY2 += punch;
+	}
+
+	int len = clamp(m_hud_crosshair_length->value, 1, 1000);
+	int width = clamp(m_hud_crosshair_width->value, 1, 1000);
+	int border = clamp(m_hud_crosshair_border->value, 0, 1000);
+
+	if (m_hud_crosshair_width->value == -1) {
+		// auto size
+		width = 2;
+		if (ScreenHeight <= 768) {
+			width = 1;
+		}
+	}
+
+	DrawCrossHair(accuracyX, accuracyY, len, width, border);
 }
 
 
@@ -1327,6 +1745,7 @@ int CHudAmmo::DrawWList(float flTime)
 		if ( i == iActiveSlot )
 		{
 			WEAPON *p = gWR.GetFirstPos( i );
+
 			int iWidth = giBucketWidth;
 			if ( p )
 				iWidth = p->rcActive.right - p->rcActive.left;
@@ -1338,14 +1757,20 @@ int CHudAmmo::DrawWList(float flTime)
 				if ( !p || !p->iId )
 					continue;
 
+				bool akimbo = CanWeaponAkimbo(p->iId);
+				HSPRITE activeSpr = akimbo ? p->hAkimboActive : p->hActive;
+				HSPRITE inactiveSpr = akimbo ? p->hAkimboInactive : p->hInactive;
+				wrect_t rcActive = akimbo ? p->rcAkimboActive : p->rcActive;
+				wrect_t rcInactive = akimbo ? p->rcAkimboInactive : p->rcInactive;
+
 				UnpackRGB( r,g,b, RGB_YELLOWISH );
 			
 				// if active, then we must have ammo.
 
 				if ( gpActiveSel == p )
 				{
-					SPR_Set(p->hActive, r, g, b );
-					SPR_DrawAdditive(0, x, y, &p->rcActive);
+					SPR_Set(activeSpr, r, g, b );
+					SPR_DrawAdditive(0, x, y, &rcActive);
 
 					SPR_Set(gHUD.GetSprite(m_HUD_selection), r, g, b );
 					SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_selection));
@@ -1362,8 +1787,8 @@ int CHudAmmo::DrawWList(float flTime)
 						ScaleColors(r, g, b, 128);
 					}
 
-					SPR_Set( p->hInactive, r, g, b );
-					SPR_DrawAdditive( 0, x, y, &p->rcInactive );
+					SPR_Set(inactiveSpr, r, g, b );
+					SPR_DrawAdditive( 0, x, y, &rcInactive);
 				}
 
 				// Draw Ammo Bar

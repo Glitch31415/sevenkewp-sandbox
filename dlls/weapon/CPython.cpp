@@ -34,7 +34,6 @@ enum python_e {
 
 LINK_ENTITY_TO_CLASS( weapon_python, CPython )
 LINK_ENTITY_TO_CLASS( weapon_357, CPython )
-LINK_ENTITY_TO_CLASS(weapon_eagle, CPython) // TODO: implement
 
 int CPython::GetItemInfo(ItemInfo *p)
 {
@@ -50,6 +49,7 @@ int CPython::GetItemInfo(ItemInfo *p)
 	p->iId = m_iId = WEAPON_PYTHON;
 	p->iWeight = PYTHON_WEIGHT;
 
+	p->fAccuracyDeg = 1;
 	return 1;
 }
 

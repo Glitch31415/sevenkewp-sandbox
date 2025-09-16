@@ -315,7 +315,8 @@ UTIL_SharedRandomFloat
 float UTIL_SharedRandomFloat( unsigned int seed, float low, float high )
 {
 	//
-	unsigned int range;
+	//unsigned int range;
+	float range;
 
 	U_Srand( (int)seed + *(int *)&low + *(int *)&high );
 
@@ -2180,9 +2181,9 @@ bool loadReplacementFile(const char* path, StringMap& replacements) {
 			
 			std::vector<std::string> parts = splitString(line, " \t");
 			std::vector<std::string> nonemptyParts;
-			for (int i = 0; i < (int)parts.size(); i++) {
-				if (parts[i].size()) {
-					nonemptyParts.push_back(parts[i]);
+			for (int k = 0; k < (int)parts.size(); k++) {
+				if (parts[k].size()) {
+					nonemptyParts.push_back(parts[k]);
 				}
 			}
 
@@ -2546,61 +2547,6 @@ bool UTIL_isSafeEntIndex(edict_t* ent, int idx, const char* action) {
 	return true;
 }
 
-std::vector<std::string> splitString(std::string str, const char* delimiters)
-{
-	std::vector<std::string> split;
-
-	const char* c_str = str.c_str();
-	size_t str_len = strlen(c_str);
-
-	size_t start = strspn(c_str, delimiters);
-
-	while (start < str_len)
-	{
-		size_t end = strcspn(c_str + start, delimiters);
-		split.push_back(str.substr(start, end));
-		start += end + strspn(c_str + start + end, delimiters);
-	}
-
-	return split;
-}
-
-std::string toLowerCase(std::string str) {
-	std::string out = str;
-
-	for (int i = 0; str[i]; i++) {
-		out[i] = tolower(str[i]);
-	}
-
-	return out;
-}
-
-std::string toUpperCase(std::string str) {
-	std::string out = str;
-
-	for (int i = 0; str[i]; i++) {
-		out[i] = toupper(str[i]);
-	}
-
-	return out;
-}
-
-std::string trimSpaces(std::string s) {
-	size_t start = s.find_first_not_of(" \t\n\r");
-	size_t end = s.find_last_not_of(" \t\n\r");
-	return (start == std::string::npos) ? "" : s.substr(start, end - start + 1);
-}
-
-std::string replaceString(std::string subject, std::string search, std::string replace) {
-	size_t pos = 0;
-	while ((pos = subject.find(search, pos)) != std::string::npos)
-	{
-		subject.replace(pos, search.length(), replace);
-		pos += replace.length();
-	}
-	return subject;
-}
-
 bool boxesIntersect(const Vector& mins1, const Vector& maxs1, const Vector& mins2, const Vector& maxs2) {
 	return  (maxs1.x >= mins2.x && mins1.x <= maxs2.x) &&
 		(maxs1.y >= mins2.y && mins1.y <= maxs2.y) &&
@@ -2627,15 +2573,6 @@ int clampi(int val, int min, int max) {
 	return val;
 }
 
-uint64_t getFileModifiedTime(const char* path) {
-	struct stat result;
-	if (stat(path, &result) == 0) {
-		return result.st_mtime;
-	}
-
-	return 0;
-}
-
 bool fileExists(const char* path) {
 	FILE* file = fopen(path, "r");
 	if (file) {
@@ -2643,71 +2580,6 @@ bool fileExists(const char* path) {
 		return true;
 	}
 	return false;
-}
-
-std::string normalize_path(std::string s)
-{
-	if (s.size() == 0)
-		return s;
-
-	replace(s.begin(), s.end(), '\\', '/');
-
-	std::vector<std::string> parts = splitString(s, "/");
-	int depth = 0;
-	for (int i = 0; i < (int)parts.size(); i++)
-	{
-		depth++;
-		if (parts[i] == "..")
-		{
-			depth--;
-			if (depth == 0)
-			{
-				// can only .. up to game root folder, and not any further
-				parts.erase(parts.begin() + i);
-				i--;
-			}
-			else if (i > 0)
-			{
-				parts.erase(parts.begin() + i);
-				parts.erase(parts.begin() + (i - 1));
-				i -= 2;
-			}
-		}
-	}
-	s = "";
-	for (int i = 0; i < (int)parts.size(); i++)
-	{
-		if (i > 0) {
-			s += '/';
-		}
-		s += parts[i];
-	}
-
-	return s;
-}
-
-std::string getGameFilePath(const char* path) {
-	static char gameDir[MAX_PATH];
-	GET_GAME_DIR(gameDir);
-
-	std::string lowerPath = toLowerCase(path);
-
-	std::string searchPaths[] = {
-		normalize_path(gameDir + std::string("_addon/") + path),
-		normalize_path(gameDir + std::string("_addon/") + lowerPath),
-		normalize_path(gameDir + std::string("/") + path),
-		normalize_path(gameDir + std::string("/") + lowerPath),
-		normalize_path(gameDir + std::string("_downloads/") + path),
-		normalize_path(gameDir + std::string("_downloads/") + lowerPath),
-	};
-
-	for (int i = 0; i < (int)ARRAY_SZ(searchPaths); i++) {
-		if (fileExists(searchPaths[i].c_str())) {
-			return searchPaths[i];
-		}
-	}
-
-	return "";
 }
 
 std::string lastMapName;
@@ -2864,19 +2736,6 @@ const char* getActiveWeapon(entvars_t* pev) {
 	CBasePlayer* plr = (CBasePlayer*)ent;
 	
 	return  plr->m_pActiveItem ? STRING(plr->m_pActiveItem->pev->classname) : "";
-}
-
-uint64_t getEpochMillis() {
-	return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
-}
-
-double TimeDifference(uint64_t start, uint64_t end) {
-	if (end > start) {
-		return (end - start) / 1000.0;
-	}
-	else {
-		return -((start - end) / 1000.0);
-	}
 }
 
 void LoadAdminList(bool forceUpdate) {
@@ -3045,16 +2904,6 @@ void KickPlayer(edict_t* ent, const char* reason) {
 	g_engfuncs.pfnServerExecute();
 }
 
-// https://stackoverflow.com/questions/1628386/normalise-orientation-between-0-and-360
-float normalizeRangef(const float value, const float start, const float end)
-{
-	const float width = end - start;
-	const float offsetValue = value - start;   // value relative to 0
-
-	return (offsetValue - (floorf(offsetValue / width) * width)) + start;
-	// + start to reset back to start of original range
-}
-
 bool createFolder(const std::string& path) {
 	if (mkdir(path.c_str(), 0777) == 0) {
 		return true;
@@ -3099,9 +2948,9 @@ const char* cstr(string_t s) {
 	return STRING(s);
 }
 
-uint32_t count_bits_set(uint32_t v) {
+int count_bits_set(uint64_t v) {
 	// https://graphics.stanford.edu/~seander/bithacks.html
-	uint32_t c; // c accumulates the total bits set in v
+	int c; // c accumulates the total bits set in v
 
 	for (c = 0; v; c++) {
 		v &= v - 1; // clear the least significant bit set
@@ -3388,12 +3237,6 @@ float UTIL_RayBoxIntersect(Vector start, Vector rayDir, Vector mins, Vector maxs
 	return (intersectPoint - start).Length();
 }
 
-const char* UTIL_SevenKewpClientString(int version) {
-	int major = version / 100;
-	int minor = version % 100;
-	return UTIL_VarArgs("SevenKewp %d.%02d", major, minor);
-}
-
 uint32_t UTIL_ClientBitMask(int clientMod) {
 	uint32_t bits = 0;
 
@@ -3406,4 +3249,18 @@ uint32_t UTIL_ClientBitMask(int clientMod) {
 	}
 
 	return bits;
+}
+
+bool UTIL_MapReplacesModel(const char* fpath) {
+	std::string lowerPath = toLowerCase(fpath);
+	fpath = lowerPath.c_str();
+
+	const char* mapReplacement = g_modelReplacements.get(fpath);
+	const char* modReplacement = g_modelReplacementsMod.get(fpath);
+	if (!mapReplacement) mapReplacement = "";
+	if (!modReplacement) modReplacement = "";
+
+	// only precache the model if the model is replaced with something
+	// the mod doesn't already replace it with.
+	return strcmp(mapReplacement, modReplacement);
 }

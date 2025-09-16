@@ -42,6 +42,7 @@
 #include "ThreadSafeQueue.h"
 #include <thread>
 #include "HashMap.h"
+#include "version.h"
 
 class CBasePlayer;
 
@@ -49,7 +50,7 @@ extern EXPORT globalvars_t				*gpGlobals;
 
 extern StringSet g_weaponNames; // names given by weapons (may have a prefix: "hlcoop/weapon_grapple")
 extern StringSet g_weaponClassnames; // valid weapon classnames
-extern int g_weaponSlotMasks[MAX_WEAPONS]; // for handling slot conflict
+extern uint64_t g_weaponSlotMasks[MAX_WEAPONS]; // for handling slot conflict
 
 extern int g_serveractive; // 1 if ServerActivate was called (no longer safe to precache)
 extern bool g_can_set_bsp_models; // false if bsp models aren't precached yet (skip SET_MODEL calls)
@@ -124,6 +125,19 @@ enum merged_item_bodies {
 	MERGE_MDL_RPGROCKET,
 	MERGE_MDL_SPORE,
 	MERGE_MDL_SHOCK_EFFECT,
+	MERGE_MDL_W_2UZIS,
+	MERGE_MDL_W_UZI,
+	MERGE_MDL_W_UZI_CLIP,
+	MERGE_MDL_W_SAW,
+	MERGE_MDL_W_SAW_CLIP,
+	MERGE_MDL_W_DESERT_EAGLE,
+	MERGE_MDL_W_M40A1,
+	MERGE_MDL_W_M40A1_CLIP,
+	MERGE_MDL_W_MINIGUN,
+	MERGE_MDL_W_KNIFE,
+	MERGE_MDL_W_M16,
+	MERGE_MDL_W_PMEDKIT,
+	MERGE_MDL_CAMERA,
 };
 
 #undef RGB
@@ -149,6 +163,7 @@ struct EXPORT RGBA {
 	RGBA(Vector v, uint8_t a) : r(v.x), g(v.y), b(v.z), a(a) {}
 	RGBA(RGB rgb) : r(rgb.r), g(rgb.g), b(rgb.b), a(255) {}
 	RGBA(RGB rgb, uint8_t a) : r(rgb.r), g(rgb.g), b(rgb.b), a(a) {}
+	RGBA(uint8_t rgfl[4]) { r = rgfl[0]; g = rgfl[1]; b = rgfl[2]; a = rgfl[3]; }
 
 	inline Vector ToVector() { return Vector(r, g, b); }
 };
@@ -228,9 +243,6 @@ typedef int EOFFSET;
 
 // In case it's not alread defined
 typedef int BOOL;
-
-// In case this ever changes
-#define M_PI			3.14159265358979323846
 
 // Keeps clutter down a bit, when declaring external entity/global method prototypes
 #define DECLARE_GLOBAL_METHOD(MethodName)  extern void DLLEXPORT MethodName( void )
@@ -820,32 +832,13 @@ inline void WRITE_COORD_VECTOR(const Vector& vec)
 	WRITE_COORD(vec.z);
 }
 
-EXPORT std::vector<std::string> splitString(std::string str, const char* delimitters);
-
-EXPORT std::string toLowerCase(std::string str);
-
-EXPORT std::string toUpperCase(std::string str);
-
-EXPORT std::string trimSpaces(std::string s);
-
-EXPORT std::string replaceString(std::string subject, std::string search, std::string replace);
-
 EXPORT bool boxesIntersect(const Vector& mins1, const Vector& maxs1, const Vector& mins2, const Vector& maxs2);
 
 EXPORT float clampf(float val, float min, float max);
 
 EXPORT int clampi(int val, int min, int max);
 
-// returns 0 if the file doesn't exist
-EXPORT uint64_t getFileModifiedTime(const char* path);
-
 EXPORT bool fileExists(const char* path);
-
-EXPORT std::string normalize_path(std::string s);
-
-// searches game directories in order (e.g. valve/path, valve_downloads/path)
-// returns an empty string if the file can't be found
-EXPORT std::string getGameFilePath(const char* path);
 
 // loads a global model/sound replacement file. Returns a key that you can use with g_replacementFiles
 // format: "file_path" "replacement_file_path"
@@ -878,10 +871,6 @@ EXPORT void LoadAdminList(bool forceUpdate=false); // call on each map change, s
 // returns ADMIN_YES for admins, ADMIN_NO for normal players, ADMIN_OWNER for NULL or listen server host
 EXPORT int AdminLevel(CBasePlayer* player);
 
-EXPORT uint64_t getEpochMillis();
-
-EXPORT double TimeDifference(uint64_t start, uint64_t end);
-
 EXPORT std::vector<std::string> getDirFiles(std::string path, std::string extension, std::string startswith, bool onlyOne);
 
 EXPORT short FixedSigned16(float value, float scale);
@@ -902,7 +891,7 @@ EXPORT bool folderExists(const std::string& path);
 
 EXPORT uint64_t getFreeSpace(const std::string& path);
 
-EXPORT uint32_t count_bits_set(uint32_t v);
+EXPORT int count_bits_set(uint64_t v);
 
 EXPORT void UTIL_ForceRetouch(edict_t* ent); // force entity to Touch() all triggers it is in contact with
 
@@ -936,7 +925,8 @@ EXPORT void UTIL_SendUserInfo(edict_t* msgPlayer, edict_t* infoPlayer, char* inf
 // returns: -1 no intersect, 0 = ray starts inside box, >0 = intersection distance
 EXPORT float UTIL_RayBoxIntersect(Vector start, Vector rayDir, Vector mins, Vector maxs);
 
-EXPORT const char* UTIL_SevenKewpClientString(int version);
-
 // returns a bit mask representing all players that are using the specified client
 EXPORT uint32_t UTIL_ClientBitMask(int clientMod);
+
+// returns true if the map replaces the model (ignores standard mod replacements)
+EXPORT bool UTIL_MapReplacesModel(const char* fpath);

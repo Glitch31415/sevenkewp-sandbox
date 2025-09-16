@@ -529,7 +529,7 @@ void CHalfLifeMultiplay :: PlayerSpawn( CBasePlayer *pPlayer )
 	CBaseEntity	*pWeaponEntity = NULL;
 
 	if (!g_noSuit)
-		pPlayer->pev->weapons |= (1<<WEAPON_SUIT);
+		pPlayer->m_weaponBits |= (1ULL<<WEAPON_SUIT);
 
 	addDefault = !g_mapCfgExists;
 
@@ -1146,6 +1146,9 @@ BOOL CHalfLifeMultiplay::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerIte
 		if ( (pItem->iFlags() & ITEM_FLAG_LIMITINWORLD) || (pItem->pev->spawnflags & SF_NORESPAWN))
 			return CGameRules::CanHavePlayerItem( pPlayer, pItem );
 
+		CBasePlayerWeapon* wep = pItem ? pItem->GetWeaponPtr() : NULL;
+		bool isAkimboWeapon = wep && wep->IsAkimboWeapon();
+
 		// check if the player already has this weapon
 		for ( int i = 0 ; i < MAX_ITEM_TYPES ; i++ )
 		{
@@ -1156,6 +1159,11 @@ BOOL CHalfLifeMultiplay::CanHavePlayerItem( CBasePlayer *pPlayer, CBasePlayerIte
 			{
 				if ( it->m_iId == pItem->m_iId )
 				{
+					// convert single handed akimbo weapon into dual handed
+					CBasePlayerWeapon* heldWep = it ? it->GetWeaponPtr() : NULL;
+					if (isAkimboWeapon && heldWep && !heldWep->CanAkimbo())
+						return TRUE;
+
 					return FALSE;
 				}
 

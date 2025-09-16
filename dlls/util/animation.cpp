@@ -78,7 +78,8 @@ studiohdr_t* GetPlayerModelPtr(const char* name, int& len) {
 	}
 
 	const char* mdlPath = UTIL_VarArgs("models/player/%s/%s.mdl", name, name);
-	studiohdr_t* pmodel = (studiohdr_t*)LOAD_FILE_FOR_ME(mdlPath, &len);
+	studiohdr_t* pmodel = (studiohdr_t*)UTIL_LoadFile(mdlPath, &len);
+
 
 	if (!pmodel) {
 		ALERT(at_console, "Player model not found: %s\n", name);
@@ -93,7 +94,7 @@ studiohdr_t* GetPlayerModelPtr(const char* name, int& len) {
 	//ALERT(at_console, "Cached player model '%s'\n", name);
 
 	if (g_playerModelCache.size() > MAX_CACHED_PLAYER_MODELS) {
-		uint64_t oldestModel = -1;
+		uint64_t oldestModel = UINT64_MAX;
 		const char* oldestKey = NULL;
 
 		HashMap<PModelCacheEntry>::iterator_t iter;
@@ -105,10 +106,10 @@ studiohdr_t* GetPlayerModelPtr(const char* name, int& len) {
 		}
 
 		if (oldestKey) {
-			PModelCacheEntry* entry = g_playerModelCache.get(oldestKey);
-			if (entry) {
+			PModelCacheEntry* pentry = g_playerModelCache.get(oldestKey);
+			if (pentry) {
 				ALERT(at_console, "Free cached player model '%s'\n", oldestKey);
-				FREE_FILE(entry->data);
+				delete[] pentry->data;
 				g_playerModelCache.del(oldestKey);
 
 			}
@@ -122,7 +123,7 @@ void ClearPlayerModelCache() {
 	HashMap<PModelCacheEntry>::iterator_t iter;
 	while (g_playerModelCache.iterate(iter)) {
 		if (iter.value) {
-			FREE_FILE(iter.value->data);
+			delete[] iter.value->data;
 		}
 	}
 
@@ -150,15 +151,28 @@ int CountModelPolys(studiohdr_t* header, int len) {
 	int bodyValue = 255; // cl_himodels 1
 	int polyCount = 0;
 
+	if (header->numbodyparts > 255) {
+		ALERT(at_logged, "CountModelPolys: Zomg too many body parts\n");
+		return 0;
+	}
+
 	for (int b = 0; b < header->numbodyparts; b++) {
 		data.seek(header->bodypartindex + b * sizeof(mstudiobodyparts_t));
 		mstudiobodyparts_t* bod = (mstudiobodyparts_t*)data.getOffsetBuffer();
+
+		if (bod->nummodels <= 0)
+			continue;
 
 		int activeModel = (bodyValue / bod->base) % bod->nummodels;
 		bodyValue -= activeModel * bod->base;
 
 		data.seek(bod->modelindex + activeModel * sizeof(mstudiomodel_t));
 		mstudiomodel_t* mod = (mstudiomodel_t*)data.getOffsetBuffer();
+
+		if (mod->nummesh > 255) {
+			ALERT(at_logged, "CountModelPolys: Zomg too many meshes\n");
+			return 0;
+		}
 
 		for (int k = 0; k < mod->nummesh; k++) {
 			data.seek(mod->meshindex + k * sizeof(mstudiomesh_t));

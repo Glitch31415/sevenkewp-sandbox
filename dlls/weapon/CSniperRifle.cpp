@@ -5,11 +5,9 @@ LINK_ENTITY_TO_CLASS(weapon_sniperrifle, CSniperRifle)
 void CSniperRifle::Spawn()
 {
 	pev->classname = MAKE_STRING("weapon_sniperrifle"); // hack to allow for old names
-	Precache();
-	SetWeaponModelW();
 	m_iId = WEAPON_M40A1;
 	m_iDefaultAmmo = M40A1_DEFAULT_GIVE;
-	FallInit();
+	CWeaponCustom::Spawn();
 }
 
 void CSniperRifle::Precache()
@@ -40,37 +38,38 @@ void CSniperRifle::Precache()
 	params.idles[0] = { M40A1_SLOWIDLE, 100, 4348 };
 	//params.idles[1] = { M40A1_SLOWIDLE2, 20, 4348 }; // bolt is in the wrong position
 
+	float accuracyDegrees = 2.0f * atanf(0.001f) * (180.0f / M_PI);
+
 	CustomWeaponShootOpts& primary = params.shootOpts[0];
 	primary.ammoCost = 1;
 	primary.cooldown = 2000;
+	primary.accuracyX = accuracyDegrees * 100;
+	primary.accuracyY = accuracyDegrees * 100;
 
 	CustomWeaponShootOpts& secondary = params.shootOpts[1];
 	secondary.ammoCost = 0;
 	secondary.cooldown = 500;
 	secondary.flags = FL_WC_SHOOT_NO_ATTACK;
 
-	float spread = VECTOR_CONE_1DEGREES.x * 0.5f;
+	float spread = 0.001f;
 	int bulletf = FL_WC_BULLETS_DYNAMIC_SPREAD;
-	int btype = BULLET_PLAYER_9MM;
 
-	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY_NOT_EMPTY).WepAnim(M40A1_FIRE));
-	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY_CLIPSIZE, 0, 0).WepAnim(M40A1_FIRE_LAST));
-	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY_NOT_EMPTY, 620)
-		.PlaySound(boltSnd1, CHAN_WEAPON, 1.0f, ATTN_IDLE, 100));
-	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY_CLIPSIZE, 620, 0)
-		.PlaySound(boltSnd2, CHAN_WEAPON, 1.0f, ATTN_IDLE, 100));
-	
-	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY)
-		.PlaySound(shootSnd, CHAN_WEAPON, 1.0f, 0.2f, 94, 109, DISTANT_NONE, WC_AIVOL_NORMAL));
-	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY).PunchSet(-2, 0));
-	AddEvent(WepEvt(WC_TRIG_SHOOT_PRIMARY).Bullets(1, gSkillData.sk_plr_762_bullet, spread, spread, btype, 1, bulletf));
+	AddEvent(WepEvt().Primary().PlaySound(shootSnd, CHAN_WEAPON, 1.0f, 0.2f, 94, 109, DISTANT_NONE, WC_AIVOL_NORMAL));
+	AddEvent(WepEvt().Primary().Bullets(1, 0, gSkillData.sk_plr_762_bullet, spread, spread, 0, WC_FLASH_NORMAL, bulletf));
+	AddEvent(WepEvt().Primary().PunchSet(-2, 0));
 
-	AddEvent(WepEvt(WC_TRIG_SHOOT_SECONDARY).PlaySound(zoomSnd, CHAN_ITEM, 1.0f, ATTN_IDLE, 100));
-	AddEvent(WepEvt(WC_TRIG_SHOOT_SECONDARY).ToggleZoom(18));
+	AddEvent(WepEvt().PrimaryNotEmpty().WepAnim(M40A1_FIRE));
+	AddEvent(WepEvt().PrimaryNotEmpty().Delay(620).IdleSound(boltSnd1));
 
-	AddEvent(WepEvt(WC_TRIG_RELOAD, 16).PlaySound(reloadSnd1, CHAN_ITEM, 1.0f, ATTN_IDLE, 100));
-	AddEvent(WepEvt(WC_TRIG_RELOAD_EMPTY, 2324).PlaySound(reloadSnd2, CHAN_ITEM, 1.0f, ATTN_IDLE, 100));
-	AddEvent(WepEvt(WC_TRIG_RELOAD_EMPTY, 2324).WepAnim(M40A1_RELOAD2));
+	AddEvent(WepEvt().PrimaryEmpty().WepAnim(M40A1_FIRE_LAST));
+	AddEvent(WepEvt().PrimaryEmpty().Delay(620).IdleSound(boltSnd2));
+
+	AddEvent(WepEvt().Secondary().IdleSound(zoomSnd));
+	AddEvent(WepEvt().Secondary().ToggleZoom(18));
+
+	AddEvent(WepEvt().Reload().Delay(16).IdleSound(reloadSnd1));
+	AddEvent(WepEvt().ReloadEmpty().Delay(2324).IdleSound(reloadSnd2));
+	AddEvent(WepEvt().ReloadEmpty().Delay(2324).WepAnim(M40A1_RELOAD2));
 
 	// client-side HUD sprites and config
 	PRECACHE_HUD_FILES("sprites/weapon_sniperrifle.txt");
@@ -93,6 +92,7 @@ int CSniperRifle::GetItemInfo(ItemInfo* p)
 	p->iPosition = 1;
 	p->iId = WEAPON_M40A1;
 	p->iWeight = M40A1_WEIGHT;
+	p->iFlagsEx = WEP_FLAG_USE_ZOOM_CROSSHAIR;
 	return true;
 }
 

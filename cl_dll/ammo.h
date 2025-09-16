@@ -38,10 +38,20 @@ struct WEAPON
 
 	int		iCount;		// # of itesm in plist
 
+	float accuracyX;
+	float accuracyX2;
+	float accuracyY;
+	float accuracyY2;
+	int iFlagsEx;
+
 	HSPRITE hActive;
 	wrect_t rcActive;
 	HSPRITE hInactive;
 	wrect_t rcInactive;
+	HSPRITE hAkimboActive;
+	wrect_t rcAkimboActive;
+	HSPRITE hAkimboInactive;
+	wrect_t rcAkimboInactive;
 	HSPRITE	hAmmo;
 	wrect_t rcAmmo;
 	HSPRITE hAmmo2;

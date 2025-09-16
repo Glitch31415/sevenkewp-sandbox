@@ -1639,11 +1639,26 @@ void PM_CatagorizePosition (void)
 	// water on each call, and the converse case will correct itself if called twice.
 	PM_CheckWater();
 
+	int jumpPower = atoi(pmove->PM_Info_ValueForKey(pmove->physinfo, "jmp"));
+
+	// try to stick to the floor while moving down slopes.
+	float downCheck = 2.0f;
+
+	if (jumpPower != 0 && jumpPower < 800 && pmove->velocity[2] > 0) {
+		// While moving up, don't check very far because the player is likely colliding with the slope
+		// or trying to jump. Small jump powers can not even leave the ground if the downwards check
+		// is too far. This is only applied at low jump powers because it has subtle effects on other
+		// physics tricks. For instance, on gf_greybox, there's a staircase which forces you to jump
+		// up every single stair. If you spam the jump button while holding forward then you get up
+		// them quickly because the 2.0f distance check latches you onto the next step.
+		downCheck = 0.2f;
+	}
+
 	point[0] = pmove->origin[0];
 	point[1] = pmove->origin[1];
-	point[2] = pmove->origin[2] - 2;
+	point[2] = pmove->origin[2] - downCheck;
 
-	if (pmove->velocity[2] > 180)   // Shooting up really fast.  Definitely not on ground.
+	if (pmove->velocity[2] > 180 || pmove->movetype == MOVETYPE_NOCLIP)   // Shooting up really fast.  Definitely not on ground.
 	{
 		pmove->onground = -1;
 	}
@@ -2642,6 +2657,14 @@ void PM_Jump (void)
 	if ( pmove->oldbuttons & IN_JUMP )
 		return;		// don't pogo stick
 
+	int jumpPower = atoi(pmove->PM_Info_ValueForKey(pmove->physinfo, "jmp"));
+
+	if (jumpPower < 0) {
+		return; // jumping disabled
+	}
+	if (jumpPower == 0)
+		jumpPower = 800; // default velocity
+
 	// In the air now.
     pmove->onground = -1;
 
@@ -2677,16 +2700,16 @@ void PM_Jump (void)
 				pmove->velocity[i] = pmove->forward[i] * PLAYER_LONGJUMP_SPEED * 1.6;
 			}
 		
-			pmove->velocity[2] = sqrt(2 * 800 * 56.0);
+			pmove->velocity[2] = sqrt(2 * jumpPower * 56.0);
 		}
 		else
 		{
-			pmove->velocity[2] = sqrt(2 * 800 * 45.0);
+			pmove->velocity[2] = sqrt(2 * jumpPower * 45.0);
 		}
 	}
 	else
 	{
-		pmove->velocity[2] = sqrt(2 * 800 * 45.0);
+		pmove->velocity[2] = sqrt(2 * jumpPower * 45.0);
 	}
 
 	// Decay it for simulation

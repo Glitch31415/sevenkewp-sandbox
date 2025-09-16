@@ -28,6 +28,12 @@
 #include <string.h> // for strncpy()
 #include "rgb.h"
 #include "shared_util.h"
+#include "version.h"
+#include "com_model.h"
+#include "studio.h"
+#include "r_studioint.h"
+
+extern bool g_crosshair_active; // true after calling SetCrosshair with a valid crosshair
 
 // Macros to hook function calls into the HUD object
 #define HOOK_MESSAGE(x) gEngfuncs.pfnHookUserMsg(#x, __MsgFunc_##x );
@@ -44,7 +50,7 @@
 								gHUD.y.UserCmd_##x( ); \
 							}
 
-#define PRINTF(msg, ...) gEngfuncs.Con_Printf(msg, __VA_ARGS__)
+#define PRINTF(msg, ...) gEngfuncs.Con_Printf(msg, ##__VA_ARGS__)
 
 inline float CVAR_GET_FLOAT( const char *x ) {	return gEngfuncs.pfnGetCvarFloat( (char*)x ); }
 inline struct cvar_s* CVAR_GET_PTR( const char *x ) { return gEngfuncs.pfnGetCvarPointer( (char*)x ); }
@@ -92,13 +98,25 @@ inline struct cvar_s *CVAR_CREATE( const char *cv, const char *val, const int fl
 #define ServerCmd (*gEngfuncs.pfnServerCmd)
 #define EngineClientCmd (*gEngfuncs.pfnClientCmd)
 #define EngineFilteredClientCmd (*gEngfuncs.pfnFilteredClientCmd)
-#define SetCrosshair (*gEngfuncs.pfnSetCrosshair)
 #define AngleVectors (*gEngfuncs.pfnAngleVectors)
+
+inline void SetCrosshair(HSPRITE hspr, wrect_t rc, int r, int g, int b) {
+	gEngfuncs.pfnSetCrosshair(hspr, rc, r, g, b);
+	g_crosshair_active = rc.bottom != 0 || rc.left != 0 || rc.right != 0 || rc.top != 0;
+}
 
 // prevent crashes when map is not loaded
 inline cl_entity_t* GetLocalPlayer() {
 	static cl_entity_t dummyPlayer;
 	return gHUD.m_is_map_loaded ? gEngfuncs.GetLocalPlayer() : &dummyPlayer;
+}
+
+extern engine_studio_api_t IEngineStudio;
+
+inline studiohdr_t* GetStudioModel(cl_entity_t* ent) {
+	if (ent && ent->model)
+		return (studiohdr_t*)IEngineStudio.Mod_Extradata(ent->model);
+	return NULL;
 }
 
 

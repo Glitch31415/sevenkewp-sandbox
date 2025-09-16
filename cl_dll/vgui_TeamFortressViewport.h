@@ -40,6 +40,7 @@
 #define MENU_CLASSHELP2 			7
 #define MENU_REPEATHELP 			8
 #define MENU_SPECHELP				9
+#define MENU_PATCH_NOTES			10
 #endif
 using namespace vgui;
 
@@ -62,9 +63,6 @@ class TeamFortressViewport;
 char* GetVGUITGAName(const char *pszName);
 BitmapTGA *LoadTGAForRes(const char* pImageName);
 void ScaleColors( int &r, int &g, int &b, int a );
-extern const char *sTFClassSelection[];
-extern int sTFValidClassInts[];
-extern const char *sLocalisedClasses[];
 extern int iTeamColors[5][3];
 extern int iNumberOfTeamColors;
 extern TeamFortressViewport *gViewPort;
@@ -114,6 +112,19 @@ enum
 	ARROW_LEFT,
 	ARROW_RIGHT,
 };
+
+enum MESSAGE_WINDOW_TYPE {
+	MESSAGE_WINDOW_OK,
+	MESSAGE_WINDOW_UPDATE_CANCEL,
+};
+
+// run a command that can only be executed from the command menu (stufftext protection)
+// Make sure to also not bind a key to menu items that trigger this, because then the server
+// could send "+commandmenu;slot2" and run the protected command.
+void RunProtectedCommand(const char* cmd);
+
+// custom action performed by button in a message window
+void CustomMessageWindowAction(const char* action);
 
 //==============================================================================
 // VIEWPORT PIECES
@@ -522,6 +533,7 @@ private:
 	// MOTD
 	int		m_iGotAllMOTD;
 	char	m_szMOTD[ MAX_MOTD_LENGTH ];
+	char	m_szPatchNotes[ MAX_MOTD_LENGTH ];
 
 	//  Command Menu Team buttons
 	CommandButton *m_pTeamButtons[6];
@@ -556,10 +568,10 @@ public:
 	void Initialize( void );
 
 	int		CreateCommandMenu(const char * menuFile, int direction, int yOffset, bool flatDesign, float flButtonSizeX, float flButtonSizeY, int xOffset );
+	void	ReloadCommandMenu();
 	void	CreateScoreBoard( void );
 	void	CreateServerBrowser( void );
 	CommandButton * CreateCustomButton( char *pButtonText, char * pButtonName, int  iYOffset );
-	CCommandMenu *	CreateDisguiseSubmenu( CommandButton *pButton, CCommandMenu *pParentMenu, const char *commandText, int iYOffset, int iXOffset = 0 );
 
 	void UpdateCursorState( void );
 	void UpdateCommandMenu(int menuIndex);
@@ -568,7 +580,6 @@ public:
 	void UpdateSpectatorPanel( void );
 
 	int	 KeyInput( int down, int keynum, const char *pszCurrentBinding );
-	void InputPlayerSpecial( void );
 	void GetAllPlayersInfo( void );
 	void DeathMsg( int killer, int victim );
 
@@ -578,9 +589,12 @@ public:
 	void SetCurrentCommandMenu( CCommandMenu *pNewMenu );
 	void SetCurrentMenu( CMenuPanel *pMenu );
 
+	void SetPatchNotes(const char* title, const char* details);
+
 	void ShowScoreBoard( void );
 	void HideScoreBoard( void );
 	bool IsScoreBoardVisible( void );
+	bool IsMessageWindowVisible( void );
 
 	bool AllowedToPrintText( void );
 
@@ -617,6 +631,8 @@ public:
 	int MsgFunc_NextMap( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_TimeLeft( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_ScoreInfo( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_TagInfo( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_PlayerPos( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_TeamScore( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_TeamInfo( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_Spectator( const char *pszName, int iSize, void *pbuf );
@@ -646,6 +662,7 @@ public:
 	ScorePanel		*m_pScoreBoard;
 	SpectatorPanel *		m_pSpectatorPanel;
 	char			m_szServerName[ MAX_SERVERNAME_LENGTH ];
+	char			m_szPatchNotesTitle[ MAX_SERVERNAME_LENGTH ];
 	char			m_szNextMap[ MAX_MAPNAME ];
 	int				m_timeLeft;
 };
@@ -677,6 +694,38 @@ public:
 	virtual void actionPerformed(Panel* panel)
 	{
 		gEngfuncs.pfnClientCmd(m_pszCommand);
+
+		if (m_iCloseVGUIMenu)
+			gViewPort->HideTopMenu();
+		else
+			gViewPort->HideCommandMenu();
+	}
+};
+
+// not for use with buttons that have a keybind (for stufftext protection)
+class CMenuHandler_StringCommandProtected : public ActionSignal
+{
+protected:
+	char	m_pszCommand[MAX_COMMAND_SIZE];
+	int		m_iCloseVGUIMenu;
+public:
+	CMenuHandler_StringCommandProtected(const char* pszCommand)
+	{
+		strncpy(m_pszCommand, pszCommand, MAX_COMMAND_SIZE);
+		m_pszCommand[MAX_COMMAND_SIZE - 1] = '\0';
+		m_iCloseVGUIMenu = false;
+	}
+
+	CMenuHandler_StringCommandProtected(const char* pszCommand, int iClose)
+	{
+		strncpy(m_pszCommand, pszCommand, MAX_COMMAND_SIZE);
+		m_pszCommand[MAX_COMMAND_SIZE - 1] = '\0';
+		m_iCloseVGUIMenu = true;
+	}
+
+	virtual void actionPerformed(Panel* panel)
+	{
+		RunProtectedCommand(m_pszCommand);
 
 		if (m_iCloseVGUIMenu)
 			gViewPort->HideTopMenu();
@@ -799,6 +848,7 @@ public:
 #define SHOW_CLASSDESC		2
 #define SHOW_MOTD			3
 #define SHOW_SPECHELP		4
+#define SHOW_PATCH_NOTES	5
 
 class CMenuHandler_TextWindow : public ActionSignal
 {
@@ -821,6 +871,23 @@ public:
 			gViewPort->HideCommandMenu();
 			gViewPort->ShowVGUIMenu( m_iState );
 		}
+	}
+};
+
+class CMenuHandler_TextWindowCustomAction : public ActionSignal
+{
+private:
+	char m_szAction[256];
+public:
+	CMenuHandler_TextWindowCustomAction(const char* actionName)
+	{
+		strcpy_safe(m_szAction, actionName, sizeof(m_szAction));
+	}
+
+	virtual void actionPerformed(Panel* panel)
+	{
+		gViewPort->HideTopMenu();
+		CustomMessageWindowAction(m_szAction);
 	}
 };
 
@@ -1026,30 +1093,6 @@ public:
 	}
 };
 
-class FeignButton : public CommandButton
-{
-private:
-	int	m_iFeignState;
-public:
-	FeignButton( int iState, const char* text,int x,int y,int wide,int tall ) : CommandButton( text,x,y,wide,tall)
-	{
-		m_iFeignState = iState;
-	}
-
-	virtual int IsNotValid()
-	{
-		// Only visible for spies
-#ifdef _TFC
-		if (g_iPlayerClass != PC_SPY)
-			return true;
-#endif
-
-		if (m_iFeignState == gViewPort->GetIsFeigning())
-			return false;
-		return true;
-	}
-};
-
 class SpectateButton : public CommandButton
 {
 public:
@@ -1064,157 +1107,6 @@ public:
 			return false;
 
 		return true;
-	}
-};
-
-#define		DISGUISE_TEAM1		(1<<0)
-#define		DISGUISE_TEAM2		(1<<1)
-#define		DISGUISE_TEAM3		(1<<2)
-#define		DISGUISE_TEAM4		(1<<3)
-
-class DisguiseButton : public CommandButton
-{
-private:
-	int m_iValidTeamsBits;
-	int m_iThisTeam;
-public:
-	DisguiseButton( int iValidTeamNumsBits, const char* text,int x,int y,int wide,int tall ) : CommandButton( text,x,y,wide,tall,false )
-	{
-		m_iValidTeamsBits = iValidTeamNumsBits;
-	}
-
-	virtual int IsNotValid()
-	{
-#ifdef _TFC
-		// Only visible for spies
-		if ( g_iPlayerClass != PC_SPY )
-			return true;
-#endif
-
-		// if it's not tied to a specific team, then always show (for spies)
-		if ( !m_iValidTeamsBits )
-			return false;
-
-		// if we're tied to a team make sure we can change to that team
-		int iTmp = 1 << (gViewPort->GetNumberOfTeams() - 1);
-		if ( m_iValidTeamsBits & iTmp )
-			return false;
-		return true;
-	}
-};
-
-class DetpackButton : public CommandButton
-{
-private:
-	int	m_iDetpackState;
-public:
-	DetpackButton( int iState, const char* text,int x,int y,int wide,int tall ) : CommandButton( text,x,y,wide,tall)
-	{
-		m_iDetpackState = iState;
-	}
-
-	virtual int IsNotValid()
-	{
-#ifdef _TFC
-		// Only visible for demomen
-		if (g_iPlayerClass != PC_DEMOMAN)
-			return true;
-#endif
-
-		if (m_iDetpackState == gViewPort->GetIsSettingDetpack())
-			return false;
-
-		return true;
-	}
-};
-
-extern int iBuildingCosts[];
-#define BUILDSTATE_HASBUILDING		(1<<0)		// Data is building ID (1 = Dispenser, 2 = Sentry, 3 = Entry Teleporter, 4 = Exit Teleporter)
-#define BUILDSTATE_BUILDING			(1<<1)
-#define BUILDSTATE_BASE				(1<<2)
-#define BUILDSTATE_CANBUILD			(1<<3)		// Data is building ID (1 = Dispenser, 2 = Sentry, 3 = Entry Teleporter, 4 = Exit Teleporter)
-
-class BuildButton : public CommandButton
-{
-private:
-	int	m_iBuildState;
-	int m_iBuildData;
-
-public:
-	enum Buildings
-	{
-		DISPENSER = 0,
-		SENTRYGUN = 1,
-		ENTRY_TELEPORTER = 2,
-		EXIT_TELEPORTER = 3
-	};
-
-	BuildButton( int iState, int iData, const char* text,int x,int y,int wide,int tall ) : CommandButton( text,x,y,wide,tall)
-	{
-		m_iBuildState = iState;
-		m_iBuildData = iData;
-	}
-
-	virtual int IsNotValid()
-	{
-#ifdef _TFC
-		// Only visible for engineers
-		if (g_iPlayerClass != PC_ENGINEER)
-			return true;
-
-		// If this isn't set, it's only active when they're not building
-		if (m_iBuildState & BUILDSTATE_BUILDING)
-		{
-			// Make sure the player's building
-			if ( !(gViewPort->GetBuildState() & BS_BUILDING) )
-				return true;
-		}
-		else
-		{
-			// Make sure the player's not building
-			if ( gViewPort->GetBuildState() & BS_BUILDING )
-				return true;
-		}
-
-		if (m_iBuildState & BUILDSTATE_BASE)
-		{
-			// Only appear if we've got enough metal to build something, or something already built
-			if ( gViewPort->GetBuildState() & (BS_HAS_SENTRYGUN | BS_HAS_DISPENSER | BS_CANB_SENTRYGUN | BS_CANB_DISPENSER | BS_HAS_ENTRY_TELEPORTER | BS_HAS_EXIT_TELEPORTER | BS_CANB_ENTRY_TELEPORTER | BS_CANB_EXIT_TELEPORTER) )
-				return false;
-
-			return true;
-		}
-
-		// Must have a building
-		if (m_iBuildState & BUILDSTATE_HASBUILDING)
-		{
-			if ( m_iBuildData == BuildButton::DISPENSER && !(gViewPort->GetBuildState() & BS_HAS_DISPENSER) )
-				return true;
-			if ( m_iBuildData == BuildButton::SENTRYGUN && !(gViewPort->GetBuildState() & BS_HAS_SENTRYGUN) )
-				return true;
-			if ( m_iBuildData == BuildButton::ENTRY_TELEPORTER && !(gViewPort->GetBuildState() & BS_HAS_ENTRY_TELEPORTER) )
-				return true;
-			if ( m_iBuildData == BuildButton::EXIT_TELEPORTER && !(gViewPort->GetBuildState() & BS_HAS_EXIT_TELEPORTER) )
-				return true;
-		}
-
-		// Can build something
-		if (m_iBuildState & BUILDSTATE_CANBUILD)
-		{
-			// Make sure they've got the ammo and don't have one already
-			if ( m_iBuildData == BuildButton::DISPENSER && (gViewPort->GetBuildState() & BS_CANB_DISPENSER) )
-				return false;
-			if ( m_iBuildData == BuildButton::SENTRYGUN && (gViewPort->GetBuildState() & BS_CANB_SENTRYGUN) )
-				return false;
-			if ( m_iBuildData == BuildButton::ENTRY_TELEPORTER && (gViewPort->GetBuildState() & BS_CANB_ENTRY_TELEPORTER) )
-				return false;
-			if ( m_iBuildData == BuildButton::EXIT_TELEPORTER && (gViewPort->GetBuildState() & BS_CANB_EXIT_TELEPORTER) )
-				return false;
-
-			return true;
-		}
-#endif
-		return false;
 	}
 };
 

@@ -57,21 +57,13 @@ float g_camWheelAdjust; // mouse wheel distance adjustment, added to offset grad
 
 void CAM_ToThirdPerson(void);
 void CAM_ToFirstPerson(void);
+bool IN_UseRawInput();
+bool IN_InvertMouse();
 
 void SDL_GetCursorPos( POINT *p )
 {
 //	gEngfuncs.GetMousePosition( (int *)&p->x, (int *)&p->y );
 	SDL_GetMouseState( (int *)&p->x, (int *)&p->y );
-}
-
-// https://stackoverflow.com/questions/1628386/normalise-orientation-between-0-and-360
-float normalizeRangef(const float value, const float start, const float end)
-{
-	const float width = end - start;
-	const float offsetValue = value - start;   // value relative to 0
-
-	return (offsetValue - (floorf(offsetValue / width) * width)) + start;
-	// + start to reset back to start of original range
 }
 
 void CL_DLLEXPORT CAM_Think( void )
@@ -89,6 +81,7 @@ void CL_DLLEXPORT CAM_Think( void )
 	if (g_camPressedTime && now - g_camPressedTime > 0.2f)
 	{
 		//iMouseInUse = 1;
+		bool firstAdjust = g_camAdjustState == 0;
 		if (g_camAdjustState == 0) {
 			g_camAdjustState = 1;
 			gEngfuncs.GetViewAngles((float*)g_camPressViewAngles);
@@ -109,7 +102,18 @@ void CL_DLLEXPORT CAM_Think( void )
 
 #ifndef WIN32
 		SDL_WarpMouseInWindow(g_sdl_window, centerX, centerY);
+#else
+		if (IN_UseRawInput()) {
+			SDL_WarpMouseInWindow(g_sdl_window, centerX, centerY);
+
+			if (firstAdjust) { // view jumps otherwise
+				camDeltaX = camDeltaY = 0;
+			}
+		}
 #endif
+
+		if (IN_InvertMouse())
+			camDeltaY *= -1;
 
 		float sensitivity = gHUD.GetSensitivity();
 		if (!sensitivity)
@@ -246,6 +250,7 @@ void CAM_ToThirdPerson(void) {
 
 void CAM_ToFirstPerson(void) { 
 	cam_thirdperson = 0;
+	g_camAdjustState = 0;
 	g_camPressAngles = Vector(0, 0, 0);
 }
 

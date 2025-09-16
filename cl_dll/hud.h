@@ -29,6 +29,10 @@
 #define _cdecl 
 #endif
 
+#ifdef MINGW
+#define _cdecl __attribute__((cdecl))
+#endif
+
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
@@ -103,16 +107,23 @@ public:
 	int Init( void );
 	int VidInit( void );
 	int Draw(float flTime);
+	void DrawDynamicCrosshair();
 	void Think(void);
 	void Reset(void);
 	virtual const char* HudName() { return "CHudAmmo"; }
 	int DrawWList(float flTime);
 	void UpdateZoomCrosshair(int id, bool zoom, bool autoaimOnTarget);
+	bool IsWeaponZoomed();
+
 	int CurWeapon(int iState, int iId, int iClip);
 	int MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_CurWeaponX(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf);
+	int MsgFunc_WeaponListX(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_CustomWep(const char* pszName, int iSize, void* pbuf);
+	int MsgFunc_CustomWepEv(const char* pszName, int iSize, void* pbuf);
+	int MsgFunc_PmodelAnim(const char* pszName, int iSize, void* pbuf);
+	int MsgFunc_WeaponBits(const char* pszName, int iSize, void* pbuf);
 	int MsgFunc_SoundIdx(const char* pszName, int iSize, void* pbuf);
 	int MsgFunc_AmmoX(const char *pszName, int iSize, void *pbuf);
 	int MsgFunc_AmmoXX(const char *pszName, int iSize, void *pbuf);
@@ -136,13 +147,18 @@ public:
 	void _cdecl UserCmd_NextWeapon( void );
 	void _cdecl UserCmd_PrevWeapon( void );
 
+	WEAPON* m_pWeapon;
+
 private:
 	float m_fFade;
-	RGBA  m_rgba;
-	WEAPON *m_pWeapon;
+	RGBA  m_rgba;	
 	int	m_HUD_bucket0;
 	int m_HUD_selection;
 
+	cvar_t* m_hud_crosshair_mode;
+	cvar_t* m_hud_crosshair_length;
+	cvar_t* m_hud_crosshair_width;
+	cvar_t* m_hud_crosshair_border;
 };
 
 //
@@ -250,17 +266,20 @@ struct extra_player_info_t
 	short frags;
 	short deaths;
 	uint16_t playerclass;
-	short health; // UNUSED currently, spectator UI would like this
+	short health;
+	int specMode; // which spectate mode the player is in
+	int specTarget; // which player is being spectated
 	bool dead; // UNUSED currently, spectator UI would like this
 	short teamnumber;
 	char teamname[MAX_TEAM_NAME];
+	int x, y, z; // coordinates for tag rendering
 };
 
 struct team_info_t 
 {
 	char name[MAX_TEAM_NAME];
-	short frags;
-	short deaths;
+	int frags;
+	int deaths;
 	short ping;
 	short packetloss;
 	short ownteam;
@@ -324,11 +343,14 @@ public:
 	void SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex = -1 );
 	void EnsureTextFitsInOneLineAndWrapIfHaveTo( int line );
 	int MaxLines(); // max lines client wants to see
+	int ChatHeight(bool maxlines); // max height of all chat lines + some padding
+	void UpdateChatPosition();
+	void SetChatInputPos(int* x, int* y);
 	virtual const char* HudName() { return "CHudSayText"; }
 friend class CHudSpectator;
 
 private:
-
+	float m_lastChatIput;
 	struct cvar_s *	m_HUD_saytext;
 	struct cvar_s *	m_HUD_saytext_time;
 	struct cvar_s *	m_HUD_saytext_lines;
@@ -350,6 +372,43 @@ private:
 	int m_wpolyMaxLen;
 	int m_epolyMaxLen;
 	RGB m_textColor;
+};
+
+enum ClientUpdateState {
+	CUPDATE_NONE,		// no update in progress
+	CUPDATE_CHECK,		// checking for a new release
+	CUPDATE_CONFIRM,	// waiting for user to confirm the update
+	CUPDATE_DOWNLOAD,	// downloading the new release
+	CUPDATE_FINISH		// update applied and pending restart
+};
+
+class CHudClientUpdater : public CHudBase
+{
+public:
+	int Init(void);
+	int VidInit(void) { return 1; }
+	int Draw(float flTime);
+	void Think();
+	virtual const char* HudName() { return "CHudClientUpdater"; }
+
+	int m_updateState;
+	bool m_updateDeclined;
+
+private:
+	cvar_t* ver_cvar;
+};
+
+class CHudNametags : public CHudBase
+{
+public:
+	int Init(void);
+	int VidInit(void) { return 1; }
+	int Draw(float flTime);
+	virtual const char* HudName() { return "CHudNametags"; }
+
+private:
+	struct cvar_s* m_HUD_nametags;
+	struct cvar_s* m_HUD_nametag_hp;
 };
 
 //
@@ -577,7 +636,7 @@ class CFog : public CHudBase
 {
 public:
 	int Init(void);
-	int VidInit(void) { return 1; }
+	int VidInit(void);
 	int MsgFunc_Fog(const char* pszName, int iSize, void* pbuf);
 	void SetupFog();
 	virtual const char* HudName() { return "CFog"; }
@@ -621,7 +680,9 @@ public:
 	int		m_iRes;
 	cvar_t  *m_pCvarStealMouse;
 	cvar_t	*m_pCvarDraw;
+	cvar_t* default_fov;
 	int m_sevenkewpVersion;
+	bool m_sevenkewpDataUpdating;
 	bool m_is_map_loaded;
 
 	int m_iFontHeight;
@@ -641,7 +702,7 @@ private:
 	wrect_t *m_rgrcRects;	/*[HUD_SPRITE_COUNT]*/
 	char *m_rgszSpriteNames; /*[HUD_SPRITE_COUNT][MAX_SPRITE_NAME_LENGTH]*/
 
-	struct cvar_s *default_fov;
+	
 public:
 	HSPRITE GetSprite( int index ) 
 	{
@@ -674,6 +735,8 @@ public:
 	CHudBenchmark	m_Benchmark;
 	CHudClientStats	m_ClientStats;
 	CFog			m_Fog;
+	CHudClientUpdater	m_ClientUpdater;
+	CHudNametags	m_Nametags;
 
 	void Init( void );
 	void VidInit( void ); // called on server connection or video mode change
@@ -704,7 +767,7 @@ public:
 	// Screen information
 	SCREENINFO	m_scrinfo;
 
-	int	m_iWeaponBits;
+	uint64_t	m_iWeaponBits;
 	int	m_fPlayerDead;
 	int m_iIntermission;
 

@@ -69,14 +69,15 @@ extern cvar_t	*cl_vsmoothing;
 #define	CAM_MODE_RELAX		1
 #define CAM_MODE_FOCUS		2
 
-vec3_t		v_origin, v_angles, v_cl_angles, v_sim_org, v_lastAngles;
+vec3_t		v_origin, v_angles, v_cl_angles, v_sim_org, v_sim_vel, v_lastAngles;
 float		v_frametime, v_lastDistance;	
 float		v_cameraRelaxAngle	= 5.0f;
 float		v_cameraFocusAngle	= 35.0f;
 int			v_cameraMode = CAM_MODE_FOCUS;
 qboolean	v_resetCamera = 1;
 
-vec3_t ev_punchangle;
+vec3_t ev_punchangle; // client-side punch angle
+vec3_t v_punchangle; // combined client and server punch angle
 
 cvar_t	*scr_ofsx;
 cvar_t	*scr_ofsy;
@@ -500,6 +501,9 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 
 	V_DriftPitch ( pparams );
 
+	VectorCopy(pparams->simorg, v_sim_org);
+	VectorCopy(pparams->simvel, v_sim_vel);
+
 	if ( gEngfuncs.IsSpectateOnly() )
 	{
 		ent = gEngfuncs.GetEntityByIndex( g_iUser2 );
@@ -690,6 +694,9 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	VectorAdd ( pparams->viewangles, (float *)&ev_punchangle, pparams->viewangles);
 
 	V_DropPunchAngle ( pparams->frametime, (float *)&ev_punchangle );
+
+	v_punchangle = ev_punchangle;
+	VectorAdd(v_punchangle, pparams->punchangle, v_punchangle);
 
 	// smooth out stair step ups
 #if 1

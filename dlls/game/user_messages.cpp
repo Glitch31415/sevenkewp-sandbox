@@ -22,6 +22,7 @@ int gmsgBattery = 0;
 int gmsgTrain = 0;
 int gmsgLogo = 0;
 int gmsgWeaponList = 0;
+int gmsgWeaponListX = 0;
 int gmsgAmmoX = 0;
 int gmsgAmmoXX = 0;
 int gmsgHudText = 0;
@@ -48,10 +49,15 @@ int gmsgStatusText = 0;
 int gmsgStatusValue = 0;
 
 int gmsgCustomWeapon = 0;
+int gmsgCustomWeaponEvents = 0;
 int gmsgSoundIdx = 0;
 int gmsgNextMap = 0;
 int gmsgTimeLeft = 0;
 int gmsgFog = 0;
+int gmsgPmodelAnim = 0;
+int gmsgWeaponBits = 0;
+int gmsgTagInfo = 0;
+int gmsgPlayerPos = 0;
 int gmsgToxicCloud = 0;
 
 std::vector<UserMessage> g_userMessages;
@@ -121,6 +127,7 @@ void LinkUserMessages(void)
 	gmsgSayText = REG_USER_MSG("SayText", -1);
 	gmsgTextMsg = REG_USER_MSG("TextMsg", -1);
 	gmsgWeaponList = REG_USER_MSG("WeaponList", -1);
+	gmsgWeaponListX = REG_USER_MSG("WeaponListX", -1);
 	gmsgResetHUD = REG_USER_MSG("ResetHUD", 1);		// called every respawn
 	gmsgInitHUD = REG_USER_MSG("InitHUD", 0);		// called every time a new player joins the server
 	gmsgShowGameTitle = REG_USER_MSG("GameTitle", 1);
@@ -147,9 +154,14 @@ void LinkUserMessages(void)
 	gmsgStatusValue = REG_USER_MSG("StatusValue", 3);
 
 	gmsgCustomWeapon = REG_USER_MSG("CustomWep", -1);
+	gmsgCustomWeaponEvents = REG_USER_MSG("CustomWepEv", -1);
 	gmsgSoundIdx = REG_USER_MSG("SoundIdx", -1);
 	gmsgNextMap = REG_USER_MSG("NextMap", -1);
 	gmsgTimeLeft = REG_USER_MSG("TimeLeft", 4);
 	gmsgFog = REG_USER_MSG("Fog", 8);
 	gmsgToxicCloud = REG_USER_MSG("ToxicCloud", 4);
+	gmsgPmodelAnim = REG_USER_MSG("PmodelAnim", 2);
+	gmsgWeaponBits = REG_USER_MSG("WeaponBits", 8);
+	gmsgTagInfo = REG_USER_MSG("TagInfo", 3);
+	gmsgPlayerPos = REG_USER_MSG("PlayerPos", -1);
 }

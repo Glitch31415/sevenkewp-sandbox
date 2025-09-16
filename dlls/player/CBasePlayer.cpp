@@ -856,7 +856,10 @@ void CBasePlayer::PackDeadPlayerItems( void )
 
 			if (iAmmoRules == GR_PLR_DROP_AMMO_ACTIVE) {
 				SET_MODEL(pWeaponBox->edict(), rgpPackWeapons[iPW]->GetModelW());
-				pWeaponBox->pev->body = rgpPackWeapons[iPW]->MergedModelBody() != -1 ? rgpPackWeapons[iPW]->MergedModelBody() : 0;
+				int mergeBody = rgpPackWeapons[iPW]->CanAkimbo() ?
+					rgpPackWeapons[iPW]->MergedModelBodyAkimbo() :
+					rgpPackWeapons[iPW]->MergedModelBody();
+				pWeaponBox->pev->body = mergeBody != -1 ? mergeBody : 0;
 				pWeaponBox->pev->sequence = rgpPackWeapons[iPW]->pev->sequence;
 
 				if (!strcmp(STRING(rgpPackWeapons[iPW]->pev->classname), "weapon_tripmine")) {
@@ -881,7 +884,7 @@ void CBasePlayer::PackDeadPlayerItems( void )
 void CBasePlayer::HideAllItems(bool hideSuit) {
 	pev->viewmodel = 0;
 	pev->weaponmodel = 0;
-	pev->weapons = hideSuit ? 0 : (1 << WEAPON_SUIT);
+	m_weaponBits = hideSuit ? 0 : (1ULL << WEAPON_SUIT);
 
 	UpdateClientData();
 
@@ -928,11 +931,13 @@ void CBasePlayer::RemoveAllItems( BOOL removeSuit, BOOL removeItemsOnly)
 	}
 	m_pActiveItem = NULL;
 
-	for (int i = 0; i < MAX_AMMO_SLOTS; i++)
-		m_rgAmmo[i] = 0;
+	for (int k = 0; k < MAX_AMMO_SLOTS; k++)
+		m_rgAmmo[k] = 0;
 
 	if (!removeItemsOnly)
 		HideAllItems(removeSuit);
+
+	ApplyEffects();
 }
 
 /*
@@ -1063,9 +1068,25 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 	}
 
 	speed = pev->velocity.Length2D();
-	bool upperBodyActing = (m_Activity == ACT_RANGE_ATTACK1 || m_Activity == ACT_RELOAD
-		|| m_Activity == ACT_USE || m_Activity == ACT_ARM || m_Activity == ACT_DISARM
-		|| m_Activity == ACT_THREAT_DISPLAY);
+
+	bool upperBodyActing = false;
+
+	switch (m_Activity) {
+	case ACT_RANGE_ATTACK1:
+	case ACT_SPECIAL_ATTACK1:
+	case ACT_SPECIAL_ATTACK2:
+	case ACT_RELOAD:
+	case ACT_SIGNAL1:
+	case ACT_SIGNAL2:
+	case ACT_USE:
+	case ACT_ARM:
+	case ACT_DISARM:
+	case ACT_THREAT_DISPLAY:
+		upperBodyActing = true;
+		break;
+	default:
+		break;
+	}
 
 	if (pev->flags & FL_FROZEN)
 	{
@@ -1089,7 +1110,11 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 		break;
 
 	case PLAYER_RELOAD:
+	case PLAYER_RELOAD2:
+	case PLAYER_RELOAD3:
 	case PLAYER_ATTACK1:
+	case PLAYER_ATTACK2:
+	case PLAYER_ATTACK3:
 	case PLAYER_USE:
 	case PLAYER_DROP_ITEM:
 	case PLAYER_DEPLOY_WEAPON:
@@ -1103,8 +1128,20 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 			if (playerAnim == PLAYER_RELOAD) {
 				m_IdealActivity = ACT_RELOAD;
 			}
+			else if (playerAnim == PLAYER_RELOAD2) {
+				m_IdealActivity = ACT_SIGNAL1;
+			}
+			else if (playerAnim == PLAYER_RELOAD3) {
+				m_IdealActivity = ACT_SIGNAL2;
+			}
 			else if (playerAnim == PLAYER_ATTACK1) {
 				m_IdealActivity = ACT_RANGE_ATTACK1;
+			}
+			else if (playerAnim == PLAYER_ATTACK2) {
+				m_IdealActivity = ACT_SPECIAL_ATTACK1;
+			}
+			else if (playerAnim == PLAYER_ATTACK3) {
+				m_IdealActivity = ACT_SPECIAL_ATTACK2;
 			}
 			else if (playerAnim == PLAYER_DROP_ITEM) {
 				m_IdealActivity = ACT_DISARM;
@@ -1193,6 +1230,8 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 		return;
 	}
 	case ACT_RANGE_ATTACK1:
+	case ACT_SPECIAL_ATTACK1:
+	case ACT_SPECIAL_ATTACK2:
 	{
 		int minAttackFrame = hasNewAnims ? 58 : 220;
 		if ((m_Activity == ACT_HOP || m_Activity == ACT_LEAP) && pev->frame < minAttackFrame) {
@@ -1209,6 +1248,18 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 
 		if (hasNewAnims && !strcmp(m_szAnimExtention, "shotgun")) {
 			strcat_safe(szAnim, "2", 64); // the second anim includes cocking
+		}
+
+		if (hasNewAnims && !strcmp(m_szAnimExtention, "uzis")) {
+			if (m_IdealActivity == ACT_RANGE_ATTACK1) {
+				strcat_safe(szAnim, "_both", 64);
+			}
+			else if (m_IdealActivity == ACT_SPECIAL_ATTACK1) {
+				strcat_safe(szAnim, "_left", 64);
+			}
+			else if (m_IdealActivity == ACT_SPECIAL_ATTACK2) {
+				strcat_safe(szAnim, "_right", 64);
+			}
 		}
 
 
@@ -1318,6 +1369,8 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 	case ACT_DISARM:
 	case ACT_ARM:
 	case ACT_RELOAD:
+	case ACT_SIGNAL1:
+	case ACT_SIGNAL2:
 	case ACT_THREAT_DISPLAY:
 	{
 		if ((m_Activity == ACT_HOP || m_Activity == ACT_LEAP) && pev->frame < 200) {
@@ -1356,10 +1409,17 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim, float duration)
 			seqName = ducking ? "crouch_aim_squeak" : "ref_aim_squeak";
 
 			if (hasNewAnims) {
-				duration = 0; // this hacky way to add new anims is not needed for SC models where each gun has its own anim.
+				duration = 0; // the hacky way to add new anims is not needed for SC models where each gun has its own anim.
 				strcpy_safe(szAnim, ducking ? "crouch_reload_" : "ref_reload_", 64);
 				strcat_safe(szAnim, m_szAnimExtention, 64);
 				seqName = szAnim;
+
+				if (!strcmp(m_szAnimExtention, "uzis")) {
+					if (m_IdealActivity == ACT_SIGNAL1)
+						strcat_safe(szAnim, "_left", 64);
+					else if (m_IdealActivity == ACT_SIGNAL2)
+						strcat_safe(szAnim, "_right", 64);
+				}
 			}
 		}
 
@@ -1525,7 +1585,7 @@ void CBasePlayer::TabulateWeapons(void) {
 			CBasePlayerItem* pPlayerItem = ent ? ent->GetWeaponPtr() : NULL;
 
 			while (pPlayerItem) {
-				pev->weapons |= g_weaponSlotMasks[pPlayerItem->m_iId];
+				m_weaponBits |= g_weaponSlotMasks[pPlayerItem->m_iId];
 
 				CBaseEntity* next = pPlayerItem->m_pNext.GetEntity();
 				pPlayerItem = next ? next->GetWeaponPtr() : NULL;
@@ -1534,7 +1594,7 @@ void CBasePlayer::TabulateWeapons(void) {
 	}
 
 	if (!g_noSuit)
-		pev->weapons |= (1 << WEAPON_SUIT);
+		m_weaponBits |= (1ULL << WEAPON_SUIT);
 }
 
 /*
@@ -2004,7 +2064,7 @@ void CBasePlayer::StartObserver( Vector vecPosition, Vector vecViewAngle )
 	m_isObserver = true;
 	m_lastObserverSwitch = gpGlobals->time;
 	pev->viewmodel = 0; // prevent floating view models
-	pev->weapons = 0; // no weapon switching
+	m_weaponBits = 0; // no weapon switching
 
 	// Clear out the status bar
 	m_fInitHUD = TRUE;
@@ -2730,9 +2790,14 @@ void CBasePlayer::PreThink(void)
 	else
 		m_iHideHUD |= HIDEHUD_FLASHLIGHT;
 
-	// tell client they have a suit if they don't but have weapons
-	// otherwise they can't switch weapons
-	if (pev->weapons && !(pev->weapons & (1 << WEAPON_SUIT))) {
+	if (HasSuit()) {
+		// set every frame for lossy connections that don't initialize on join properly
+		m_iHideHUD &= ~HIDEHUD_HEALTH;
+		m_fakeSuit = false;
+	}
+	else if (m_weaponBits) {
+		// Tell client they have a suit if they don't but DO have weapons.
+		// Otherwise they can't switch weapons
 		m_fakeSuit = true;
 		m_iHideHUD = HIDEHUD_FLASHLIGHT | HIDEHUD_HEALTH;
 	}
@@ -2745,7 +2810,7 @@ void CBasePlayer::PreThink(void)
 	CheckSuitUpdate();
 
 	// only show weapon hud if player has a weapon besides the suit
-	if (pev->weapons & ~(1 << WEAPON_SUIT) && !m_weaponsDisabled) {
+	if ((m_weaponBits & ~(1ULL << WEAPON_SUIT)) && !m_weaponsDisabled) {
 		m_iHideHUD &= ~HIDEHUD_WEAPONS;
 	}
 	else {
@@ -3191,7 +3256,7 @@ void CBasePlayer::CheckSuitUpdate()
 	int isearch = m_iSuitPlayNext;
 	
 	// Ignore suit updates if no suit
-	if ( !(pev->weapons & (1<<WEAPON_SUIT)) )
+	if ( !HasSuit() )
 		return;
 
 	// if in range of radiation source, ping geiger counter
@@ -3271,7 +3336,7 @@ void CBasePlayer::SetSuitUpdate(const char *name, int fgroup, int iNoRepeatTime)
 	}
 	
 	// Ignore suit updates if no suit
-	if ( !(pev->weapons & (1<<WEAPON_SUIT)) )
+	if ( !HasSuit() )
 		return;
 	
 	// get sentence or group number
@@ -3327,17 +3392,17 @@ void CBasePlayer::SetSuitUpdate(const char *name, int fgroup, int iNoRepeatTime)
 
 	bool replacedExisting = false;
 	if (IsBatteryUpdateSuitSentence(name)) {
-		for (int i = 0; i < CSUITPLAYLIST; i++) {
-			if (!m_rgSuitPlayList[i]) {
+		for (int k = 0; k < CSUITPLAYLIST; k++) {
+			if (!m_rgSuitPlayList[k]) {
 				continue;
 			}
 
 			char sentence[CBSENTENCENAME_MAX + 1];
 			strcpy_safe(sentence, "!", CBSENTENCENAME_MAX + 1);
-			strcat_safe(sentence, gszallsentencenames[m_rgSuitPlayList[i]], CBSENTENCENAME_MAX + 1);
+			strcat_safe(sentence, gszallsentencenames[m_rgSuitPlayList[k]], CBSENTENCENAME_MAX + 1);
 
 			if (IsBatteryUpdateSuitSentence(sentence)) {
-				m_rgSuitPlayList[i] = isentence;
+				m_rgSuitPlayList[k] = isentence;
 				replacedExisting = true;
 				break;
 			}
@@ -3506,6 +3571,9 @@ void CBasePlayer::PostThink()
 	if ( g_fGameOver )
 		goto pt_end;         // intermission or finale
 
+	UpdateTag();
+	UpdateTagPos();
+
 	if (!IsAlive())
 		goto pt_end;
 
@@ -3523,10 +3591,10 @@ void CBasePlayer::PostThink()
 		}
 	}
 
+	ImpulseCommands();
+
 // do weapon stuff
 	ItemPostFrame( );
-
-	ImpulseCommands();
 
 // check to see if player landed hard enough to make a sound
 // falling farther than half of the maximum safe distance, but not as far a max safe distance will
@@ -3627,6 +3695,8 @@ void CBasePlayer::PostThink()
 
 	DebugThink();
 
+	SyncWeaponBits();
+
 pt_end:
 #if defined( CLIENT_WEAPONS )
 		// Decay timers on weapons
@@ -3645,6 +3715,7 @@ pt_end:
 				{
 					gun->m_flNextPrimaryAttack		= V_max( gun->m_flNextPrimaryAttack - gpGlobals->frametime, -1.0f );
 					gun->m_flNextSecondaryAttack	= V_max( gun->m_flNextSecondaryAttack - gpGlobals->frametime, -0.001f );
+					gun->m_flNextTertiaryAttack		= V_max( gun->m_flNextTertiaryAttack - gpGlobals->frametime, -0.001f );
 
 					if ( gun->m_flTimeWeaponIdle != 1000 )
 					{
@@ -3755,6 +3826,7 @@ void CBasePlayer::Spawn( void )
 
 	g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
 	g_engfuncs.pfnSetPhysicsKeyValue( edict(), "hl", "1" );
+	SetJumpPower(0);
 
 	pev->fov = m_iFOV				= 0;// init field of view.
 	m_iClientFOV		= -1; // make sure fov reset is sent
@@ -3778,6 +3850,8 @@ void CBasePlayer::Spawn( void )
 // dont let uninitialized value here hurt the player
 	m_flFallVelocity = 0;
 	m_deathMessageSent = false;
+
+	SetThirdPersonWeaponAnim(0);
 
 	g_pGameRules->SetDefaultPlayerTeam( this );
 	edict_t* pentSpawnSpot = g_pGameRules->GetPlayerSpawnSpot( this );
@@ -4239,6 +4313,12 @@ void CBasePlayer::SelectItem(const char *pstr)
 		return;
 	}
 
+	CWeaponCustom* wc = m_pActiveItem ? m_pActiveItem->MyWeaponCustomPtr() : NULL;
+	if (wc && wc->IsExclusiveHold()) {
+		UTIL_ClientPrint(this, print_center, "Drop this weapon to select another.");
+		return;
+	}
+
 	CBasePlayerItem *pItem = NULL;
 
 	for (int i = 0; i < MAX_ITEM_TYPES; i++)
@@ -4295,6 +4375,12 @@ void CBasePlayer::SelectLastItem(void)
 	}
 
 	if (m_weaponsDisabled) {
+		return;
+	}
+
+	CWeaponCustom* wc = m_pActiveItem ? m_pActiveItem->MyWeaponCustomPtr() : NULL;
+	if (wc && wc->IsExclusiveHold()) {
+		UTIL_ClientPrint(this, print_center, "Drop this weapon to select another.");
 		return;
 	}
 
@@ -4398,7 +4484,7 @@ void CBasePlayer :: FlashlightTurnOn( void )
 		return;
 	}
 
-	if ( (pev->weapons & (1<<WEAPON_SUIT)) )
+	if (HasSuit())
 	{
 		m_flashlightEnabled = true;
 
@@ -4480,6 +4566,8 @@ void CBasePlayer::ImpulseCommands( )
 
 	// Handle use events
 	PlayerUse();
+
+	bool tertiaryPressed = false;
 		
 	int iImpulse = (int)pev->impulse;
 	switch (iImpulse)
@@ -4540,11 +4628,21 @@ void CBasePlayer::ImpulseCommands( )
 		}
 
 		break;
+	case 222:
+		// tertiary attack
+		// An impulse is used because buttons can only have 16 bits and all are used
+		tertiaryPressed = true;
+		break;
 
 	default:
 		// check all of the cheat impulse commands now
 		CheatImpulseCommands( iImpulse );
 		break;
+	}
+
+	if (tertiaryPressed) {
+		pev->button |= IN_ATTACK3;
+		m_afButtonPressed |= IN_ATTACK3;
 	}
 	
 	pev->impulse = 0;
@@ -4614,6 +4712,8 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		if (IsSevenKewpClient()) {
 			GiveNamedItem("weapon_m249");
 			GiveNamedItem("weapon_sniperrifle");
+			GiveNamedItem("weapon_uziakimbo");
+			GiveNamedItem("weapon_eagle");
 			GiveNamedItem("ammo_556");
 			GiveNamedItem("ammo_762");
 		}
@@ -4837,7 +4937,7 @@ int CBasePlayer::RemovePlayerItem( CBasePlayerItem *pItem )
 	else if ( m_pLastItem.GetEntity() == pItem )
 		m_pLastItem = NULL;
 
-	pev->weapons &= ~(1 << pItem->m_iId); // take item off hud
+	m_weaponBits &= ~(1ULL << pItem->m_iId); // take item off hud
 
 	CBaseEntity* pPrevEnt = m_rgpPlayerItems[pItem->iItemSlot()].GetEntity();
 	CBasePlayerItem *pPrev = pPrevEnt ? pPrevEnt->GetWeaponPtr() : NULL;
@@ -4851,7 +4951,7 @@ int CBasePlayer::RemovePlayerItem( CBasePlayerItem *pItem )
 	{
 		while (pPrev && pPrev->m_pNext.GetEntity() != pItem)
 		{
-			CBaseEntity* pPrevEnt = pPrev->m_pNext.GetEntity();
+			pPrevEnt = pPrev->m_pNext.GetEntity();
 			pPrev = pPrevEnt ? pPrevEnt->GetWeaponPtr() : NULL;
 		}
 		if (pPrev)
@@ -5048,6 +5148,9 @@ reflecting all of the HUD state info.
 */
 void CBasePlayer :: UpdateClientData( void )
 {
+	if (!m_clientCheckFinished) 
+		return; // need to know client type before sending client-specific HUD messages
+
 	if (m_fInitHUD)
 	{
 		m_fInitHUD = FALSE;
@@ -5089,7 +5192,7 @@ void CBasePlayer :: UpdateClientData( void )
 			WRITE_STRING("item_longjump");
 			MESSAGE_END();
 
-			if (pev->weapons & (1 << WEAPON_SUIT))
+			if (HasSuit())
 				EMIT_SOUND_SUIT(edict(), "!HEV_A1");
 		}
 	}
@@ -5233,24 +5336,9 @@ void CBasePlayer :: UpdateClientData( void )
 	if (!m_fKnownItem)
 	{
 		m_fKnownItem = TRUE;
-
-	// WeaponInit Message
-	// byte  = # of weapons
-	//
-	// for each weapon:
-	// byte		name str length (not including null)
-	// bytes... name
-	// byte		Ammo Type
-	// byte		Ammo2 Type
-	// byte		bucket
-	// byte		bucket pos
-	// byte		flags	
-	// ????		Icons
 		
 		// Send ALL the weapon info now
-		int i;
-
-		for (i = 0; i < MAX_WEAPONS; i++)
+		for (int i = 0; i < MAX_WEAPONS; i++)
 		{
 			ItemInfo* II = &CBasePlayerItem::ItemInfoArray[i];
 
@@ -5264,6 +5352,9 @@ void CBasePlayer :: UpdateClientData( void )
 			if ( !II->iId )
 				continue;
 
+			if (!IsSevenKewpClient() && II->iId >= 32)
+				continue; // crash on AG if sending too high of an ID
+
 			MESSAGE_BEGIN(MSG_ONE, gmsgWeaponList, NULL, pev);
 			WRITE_STRING(II->pszName);			// string	weapon name
 			WRITE_BYTE(GetAmmoIndex(II->pszAmmo1));	// byte		Ammo Type
@@ -5275,6 +5366,17 @@ void CBasePlayer :: UpdateClientData( void )
 			WRITE_BYTE(i);							// byte		id (bit index into pev->weapons)
 			WRITE_BYTE(II->iFlags);					// byte		Flags
 			MESSAGE_END();
+
+			if (IsSevenKewpClient()) {
+				MESSAGE_BEGIN(MSG_ONE, gmsgWeaponListX, NULL, pev);
+				WRITE_BYTE(i);
+				WRITE_BYTE(II->iFlagsEx);
+				WRITE_SHORT(V_min(65535, II->fAccuracyDeg * 100));
+				WRITE_SHORT(V_min(65535, II->fAccuracyDeg2 * 100));
+				WRITE_SHORT(V_min(65535, II->fAccuracyDegY * 100));
+				WRITE_SHORT(V_min(65535, II->fAccuracyDegY2 * 100));
+				MESSAGE_END();
+			}
 		}
 	}
 
@@ -5837,16 +5939,35 @@ void CBasePlayer::DropPlayerItem ( const char *pszItemName )
 				return;
 			}
 
-			if ( !g_pGameRules->GetNextBestWeapon( this, pWeapon ) && !pWeapon->CanHolster())
+			if (!pWeapon->CanHolster())
 				return; // can't drop the item they asked for, may be something we can't holster
 
 			m_lastDropTime = gpGlobals->time;
-
 			UTIL_MakeVectors ( pev->v_angle ); 
-
-			pev->weapons &= ~(1<<pWeapon->m_iId);// take item off hud
-
 			SetAnimation(PLAYER_DROP_ITEM);
+			SetJumpPower(0);
+
+			CWeaponCustom* cwep = pWeapon->MyWeaponCustomPtr();
+			if (cwep && cwep->CanAkimbo()) {
+				// only drop the left weapon
+				Vector angles(0, pev->angles.y, 0);
+				CBaseEntity* pOneWep = CBaseEntity::Create(STRING(pWeapon->pev->classname),
+					pev->origin + gpGlobals->v_forward * 10, angles, true, edict());
+				pOneWep->pev->velocity = gpGlobals->v_forward * 400;
+				CWeaponCustom* cOneWep = pOneWep->MyWeaponCustomPtr();
+				cOneWep->m_iClip = cwep->GetAkimboClip();
+				cOneWep->m_iDefaultAmmo = 0;
+				cwep->SetAkimboClip(0);
+				cwep->SetCanAkimbo(false);
+				cwep->SetAkimbo(false);
+				pWeapon = cOneWep;
+			}
+			else {
+				m_weaponBits &= ~(1ULL << pWeapon->m_iId);// take item off hud
+				g_pGameRules->GetNextBestWeapon(this, pWeapon);
+			}
+
+			pWeapon->m_isDroppedWeapon = true;
 
 			if (!strcmp(STRING(pWeapon->pev->classname), "weapon_shockrifle")) {
 				// fixme: logic duplicated in kill code
@@ -5876,7 +5997,8 @@ void CBasePlayer::DropPlayerItem ( const char *pszItemName )
 			CBasePlayerWeapon* wep = pWeapon->GetWeaponPtr();
 			if (wep) {
 				SET_MODEL(pWeaponBox->edict(), wep->GetModelW());
-				pWeaponBox->pev->body = wep->MergedModelBody() != -1 ? wep->MergedModelBody() : 0;
+				int mergeBody = wep->CanAkimbo() ? wep->MergedModelBodyAkimbo() : wep->MergedModelBody();
+				pWeaponBox->pev->body = mergeBody ? mergeBody : 0;
 				pWeaponBox->pev->sequence = wep->pev->sequence;
 
 				if (!strcmp(STRING(pWeapon->pev->classname), "weapon_tripmine")) {
@@ -5892,6 +6014,10 @@ void CBasePlayer::DropPlayerItem ( const char *pszItemName )
 
 			pWeaponBox->SetThink(&CWeaponBox::Kill);
 			pWeaponBox->pev->nextthink = gpGlobals->time + item_despawn_time.value;
+
+			if (cwep && (cwep->params.flags & FL_WC_WEP_USE_ONLY)) {
+				pWeaponBox->SetTouch(&CBaseEntity::ItemBounceTouch);
+			}
 
 			// drop half of the ammo for this weapon.
 			int	iAmmoIndex;
@@ -5917,6 +6043,7 @@ void CBasePlayer::DropPlayerItem ( const char *pszItemName )
 
 			}
 
+			ApplyEffects();
 			CleanupWeaponboxes();
 
 			return;// we're done, so stop searching with the FOR loop.
@@ -6032,7 +6159,7 @@ BOOL CBasePlayer::HasPlayerItem( CBasePlayerItem *pCheckItem )
 			return TRUE;
 		}
 
-		CBaseEntity* ent = pItem->m_pNext.GetEntity();
+		ent = pItem->m_pNext.GetEntity();
 		pItem = ent ? ent->GetWeaponPtr() : NULL;
 	}
 
@@ -6081,13 +6208,13 @@ BOOL CBasePlayer :: SwitchWeapon( CBasePlayerItem *pWeapon )
 	if (m_weaponsDisabled) {
 		return FALSE;
 	}
-	
-	ResetAutoaim( );
-	
+
 	if (m_pActiveItem)
 	{
 		((CBasePlayerItem*)m_pActiveItem.GetEntity())->Holster();
 	}
+
+	ResetAutoaim();
 
 	m_pActiveItem = pWeapon;
 	pWeapon->Deploy( );
@@ -6440,7 +6567,6 @@ void CBasePlayer::UpdateMonsterInfo() {
 */
 
 void CBasePlayer::UpdateScore() {
-	int idleTime = g_engfuncs.pfnTime() - m_lastUserInput;
 	bool statusChanged = GetScoreboardStatus() != m_lastScoreStatus;
 	bool scoreChanged = m_lastScore != (int)pev->frags;
 
@@ -6485,6 +6611,130 @@ void CBasePlayer::UpdateScore() {
 	else {
 		UpdateTeamInfo();
 	}
+}
+
+void CBasePlayer::UpdateTag(CBasePlayer* dst) {
+	int hpPercent = IsAlive() ? ((pev->health / pev->max_health) * 100 + 0.5f) : 0;
+	uint8_t hp = V_max(0, hpPercent);
+	uint8_t observer = ((pev->iuser2-1) << 3) | (pev->iuser1 & 0x7);
+	bool statusChanged = hp != m_lastTagHp || observer != m_lastTagObserver;
+
+	if (!dst) {
+		if ((!statusChanged) || g_engfuncs.pfnTime() - m_lastTagUpdate < 0.05f) {
+			return;
+		}
+	}
+
+	m_lastTagUpdate = g_engfuncs.pfnTime();
+	m_lastTagHp = hp;
+	m_lastTagObserver = observer;
+
+	for (int i = 1; i < gpGlobals->maxClients; i++) {
+		CBasePlayer* targetPlr = UTIL_PlayerByIndex(i);
+
+		if (!targetPlr || !targetPlr->IsSevenKewpClient())
+			continue;
+
+		if (dst && dst != targetPlr)
+			continue;
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgTagInfo, 0, targetPlr->edict());
+		WRITE_BYTE(entindex());
+		WRITE_BYTE(hp);
+		WRITE_BYTE(observer);
+		MESSAGE_END();
+	}	
+}
+
+void CBasePlayer::UpdateTagPos() {
+	if (!IsSevenKewpClient())
+		return;
+
+	if (g_engfuncs.pfnTime() - m_lastTagPosUpdate < 0.1f) {
+		return;
+	}
+	m_lastTagPosUpdate = g_engfuncs.pfnTime();
+
+	char* info = g_engfuncs.pfnGetInfoKeyBuffer(edict());
+	char* nametags = g_engfuncs.pfnInfoKeyValue(info, "cl_nametags");
+	if (!nametags || atoi(nametags) < 2) {
+		return;
+	}
+
+	static uint8_t tagData[32*8];
+	mstream dat((char*)tagData, 32 * 8);
+
+	bool anyUpdates = false;
+
+	for (int i = 1; i < gpGlobals->maxClients; i++) {
+		CBasePlayer* plr = UTIL_PlayerByIndex(i);
+
+		if (!plr || plr == this || plr->InPVS(edict())) {
+			dat.writeBit(0);
+			continue;
+		}
+			
+		int16_t x = clamp((int)(plr->pev->origin.x / 8), INT16_MIN, INT16_MAX);
+		int16_t y = clamp((int)(plr->pev->origin.y / 8), INT16_MIN, INT16_MAX);
+		int16_t z = clamp((int)(plr->pev->origin.z / 8), INT16_MIN, INT16_MAX);
+
+		int k = i - 1;
+		if (m_lastTagPos[k][0] == x && m_lastTagPos[k][1] == y && m_lastTagPos[k][2] == z) {
+			dat.writeBit(0);
+			continue;
+		}
+
+		if (dat.tell() >= 180) {
+			dat.writeBit(0);
+			ALERT(at_error, "Exceeded max PlayerPos bytes\n");
+			continue;
+		}
+
+		dat.writeBit(1);
+
+		if (x != m_lastTagPos[k][0]) {
+			dat.writeBit(1);
+			dat.writeBits(x, 13);
+		}
+		else {
+			dat.writeBit(0);
+		}
+
+		if (y != m_lastTagPos[k][1]) {
+			dat.writeBit(1);
+			dat.writeBits(y, 13);
+		}
+		else {
+			dat.writeBit(0);
+		}
+
+		if (z != m_lastTagPos[k][2]) {
+			dat.writeBit(1);
+			dat.writeBits(z, 13);
+		}
+		else {
+			dat.writeBit(0);
+		}
+
+		m_lastTagPos[k][0] = x;
+		m_lastTagPos[k][1] = y;
+		m_lastTagPos[k][2] = z;
+		
+		anyUpdates = true;
+	}
+
+	dat.endBitWriting();
+	int sz = dat.tell();
+
+	if (!anyUpdates)
+		return;
+
+	MESSAGE_BEGIN(MSG_ONE_UNRELIABLE, gmsgPlayerPos, 0, edict());
+	WRITE_BYTE(sz);
+	for (int i = 0; i < sz; i++) {
+		WRITE_BYTE(tagData[i]);
+	}
+	MESSAGE_END();
 }
 
 uint16_t CBasePlayer::GetScoreboardStatus() {
@@ -6564,8 +6814,6 @@ void CBasePlayer::QueryClientType() {
 }
 
 void CBasePlayer::HandleClientCvarResponse(int requestID, const char* pszCvarName, const char* pszValue) {
-	bool hasCvar = strstr(pszValue, "Bad CVAR request") == NULL;
-	
 	if (requestID >= 0 && requestID < 6) {
 		m_queryResults[requestID] = ALLOC_STRING(pszValue);
 
@@ -6633,10 +6881,33 @@ void CBasePlayer::QueryClientTypeFinished() {
 				}
 			}
 		}
+
+		// get health of other players
+		for (int i = 1; i < gpGlobals->maxClients; i++) {
+			CBasePlayer* otherPlr = UTIL_PlayerByIndex(i);
+
+			if (otherPlr)
+				otherPlr->UpdateTag(this);
+		}
 	}
+
+	// reset update timers
+	m_lastTagHp = 0;
+	m_lastTagUpdate = 0;
+	m_lastTagPosUpdate = 0;
+
+	for (int i = 0; i < 32; i++) {
+		memset(m_lastTagPos[i], 0, sizeof(m_lastTagPos[i]));
+	}
+
+	// can init the weapon hud now without crashing certain clients
+	m_clientCheckFinished = true;
 
 	// equip the player now that we know which weapons they can use
 	g_pGameRules->PlayerSpawn(this);
+
+	// recalculate HUD visibility
+	m_iClientHideHUD = -1;
 }
 
 client_info_t CBasePlayer::GetClientInfo() {
@@ -6679,7 +6950,7 @@ void CBasePlayer::SendLegacyClientWarning() {
 }
 
 void CBasePlayer::SendSevenKewpClientNotice() {
-	std::string clientReq = UTIL_SevenKewpClientString(MIN_SEVENKEWP_VERSION);
+	std::string clientReq = UTIL_SevenKewpClientString(SEVENKEWP_VERSION);
 	UTIL_ClientPrint(this, print_console, "\n-------------------------------------------------------------------------\n");
 	UTIL_ClientPrint(this, print_console, UTIL_VarArgs("This server requires the \"%s\" client to use certain weapons.\n", clientReq.c_str()));
 	UTIL_ClientPrint(this, print_console, "Download the latest SevenKewp client here:\n\n");
@@ -7122,7 +7393,7 @@ void CBasePlayer::LoadInventory() {
 }
 
 void CBasePlayer::ResolveWeaponSlotConflict(int wepId) {
-	int mask = g_weaponSlotMasks[wepId];
+	uint64_t mask = g_weaponSlotMasks[wepId];
 
 	if (count_bits_set(mask) <= 1) {
 		return; // impossible for there to be a conflict
@@ -7131,9 +7402,9 @@ void CBasePlayer::ResolveWeaponSlotConflict(int wepId) {
 	ItemInfo& II = CBasePlayerItem::ItemInfoArray[wepId];
 
 	for (int i = 0; i < MAX_WEAPONS; i++) {
-		int bit = (1 << i);
+		uint64_t bit = (1ULL << i);
 		if (mask & bit) {
-			if ((pev->weapons & bit) && i != wepId) {
+			if ((m_weaponBits & bit) && i != wepId) {
 				// player is already holding a weapon that fills this slot.
 				// Drop this held weapon because the player won't be able to choose which
 				// weapon they want from that slot.
@@ -7153,21 +7424,32 @@ void CBasePlayer::ResolveWeaponSlotConflict(int wepId) {
 			WRITE_BYTE(i);							// byte		id (bit index into pev->weapons)
 			WRITE_BYTE(II.iFlags);					// byte		Flags
 			MESSAGE_END();
+
+			if (IsSevenKewpClient()) {
+				MESSAGE_BEGIN(MSG_ONE, gmsgWeaponListX, NULL, pev);
+				WRITE_BYTE(i);
+				WRITE_BYTE(II.iFlagsEx);
+				WRITE_SHORT(V_min(65535, II.fAccuracyDeg * 100));
+				WRITE_SHORT(V_min(65535, II.fAccuracyDeg2 * 100));
+				WRITE_SHORT(V_min(65535, II.fAccuracyDegY * 100));
+				WRITE_SHORT(V_min(65535, II.fAccuracyDegY2 * 100));
+				MESSAGE_END();
+			}
 		}
 	}
 }
 
 int CBasePlayer::GetCurrentIdForConflictedSlot(int wepId) {
-	int mask = g_weaponSlotMasks[wepId];
+	uint64_t mask = g_weaponSlotMasks[wepId];
 
 	if (count_bits_set(mask) <= 1) {
 		return wepId; // impossible for there to be a conflict
 	}
 
 	for (int i = 0; i < MAX_WEAPONS; i++) {
-		int bit = (1 << i);
+		uint64_t bit = (1ULL << i);
 		if (mask & bit) {
-			if ((pev->weapons & bit) && i != wepId) {
+			if ((m_weaponBits & bit) && i != wepId) {
 				return i;
 			}
 		}
@@ -7455,5 +7737,58 @@ void CBasePlayer::DebugThink() {
 
 bool CBasePlayer::IsSevenKewpClient() {
 	//return true;
-	return m_sevenkewpVersion >= MIN_SEVENKEWP_VERSION;
+	return UTIL_AreSevenKewpVersionsCompatible(m_sevenkewpVersion, SEVENKEWP_VERSION);
+}
+
+void CBasePlayer::SetThirdPersonWeaponAnim(int sequence, float fps) {
+	for (int i = 1; i < gpGlobals->maxClients; i++) {
+		CBasePlayer* plr = UTIL_PlayerByIndex(i);
+		
+		if (!plr || !plr->IsSevenKewpClient())
+			continue;
+
+		MESSAGE_BEGIN(MSG_ONE, gmsgPmodelAnim, 0, plr->edict());
+		WRITE_BYTE(entindex() - 1);
+		WRITE_BYTE(sequence);
+		MESSAGE_END();
+	}
+}
+
+void CBasePlayer::SetJumpPower(int power) {
+	g_engfuncs.pfnSetPhysicsKeyValue(edict(), "jmp", UTIL_VarArgs("%d", power));
+}
+
+void CBasePlayer::SyncWeaponBits() {
+	// weapons field sent to HL clients
+	pev->weapons = m_weaponBits & 0xffffffff;
+	
+	if (m_weaponBits == m_lastWeaponBits || !IsSevenKewpClient()) {
+		return;
+	}
+
+	// TODO: slot conflict logic from UpdateClientData
+
+	uint64_t sentValue = m_weaponBits;
+
+	for (int i = 0; i < MAX_WEAPONS; i++) {
+		if (m_weaponBits & (1ULL << i)) {
+			// weapons that share slots occupy multiple bits so that the menu renders correctly
+			// (client may think the slot is empty if only one weapon is held from a shared slot)
+			sentValue |= g_weaponSlotMasks[i];
+		}
+	}
+
+	uint32_t high = sentValue >> 32;
+	uint32_t low = sentValue & 0xffffffff;
+
+	MESSAGE_BEGIN(MSG_ONE, gmsgWeaponBits, 0, edict());
+	WRITE_LONG(low);
+	WRITE_LONG(high);
+	MESSAGE_END();
+
+	m_lastWeaponBits = m_weaponBits;
+}
+
+bool CBasePlayer::HasSuit() {
+	return m_weaponBits & (1ULL << WEAPON_SUIT);
 }

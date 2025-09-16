@@ -135,8 +135,6 @@ StringMap g_itemNameRemap = {
 	{"weapon_9mmar", "weapon_9mmAR"},
 	{"weapon_mp5", "weapon_9mmAR"},
 	{"weapon_m16", "weapon_9mmAR"},
-	{"weapon_minigun", "weapon_9mmAR"},
-	{"weapon_eagle", "weapon_357"},
 	{"weapon_python", "weapon_357"},
 	{"weapon_glock", "weapon_9mmhandgun"},
 
@@ -148,6 +146,7 @@ StringMap g_itemNameRemap = {
 	{"ammo_egonclip", "ammo_gaussclip"},
 	{"ammo_mp5grenades", "ammo_ARgrenades"},
 	{"ammo_argrenades", "ammo_ARgrenades"},
+	{"ammo_762", "ammo_crossbow"},
 
 	// keyvalues that should be ignored
 	{"equipmode", "<keyvalue>"},
@@ -164,6 +163,8 @@ StringMap g_itemNameRemapHL = {
 	{"weapon_sniperrifle", "weapon_crossbow"},
 	{"weapon_uzi", "weapon_9mmAR"},
 	{"weapon_uziakimbo", "weapon_9mmAR"},
+	{"weapon_minigun", "weapon_9mmAR"},
+	{"weapon_eagle", "weapon_357"},
 };
 
 void AddPrecacheWeapon(std::string wepName) {

@@ -43,7 +43,9 @@ BOOL CanAttack(float attack_time, float curtime, BOOL isPredicted)
 	}
 	else
 	{
-		return (attack_time <= 0.0) ? TRUE : FALSE;
+		// https://github.com/ValveSoftware/halflife/issues/1621#issuecomment-760547895
+		//return (attack_time <= 0.0) ? TRUE : FALSE;
+		return ((static_cast<int>(std::floor(attack_time * 1000.0)) * 1000.0) <= 0.0) ? TRUE : FALSE;
 	}
 }
 
@@ -203,6 +205,12 @@ void CBasePlayerWeapon::ItemPostFrame(void)
 		m_pPlayer->TabulateAmmo();
 		PrimaryAttack();
 	}
+	else if ((m_pPlayer->pev->button & IN_ATTACK3) && CanAttack(m_flNextTertiaryAttack, gpGlobals->time, UseDecrement()))
+	{
+		m_pPlayer->TabulateAmmo();
+		TertiaryAttack();
+		m_pPlayer->pev->button &= ~IN_ATTACK3;
+	}
 	else if (m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload)
 	{
 		// reload when reload is pressed, or if no buttons are down and weapon is empty.
@@ -225,8 +233,10 @@ void CBasePlayerWeapon::ItemPostFrame(void)
 		}
 		else
 		{
+			bool emptyClip = IsAkimbo() ? (!m_iClip && !GetAkimboClip()) : !m_iClip;
+
 			// weapon is useable. Reload if empty and weapon has waited as long as it has to after firing
-			if (m_iClip == 0 && !(iFlags() & ITEM_FLAG_NOAUTORELOAD) && m_flNextPrimaryAttack < (UseDecrement() ? 0.0 : gpGlobals->time))
+			if (emptyClip && !(iFlags() & ITEM_FLAG_NOAUTORELOAD) && m_flNextPrimaryAttack < (UseDecrement() ? 0.0 : gpGlobals->time))
 			{
 				Reload();
 				return;
@@ -263,7 +273,7 @@ int CBasePlayerWeapon::AddToPlayer(CBasePlayer* pPlayer)
 {
 	int bResult = CBasePlayerItem::AddToPlayer(pPlayer);
 
-	pPlayer->pev->weapons |= (1 << m_iId);
+	pPlayer->m_weaponBits |= (1ULL << m_iId);
 
 	if (!m_iPrimaryAmmoType)
 	{
@@ -319,7 +329,7 @@ int CBasePlayerWeapon::UpdateClientData(CBasePlayer* pPlayer)
 		bSend = TRUE;
 	}
 
-	if (bSend)
+	if (bSend && pPlayer->m_clientCheckFinished)
 	{
 		if (m_iClip > 127 && pPlayer->IsSevenKewpClient()) {
 			uint16_t ammoVal = V_max(0, m_iClip);
@@ -387,6 +397,14 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int skiplocal, int body)
 	WRITE_BYTE(pev->body);					// weaponmodel bodygroup.
 	MESSAGE_END();
 
+	SendWeaponAnimSpec(iAnim);
+}
+
+void CBasePlayerWeapon::SendWeaponAnimSpec(int iAnim) {
+	CBasePlayer* m_pPlayer = GetPlayer();
+	if (!m_pPlayer)
+		return;
+
 	// play animation for spectators
 	for (int i = 1; i < gpGlobals->maxClients; i++) {
 		CBasePlayer* spec = (CBasePlayer*)UTIL_PlayerByIndex(i);
@@ -399,6 +417,7 @@ void CBasePlayerWeapon::SendWeaponAnim(int iAnim, int skiplocal, int body)
 		}
 	}
 }
+
 
 BOOL CBasePlayerWeapon::AddPrimaryAmmo(int iCount, char* szName, int iMaxClip, int iMaxCarry)
 {
@@ -543,6 +562,9 @@ BOOL CBasePlayerWeapon::DefaultDeploy(const char* szViewModel, const char* szWea
 	m_flLastFireTime = 0.0;
 
 	m_pPlayer->SetAnimation(PLAYER_DEPLOY_WEAPON);
+	
+	m_pPlayer->ApplyEffects();
+	m_pPlayer->SetJumpPower(0);
 
 	return TRUE;
 }

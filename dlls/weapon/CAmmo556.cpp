@@ -9,16 +9,13 @@ class CAmmo556 : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		//SET_MODEL_MERGED(ENT(pev), "models/w_saw_clip.mdl", MERGE_MDL_W_CHAINAMMO);
-		SET_MODEL(ENT(pev), "models/w_saw_clip.mdl");
+		SET_MODEL_MERGED(ENT(pev), "models/w_saw_clip.mdl", MERGE_MDL_W_SAW_CLIP);
 		
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		//PRECACHE_REPLACEMENT_MODEL("models/w_saw_clip.mdl");
-		PRECACHE_MODEL("models/w_saw_clip.mdl");
-		
+		PRECACHE_REPLACEMENT_MODEL("models/w_saw_clip.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
@@ -32,7 +29,7 @@ class CAmmo556 : public CBasePlayerAmmo
 			if (!plr->IsSevenKewpClient())
 				limit = V_min(limit, 200); // HL clients can't display ammo counts above 255
 
-			bResult = (pOther->GiveAmmo(AMMO_556_GIVE, "556", limit) != -1);
+			bResult = (pOther->GiveAmmo(AMMO_556_BOX_GIVE, "556", limit) != -1);
 		}
 		else {
 			// HL players don't have any weapons that use 556 ammo in this map, give them 9mm instead

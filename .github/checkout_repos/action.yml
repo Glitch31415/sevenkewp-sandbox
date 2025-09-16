@@ -1,8 +1,39 @@
+# checking out submodules individually because I want to skip the huge sevenkewp data submodule
+
 name: Checkout Repositories
 description: A composite action to checkout all required repositories.
 runs:
   using: "composite"
   steps:
+    - name: Checkout mbedtls
+      uses: actions/checkout@v4
+      with:
+        repository: Mbed-TLS/mbedtls
+        path: ./external/mbedtls
+        ref: v3.6.4
+
+    - name: Checkout mbedtls/framework
+      uses: actions/checkout@v4
+      with:
+        repository: Mbed-TLS/mbedtls-framework
+        path: ./external/mbedtls/framework
+        ref: 2a3e2c5ea053c14b745dbdf41f609b1edc6a72fa
+
+    - name: Checkout curl
+      uses: actions/checkout@v4
+      with:
+        repository: curl/curl
+        path: ./external/curl
+        ref: curl-8_15_0
+        fetch-depth: 1 
+
+    - name: Checkout rapidjson
+      uses: actions/checkout@v4
+      with:
+        repository: Tencent/rapidjson
+        path: ./external/rapidjson
+        ref: 24b5e7a8b27f42fa16b96fc70aade9106cf7102f
+
     - name: Checkout rehlds
       uses: actions/checkout@v4
       with:

@@ -867,10 +867,11 @@
 #define MOD_SPRITE_FOLDER "hlcoop/"
 
 #define NOT_PRECACHED_MODEL "models/not_precached.mdl"
-#define MERGED_ITEMS_MODEL "models/w_items_v2.mdl"
+#define MERGED_ITEMS_MODEL "models/w_items_v3.mdl"
 #define MERGED_GIBS_MODEL "models/gibs.mdl"
 #define NOT_PRECACHED_SOUND "common/null.wav"
 #define MAX_PRECACHE 512
+#define MAX_MODELS_REHLDS 8192
 #define MAX_PRECACHE_SOUND 511
 #define MAX_PRECACHE_MODEL 510
 #define MAX_PRECACHE_GENERIC 511

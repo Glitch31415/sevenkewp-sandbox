@@ -243,6 +243,8 @@ void ClientDisconnect( edict_t *pEntity )
 	edict_t* edicts = ENT(0);
 	uint32_t plrbit = PLRBIT(pEntity);
 
+	plr->m_clientCheckFinished = false;
+
 	// remove visibility flags for all entities
 	for (int i = 1; i < gpGlobals->maxEntities; i++)
 	{
@@ -256,6 +258,10 @@ void ClientDisconnect( edict_t *pEntity )
 			ent->m_netPlayers &= ~plrbit;
 			ent->m_hidePlayers &= ~plrbit;
 		}
+	}
+
+	for (int i = 0; i < MAX_WEAPONS; i++) {
+		CWeaponCustom::m_predDataSent[i] &= ~plrbit;
 	}
 
 // since the edict doesn't get deleted, fix it so it doesn't interfere.
@@ -408,11 +414,17 @@ void ClientPutInServer( edict_t *pEntity )
 	pPlayer->QueryClientType();
 	pPlayer->LoadScore();
 	pPlayer->m_lastUserInput = g_engfuncs.pfnTime();
+<<<<<<< HEAD
 	float copacity = 1.00;
 	if (pPlayer->pev->health <= 50) {
 		copacity = 1-((float)(100-pPlayer->pev->health)/100);
 	}
 	pPlayer->m_nightvisionColor = RGB((int)((100-pPlayer->pev->health)*2.55*copacity), (int)(255*copacity), 0);
+=======
+	pPlayer->m_lastTimeLeftUpdate = 0;
+
+	pPlayer->m_nightvisionColor = RGB(0, 255, 0);
+>>>>>>> 20e0e1816c70522a7608928dbc1b01e746d36ed6
 
 	// Allocate a CBasePlayer for pev, and call spawn
 	pPlayer->Spawn();
@@ -570,6 +582,7 @@ void ServerDeactivate( void )
 	memset(g_indexSounds, 0, sizeof(g_indexSounds));
 	memset(g_hudMsgHistory, 0, sizeof(g_hudMsgHistory));
 	memset(CWeaponCustom::m_customWeaponSounds, 0, sizeof(CWeaponCustom::m_customWeaponSounds));
+	memset(CWeaponCustom::m_predDataSent, 0, sizeof(CWeaponCustom::m_predDataSent));
 
 	// in case the next map doesn't configure a sky or light_environment
 	CVAR_SET_STRING("sv_skyname", "");
@@ -704,7 +717,7 @@ int PrecacheBspModels(bool serverSideModels) {
 	return uniqueBspModels.size();
 }
 
-int g_weaponSlotMasks[MAX_WEAPONS];
+uint64_t g_weaponSlotMasks[MAX_WEAPONS];
 
 void MarkWeaponSlotConflicts() {
 	for (int i = 0; i < MAX_WEAPONS; i++)
@@ -714,7 +727,7 @@ void MarkWeaponSlotConflicts() {
 		if (!II.iId)
 			continue;
 
-		int mask = 1 << II.iId;
+		uint64_t mask = 1ULL << II.iId;
 
 		for (int k = 0; k < MAX_WEAPONS; k++)
 		{
@@ -731,7 +744,7 @@ void MarkWeaponSlotConflicts() {
 			// any weapon is held for that slot. A network message controls which weapon is rendered
 			// in the shared slot.
 			if (II.iSlot == II2.iSlot && II.iPosition == II2.iPosition) {
-				mask |= 1 << II2.iId;
+				mask |= 1ULL << II2.iId;
 			}
 		}
 
@@ -854,7 +867,7 @@ UTIL_PrecacheOther("monster_kingpin");
 }
 	std::string clientDataFilesHash = UTIL_HashClientDataFiles();
 	char* serverinfo = (char*)g_engfuncs.pfnGetInfoKeyBuffer(g_engfuncs.pfnPEntityOfEntIndex(0));
-	g_engfuncs.pfnSetKeyValue(serverinfo, "skv", UTIL_VarArgs("%d", MIN_SEVENKEWP_VERSION));
+	g_engfuncs.pfnSetKeyValue(serverinfo, "skv", UTIL_VarArgs("%d", SEVENKEWP_VERSION));
 	g_engfuncs.pfnSetKeyValue(serverinfo, "skmd5", clientDataFilesHash.c_str());
 
 	// reset player inventories
@@ -2016,7 +2029,7 @@ int GetWeaponData( struct edict_s *player, struct weapon_data_s *info )
 	
 	ItemInfo II;
 
-	memset( info, 0, 32 * sizeof( weapon_data_t ) );
+	memset( info, 0, MAX_WEAPONS * sizeof( weapon_data_t ) );
 
 	if ( !pl )
 		return 1;
@@ -2038,7 +2051,7 @@ int GetWeaponData( struct edict_s *player, struct weapon_data_s *info )
 					memset( &II, 0, sizeof( II ) );
 					gun->GetItemInfo( &II );
 
-					if ( II.iId >= 0 && II.iId < 32 )
+					if ( II.iId >= 0 && II.iId < MAX_WEAPONS )
 					{
 						item = &info[ II.iId ];
 					 	
@@ -2048,6 +2061,7 @@ int GetWeaponData( struct edict_s *player, struct weapon_data_s *info )
 						item->m_flTimeWeaponIdle		= V_max( gun->m_flTimeWeaponIdle, -0.001f );
 						item->m_flNextPrimaryAttack		= V_max( gun->m_flNextPrimaryAttack, -0.001f );
 						item->m_flNextSecondaryAttack	= V_max( gun->m_flNextSecondaryAttack, -0.001f );
+						item->fuser4					= V_max( gun->m_flNextTertiaryAttack, -0.001f );
 						item->m_fInReload				= gun->m_fInReload;
 						item->m_fInSpecialReload		= gun->m_fInSpecialReload;
 						item->fuser1					= V_max( gun->pev->fuser1, -0.001f );
@@ -2066,7 +2080,7 @@ int GetWeaponData( struct edict_s *player, struct weapon_data_s *info )
 		}
 	}
 #else
-	memset( info, 0, 32 * sizeof( weapon_data_t ) );
+	memset( info, 0, MAX_WEAPONS * sizeof( weapon_data_t ) );
 #endif
 	return 1;
 }
@@ -2107,7 +2121,7 @@ void UpdateClientData ( const edict_t *ent, int sendweapons, struct clientdata_s
 	cd->watertype		= pev->watertype;
 	cd->weapons			= pev->weapons;
 
-	for (int i = 0; i < MAX_WEAPONS; i++) {
+	for (int i = 0; i < 32; i++) {
 		if (pev->weapons & (1 << i)) {
 			// weapons that share slots occupy multiple bits so that the menu renders correctly
 			// (client may think the slot is empty if only one weapon is held from a shared slot)

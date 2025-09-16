@@ -41,6 +41,7 @@ extern engine_studio_api_t IEngineStudio;
 static int tracerCount[ 32 ];
 
 #include "pm_shared.h"
+#include "studio.h"
 
 void V_PunchAxis( int axis, float punch );
 void VectorAngles( const float *forward, float *angles );
@@ -69,7 +70,6 @@ void EV_EgonStop( struct event_args_s *args  );
 void EV_HornetGunFire( struct event_args_s *args  );
 void EV_TripmineFire( struct event_args_s *args  );
 void EV_SnarkFire( struct event_args_s *args  );
-void EV_FireCustom( struct event_args_s *args  );
 
 
 void EV_TrainPitchAdjust( struct event_args_s *args );
@@ -908,7 +908,7 @@ void EV_FireGauss( event_args_t *args )
 		gEngfuncs.pEventAPI->EV_WeaponAnimation( GAUSS_FIRE2, 2 );
 
 		if ( m_fPrimaryFire == false )
-			 g_flApplyVel = flDamage;	
+			 g_flApplyVel = flDamage * 5.0f;	
 			 
 	}
 
@@ -1373,7 +1373,7 @@ enum EGON_FIREMODE { FIRE_NARROW, FIRE_WIDE};
 #define EGON_SOUND_RUN			"weapons/egon_run3.wav"
 #define EGON_SOUND_STARTUP		"weapons/egon_windup2.wav"
 #define RPG_BEAM_SPRITE			"sprites/laserbeam.spr"
-#define LASER_DOT_SPRITE		"sprites/laserdot.spr"
+#define LASER_DOT_SPRITE		"sprites/hlcoop/laserdot.spr"
 
 #define ARRAYSIZE(p)		(sizeof(p)/sizeof(p[0]))
 
@@ -1541,12 +1541,27 @@ extern int g_runfuncs;
 
 // Not really an event but the laser dot is special and needs server-side entity which has to
 // be networked to HL players anyway.
-void EV_RpgLaserOn() {
+void EV_LaserOn(int dotSprite, float dotSz, int beamSprite, float beamWidth, int beamAttachment) {
+	bool needCreate = (beamSprite && !pBeam) || (dotSprite && !pLaserDot);
+	if (!needCreate)
+		return;
+
+	bool mdlHasAttachment = true;
+
+	if (beamSprite) {
+		studiohdr_t* mdl = GetStudioModel(gEngfuncs.GetViewModel());
+		mdlHasAttachment = mdl && mdl->numattachments >= beamAttachment;
+		
+		if (!mdlHasAttachment && pLaserDot) {
+			return; // can't create a beam and the dot is already created
+		}
+	}
+	
 	cl_entity_t* player = GetLocalPlayer();
 	Vector origin = player->origin;
 	int idx = player->index;
 
-	if (!pBeam && cl_lw->value) //Adrian: Added the cl_lw check for those lital people that hate weapon prediction.
+	if (needCreate && cl_lw->value) //Adrian: Added the cl_lw check for those lital people that hate weapon prediction.
 	{
 		vec3_t vecSrc, vecEnd, origin, forward, right, up;
 		pmtrace_t tr;
@@ -1573,18 +1588,20 @@ void EV_RpgLaserOn() {
 			float g = 0.125f * a;
 			float b = 0.125f * a;
 
-			pLaserDot = gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, vec3_origin, 1.0,
-				gEngfuncs.pEventAPI->EV_FindModelIndex(LASER_DOT_SPRITE),
-				kRenderGlow, kRenderFxNoDissipation, 1.0, 99999, FTENT_PERSIST);
-
-			pBeam = gEngfuncs.pEfxAPI->R_BeamEntPoint(idx | 0x1000, tr.endpos,
-				gEngfuncs.pEventAPI->EV_FindModelIndex(RPG_BEAM_SPRITE),
-				99999, 0.1f, 0, 0.7, 55, 0, 0, r, g, b);
+			if (dotSprite) {
+				pLaserDot = gEngfuncs.pEfxAPI->R_TempSprite(tr.endpos, vec3_origin, dotSz, dotSprite,
+					kRenderGlow, kRenderFxNoDissipation, 1.0, 99999, FTENT_PERSIST);
+			}
+			
+			if (beamSprite && mdlHasAttachment) {
+				pBeam = gEngfuncs.pEfxAPI->R_BeamEntPoint(idx | (0x1000 * beamAttachment),
+					tr.endpos, beamSprite, 99999, beamWidth, 0, 0.7, 55, 0, 0, r, g, b);
+			}
 		}
 	}
 }
 
-void EV_RpgLaserOff()
+void EV_LaserOff()
 {
 	if (pBeam)
 	{
@@ -1803,110 +1820,164 @@ extern int g_irunninggausspred;
 const char* GetWeaponCustomSound(int idx);
 int GetCustomWeaponBody(int id);
 
-void EV_FireCustom(event_args_t* args) {
-	int wepid = args->iparam1;
-	int evtidx = args->iparam2;
-	int idx = args->entindex;
-	CustomWeaponParams* params = GetCustomWeaponParams(wepid);
+void WC_EV_LocalSound(WepEvt& evt, int sndIdx, int chan, int pitch, float vol, float attn, int panning) {
+	const char* soundPath = GetWeaponCustomSound(sndIdx);
+	cl_entity_t* player = GetLocalPlayer();
+	int entidx = player->index;
+	Vector origin = player->origin;
 
-	if (!params) {
-		return;
+	if (panning == 1) {
+		// playing sounds in stereo sounds kind of cool but this method of panning is bad
+		// and shifts ears as you turn around
+		//origin = origin + right * -8;
+		//idx = 0;
+
+		vol *= 0.8f;
+	}
+	else if (panning == 2) {
+		vol *= 0.8f;
 	}
 
-	if (evtidx < 0 && evtidx >= MAX_WC_EVENTS)
-		return;
+	gEngfuncs.pEventAPI->EV_PlaySound(entidx, origin, chan, soundPath, vol, attn, 0, pitch);
+}
 
-	WepEvt& evt = params->events[evtidx];
+extern vec3_t v_angles;
+extern vec3_t v_sim_org;
+extern vec3_t v_sim_vel;
 
-	if (!EV_IsLocal(args->entindex)) {
-		switch (evt.evtType) {
-		case WC_EVT_PUNCH_SET:
-		case WC_EVT_PUNCH_RANDOM:
-		case WC_EVT_SET_BODY:
-		case WC_EVT_WEP_ANIM:
-		case WC_EVT_KICKBACK:
-			return;
+void WC_EV_EjectShell(WepEvt& evt, bool leftHand) {
+	cl_entity_t* player = GetLocalPlayer();
+	int entidx = player->index;
+	Vector angles = v_angles;
+	Vector forward, right, up;
+ 	AngleVectors(angles, forward, right, up);
+	
+	Vector view_ofs;
+	gEngfuncs.pEventAPI->EV_LocalPlayerViewheight(view_ofs);
+	Vector origin = v_sim_org;
+
+	Vector ShellVelocity;
+	Vector ShellOrigin;
+
+	float forwardScale = evt.ejectShell.offsetForward * 0.01f;
+	float upScale = evt.ejectShell.offsetUp * 0.01f;
+	float rightScale = evt.ejectShell.offsetRight * 0.01f;
+
+	static event_args_s args;
+	args.entindex = entidx;
+
+	if (leftHand) {
+		right = right * -1;
+	}
+
+	EV_GetDefaultShellInfo(&args, origin, v_sim_vel, ShellVelocity, ShellOrigin, forward, right, up,
+		forwardScale, upScale, rightScale);
+
+	EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], evt.ejectShell.model, TE_BOUNCE_SHELL);
+}
+
+float UTIL_SharedRandomFloat(unsigned int seed, float low, float high);
+int UTIL_SharedRandomLong(unsigned int seed, int low, int high);
+
+void WC_EV_PunchAngle(WepEvt& evt, int seed) {
+	float punchAngleX = FP_10_6_TO_FLOAT(evt.punch.x);
+	float punchAngleY = FP_10_6_TO_FLOAT(evt.punch.y);
+	float punchAngleZ = FP_10_6_TO_FLOAT(evt.punch.z);
+
+	if (evt.punch.flags & FL_WC_PUNCH_NO_RETURN) {
+		Vector angles;
+		gEngfuncs.GetViewAngles(angles);
+
+		if (evt.punch.flags & FL_WC_PUNCH_SET) {
+			angles = angles + Vector(punchAngleX, punchAngleY, punchAngleZ);
 		}
-	}
-
-	vec3_t origin;
-	vec3_t angles;
-	vec3_t velocity;
-
-	vec3_t vecSrc;
-	vec3_t up, right, forward;
-
-	idx = args->entindex;
-	VectorCopy(args->origin, origin);
-	VectorCopy(args->angles, angles);
-	VectorCopy(args->velocity, velocity);
-
-	AngleVectors(angles, forward, right, up);
-
-	switch (evt.evtType) {
-	case WC_EVT_PLAY_SOUND: {
-		int soundIdx = args->fparam1;
-		const char* soundPath = GetWeaponCustomSound(soundIdx);
-		float vol = evt.playSound.volume / 255.0f;
-		int pitch = gEngfuncs.pfnRandomLong(evt.playSound.pitchMin, evt.playSound.pitchMax);
-		gEngfuncs.pEventAPI->EV_PlaySound(idx, origin, evt.playSound.channel, soundPath, vol,
-			evt.playSound.attn / 64.0f, 0, pitch);
-		break;
-	}
-	case WC_EVT_EJECT_SHELL: {
-		vec3_t ShellVelocity;
-		vec3_t ShellOrigin;
-
-		float forwardScale = evt.ejectShell.offsetForward * 0.01f;
-		float upScale = evt.ejectShell.offsetUp * 0.01f;
-		float rightScale = evt.ejectShell.offsetRight * 0.01f;
-
-		EV_GetDefaultShellInfo(args, origin, velocity, ShellVelocity, ShellOrigin, forward, right, up,
-			forwardScale, upScale, rightScale);
-		EV_EjectBrass(ShellOrigin, ShellVelocity, angles[YAW], evt.ejectShell.model, TE_BOUNCE_SHELL);
-		break;
-	}
-	case WC_EVT_PUNCH_SET:
-	case WC_EVT_PUNCH_RANDOM: {
-		float punchAngleX = FP_10_6_TO_FLOAT(evt.punch.x);
-		float punchAngleY = FP_10_6_TO_FLOAT(evt.punch.y);
-		float punchAngleZ = FP_10_6_TO_FLOAT(evt.punch.z);
-
-		if (evt.evtType == WC_EVT_PUNCH_RANDOM) {
-			V_PunchAxis(0, gEngfuncs.pfnRandomFloat(-punchAngleX, punchAngleX));
-			V_PunchAxis(1, gEngfuncs.pfnRandomFloat(-punchAngleY, punchAngleY));
-			V_PunchAxis(2, gEngfuncs.pfnRandomFloat(-punchAngleZ, punchAngleZ));
+		else {
+			angles = angles + Vector(
+				UTIL_SharedRandomFloat(seed, -punchAngleX, punchAngleX),
+				UTIL_SharedRandomFloat(seed + 1, -punchAngleY, punchAngleY),
+				UTIL_SharedRandomFloat(seed + 2, -punchAngleZ, punchAngleZ)
+			);
 		}
-		else if (evt.evtType == WC_EVT_PUNCH_SET) {
+
+		gEngfuncs.SetViewAngles(angles);
+	}
+	else {
+		if (evt.punch.flags & FL_WC_PUNCH_SET) {
 			V_PunchAxis(0, punchAngleX);
 			V_PunchAxis(1, punchAngleY);
 			V_PunchAxis(2, punchAngleZ);
 		}
-		break;
-	}
-	case WC_EVT_SET_BODY:
-		break;
-	case WC_EVT_WEP_ANIM: {
-		int anim = gEngfuncs.pfnRandomLong(evt.anim.animMin, evt.anim.animMax);
-		gEngfuncs.pEventAPI->EV_WeaponAnimation(anim, GetCustomWeaponBody(wepid));
-		break;
-	}
-	case WC_EVT_BULLETS:
-		EV_GetGunPosition(args, vecSrc, origin);
-		EV_HLDM_FireBullets(idx, forward, right, up, evt.bullets.count, vecSrc, forward, 8192,
-			evt.bullets.btype, evt.bullets.tracerFreq, &tracerCount[idx - 1], args->fparam1, args->fparam2);
-
-		if (EV_IsLocal(idx) && evt.bullets.flashSz)
-			EV_MuzzleFlash();
-		break;
-	case WC_EVT_KICKBACK:
-		g_irunninggausspred = 1;
-		g_flApplyVel = evt.kickback.pushForce / 5.0f;
-		break;
-	case WC_EVT_TOGGLE_ZOOM:
-		break;
-	default:
-		gEngfuncs.Con_Printf("Bad custom weapon event type playback %d\n", (int)evt.evtType);
-		break;
+		else {
+			V_PunchAxis(0, UTIL_SharedRandomFloat(seed, -punchAngleX, punchAngleX));
+			V_PunchAxis(1, UTIL_SharedRandomFloat(seed + 1, -punchAngleY, punchAngleY));
+			V_PunchAxis(2, UTIL_SharedRandomFloat(seed + 2, -punchAngleZ, punchAngleZ));
+		}
 	}
 }
+
+void WC_EV_WepAnim(WepEvt& evt, int wepid, int animIdx) {
+	gEngfuncs.pEventAPI->EV_WeaponAnimation(animIdx, GetCustomWeaponBody(wepid));
+}
+
+extern vec3_t ev_punchangle;
+
+void WC_EV_FireBullets(float spreadX, float spreadY, bool showTracer, bool gunshotDecal, bool textureSound)
+{
+	pmtrace_t tr;
+
+	cl_entity_t* player = GetLocalPlayer();
+	int idx = player->index;
+
+	Vector origin = v_sim_org;
+	Vector view_ofs;
+	gEngfuncs.pEventAPI->EV_LocalPlayerViewheight(view_ofs);
+
+	Vector vecSrc = origin + view_ofs;
+	Vector forward, right, up;
+	Vector angles = v_angles + ev_punchangle;
+	AngleVectors(angles, forward, right, up);
+
+	Vector vecDir = forward + spreadX * right + spreadY * up;
+	Vector vecEnd = vecSrc + vecDir * 8192.0f;
+
+	//gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
+	//gEngfuncs.pEventAPI->EV_PushPMStates();
+	gEngfuncs.pEventAPI->EV_SetSolidPlayers(idx - 1);
+	gEngfuncs.pEventAPI->EV_SetTraceHull(2);
+	gEngfuncs.pEventAPI->EV_PlayerTrace(vecSrc, vecEnd, PM_NORMAL, -1, &tr);
+
+	// TODO: tracers do not match the server when quickly moving the mouse or during rapid fire
+	/*
+	gEngfuncs.Con_Printf("Forward: %.4f %.4f %.4f\n", forward.x, forward.y, forward.z);
+	gEngfuncs.Con_Printf("VecDir: %.4f %.4f %.4f\n", vecDir.x, vecDir.y, vecDir.z);
+	int m_iBeam = gEngfuncs.pEventAPI->EV_FindModelIndex("sprites/smoke.spr");
+	gEngfuncs.pEfxAPI->R_BeamPoints(vecSrc, vecEnd, m_iBeam, 5, 1, 0, 1, 0, 0, 0, 0, 1, 1);
+	*/
+
+	if (showTracer) {
+		Vector offset(0, 0, -4);
+		Vector vecTracerSrc = vecSrc + offset + right * 2 + forward * 16;
+		EV_CreateTracer(vecTracerSrc, tr.endpos);
+	}
+
+	// do damage, paint decals
+	if (tr.fraction != 1.0) {
+		if (gunshotDecal) {
+			EV_HLDM_DecalGunshot(&tr, BULLET_PLAYER_9MM);
+		}
+		if (textureSound) {
+			EV_HLDM_PlayTextureSound(idx, &tr, vecSrc, vecEnd, BULLET_PLAYER_9MM);
+		}
+	}
+
+	//gEngfuncs.pEventAPI->EV_PopPMStates();
+}
+
+
+void WC_EV_Bullets(WepEvt& evt, float spreadX, float spreadY, bool showTracer, bool decal, bool texSound) {
+	WC_EV_FireBullets(spreadX, spreadY, showTracer, decal, texSound);
+
+	if (evt.bullets.flashSz)
+		EV_MuzzleFlash();
+}
+

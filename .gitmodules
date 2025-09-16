@@ -7,3 +7,12 @@
 [submodule "plugins/HLCMapPlugins"]
 	path = plugins/HLCMapPlugins
 	url = https://github.com/wootguy/HLCMapPlugins
+[submodule "external/curl"]
+	path = external/curl
+	url = https://github.com/curl/curl
+[submodule "external/rapidjson"]
+	path = external/rapidjson
+	url = https://github.com/Tencent/rapidjson
+[submodule "external/mbedtls"]
+	path = external/mbedtls
+	url = https://github.com/Mbed-TLS/mbedtls.git

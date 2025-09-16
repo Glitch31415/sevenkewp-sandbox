@@ -18,6 +18,7 @@ EXPORT extern int gmsgBattery;
 EXPORT extern int gmsgTrain;
 EXPORT extern int gmsgLogo;
 EXPORT extern int gmsgWeaponList;
+EXPORT extern int gmsgWeaponListX; // more parameters
 EXPORT extern int gmsgAmmoX;
 EXPORT extern int gmsgAmmoXX; // Extra-Extra-Large ammo count <:)
 EXPORT extern int gmsgHudText;
@@ -44,10 +45,15 @@ EXPORT extern int gmsgStatusText;
 EXPORT extern int gmsgStatusValue;
 
 EXPORT extern int gmsgCustomWeapon; // custom weapon prediction parameters
+EXPORT extern int gmsgCustomWeaponEvents; // custom weapon prediction parameters (events)
 EXPORT extern int gmsgSoundIdx; // mapping of sound indexes to file paths
 EXPORT extern int gmsgNextMap; // next map name
 EXPORT extern int gmsgTimeLeft; // seconds left before map ends (0 = infinite)
 EXPORT extern int gmsgFog; // fog rendering parameters
+EXPORT extern int gmsgPmodelAnim; // third person weapon animation
+EXPORT extern int gmsgWeaponBits; // which weapons does this client have (for weapon IDs >= 32)
+EXPORT extern int gmsgTagInfo; // data for name tags
+EXPORT extern int gmsgPlayerPos; // tag positions for players outside of the PVS
 EXPORT extern int gmsgToxicCloud; // chumtoad attack
 
 // Note: also update msgTypeStr() in util.cpp when adding new messages

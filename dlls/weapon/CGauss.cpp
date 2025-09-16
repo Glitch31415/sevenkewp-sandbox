@@ -497,6 +497,7 @@ while (flDamage > 1 && loops < 25)
 
 			// if you hurt yourself clear the headshot bit
 
+<<<<<<< HEAD
 			float prevmaxhealth = pEntity->pev->max_health;
 			float flpDamage = prevmaxhealth;
 			float angcheck = sin(UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0, M_PI_2));
@@ -584,6 +585,11 @@ default:
 			sdm = false;
 			vecSrc = tr.vecEndPos + vecDir;
 			pentIgnore = ENT( pEntity->pev );
+=======
+			DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
+			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
+>>>>>>> 20e0e1816c70522a7608928dbc1b01e746d36ed6
 		}
 		else {
 		//if ( pEntity->ReflectGauss() )

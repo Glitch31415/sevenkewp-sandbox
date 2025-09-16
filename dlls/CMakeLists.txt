@@ -382,6 +382,9 @@ set(WEAPON_HDR
 	weapon/CM249.h
 	weapon/CSniperRifle.h
 	weapon/CUzi.h
+	weapon/CMinigun.h
+	weapon/CEagle.h
+	weapon/CM16.h
 	weapon/CWeaponCustom.h
 	weapon/weapons.h
 )
@@ -421,6 +424,9 @@ set(WEAPON_SRC
 	weapon/CM249.cpp
 	weapon/CSniperRifle.cpp
 	weapon/CUzi.cpp
+	weapon/CMinigun.cpp
+	weapon/CEagle.cpp
+	weapon/CM16.cpp
 	weapon/CWeaponCustom.cpp
 	weapon/combat.cpp
 )
@@ -431,6 +437,7 @@ set(AMMO_HDR
 set(AMMO_SRC
 	weapon/CBasePlayerAmmo.cpp
 	weapon/CAmmo556.cpp
+	weapon/CAmmo556Clip.cpp
 	weapon/CAmmo762.cpp
 	weapon/CCrossbowAmmo.cpp
 	weapon/CGaussAmmo.cpp
@@ -458,7 +465,6 @@ set(UTIL_HDR
 	util/plane.h
 	util/saverestore.h
 	util/util.h
-	util/mstream.h
 	util/lagcomp.h
 	util/vector.h
 	util/Scheduler.h
@@ -469,6 +475,7 @@ set(UTIL_HDR
 	util/wav.h
 	util/HashMap.h
 	util/StringPool.h
+	../game_shared/mstream.h
 	../game_shared/shared_util.h
 	../game_shared/md5.h
 )
@@ -482,7 +489,6 @@ set(UTIL_SRC
 	util/plane.cpp
 	util/sound.cpp
 	util/util.cpp
-	util/mstream.cpp
 	util/lagcomp.cpp
 	util/saverestore.cpp
 	util/Scheduler.cpp
@@ -494,8 +500,10 @@ set(UTIL_SRC
 	util/wav.cpp
 	util/HashMap.cpp
 	util/StringPool.cpp
+	../game_shared/mstream.cpp
 	../game_shared/shared_util.cpp
 	../game_shared/md5.cpp
+	../game_shared/miniz.c
 )
 set(PLAYER_HDR
 	../pm_shared/pm_debug.h
@@ -679,11 +687,16 @@ set_source_files_properties(${ENT_SRC} PROPERTIES HEADER_FILE_ONLY TRUE)
 add_library(${SERVER_DLL_NAME} SHARED ${ALL_SRC})
 
 target_include_directories(${SERVER_DLL_NAME} PRIVATE monster)
+target_include_directories(${SERVER_DLL_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/external/curl/include/)
 
-target_compile_definitions(${SERVER_DLL_NAME} PRIVATE -DQUIVER -DVOXEL -DQUAKE2 -DVALVE_DLL -DCLIENT_WEAPONS -D_CRT_SECURE_NO_DEPRECATE)
+target_compile_definitions(${SERVER_DLL_NAME} PRIVATE -DQUIVER -DVOXEL -DQUAKE2 -DVALVE_DLL -DCLIENT_WEAPONS -D_CRT_SECURE_NO_DEPRECATE -DCURL_STATICLIB)
 
 if (INCREASED_SERVER_LIMITS)
 	target_compile_definitions(${SERVER_DLL_NAME} PRIVATE -DINCREASED_SERVER_LIMITS)
+endif()
+
+if (ENABLE_CURL)
+	target_compile_definitions(${SERVER_DLL_NAME} PRIVATE -DENABLE_CURL)
 endif()
 
 if(UNIX)
@@ -692,6 +705,16 @@ if(UNIX)
 		set(ASAN_CFLAGS "-fsanitize=address -fno-omit-frame-pointer")
 		set(ASAN_LFLAGS "-fsanitize=address")
 		set(OPT_FLAG "-Og")
+	endif()
+	
+	if (ENABLE_CURL)
+		target_compile_definitions(${SERVER_DLL_NAME} PRIVATE -DENABLE_CURL)
+		target_link_libraries(${SERVER_DLL_NAME}
+			${CMAKE_SOURCE_DIR}/external/curl/build/lib/libcurl.a
+			${CMAKE_SOURCE_DIR}/external/mbedtls/build/library/libmbedtls.a
+			${CMAKE_SOURCE_DIR}/external/mbedtls/build/library/libmbedx509.a
+			${CMAKE_SOURCE_DIR}/external/mbedtls/build/library/libmbedcrypto.a
+		)
 	endif()
 
 	set_target_properties(${SERVER_DLL_NAME} PROPERTIES
@@ -748,7 +771,22 @@ elseif(MSVC)
 	source_group("Source Files\\Hooks" FILES ${HOOKS_SRC})
 	
 	# WinSock libraries for network utils
-	target_link_libraries(${PROJECT_NAME} PRIVATE WS2_32 IPHLPAPI)
+	target_link_libraries(${SERVER_DLL_NAME}
+		Ws2_32 iphlpapi
+	)
+	
+	if (ENABLE_CURL)
+		set(LIB_BUILD_PATH "build")
+		if (STATIC_MSVC_RUNTIME)
+			set(LIB_BUILD_PATH "build_static")
+		endif()
+	
+		target_compile_definitions(${SERVER_DLL_NAME} PRIVATE -DENABLE_CURL)
+		target_link_libraries(${SERVER_DLL_NAME} 
+			Ws2_32 Crypt32 Secur32 Wldap32 iphlpapi # curl dependencies
+			${CMAKE_SOURCE_DIR}/external/curl/${LIB_BUILD_PATH}/lib/Release/libcurl.lib
+		)
+	endif()
 
 else()
 	message(FATAL_ERROR "TODO: Mac support")

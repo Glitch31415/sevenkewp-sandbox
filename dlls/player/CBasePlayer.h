@@ -83,7 +83,11 @@ typedef enum
 	PLAYER_SUPERJUMP,
 	PLAYER_DIE,
 	PLAYER_ATTACK1,
+	PLAYER_ATTACK2, // left hand fire
+	PLAYER_ATTACK3, // right hand fire
 	PLAYER_RELOAD,
+	PLAYER_RELOAD2, // left hand reload
+	PLAYER_RELOAD3, // right hand reload
 	PLAYER_DROP_ITEM,
 	PLAYER_USE,
 	PLAYER_DEPLOY_WEAPON,
@@ -119,10 +123,6 @@ enum sbar_data
 // more than ~128 new ents ar once makes clients freeze with "datagram overflow" which is not
 // always recoverable. 64 fills up MAX_PACKET_ENTITIES very fast even at cl_updaterate 10
 #define MAX_NEW_PACKET_ENTITIES 64
-
-// Minimum version allowed for the server to treat this client as a sevenkewp client instead
-// of an HL client. This prevents prevent crashes and SVC_BAD.
-#define MIN_SEVENKEWP_VERSION 1
 
 enum HL_CLIENT_SYSTEM {
 	CLIENT_SYSTEM_NOT_CHECKED, // player hasn't responded to cvar queries yet
@@ -218,7 +218,6 @@ public:
 	
 	int					m_rgItems[MAX_ITEMS];
 	int					m_fKnownItem;		// True when a new item needs to be added
-	int					m_fNewAmmo;			// True when a new item has been added
 
 	unsigned int		m_afPhysicsFlags;	// physics flags - set when 'normal' physics should be revisited or overriden
 	float				m_fNextSuicideTime; // the time after which the player can next use the suicide command
@@ -334,6 +333,15 @@ public:
 
 	uint32_t m_debugFlags; // misc flags for developers and mappers
 	float m_lastNodeUpdate;
+
+	// currently held weapons
+	uint64_t m_weaponBits;
+	uint64_t m_lastWeaponBits;
+
+	// updates for frequently updated details like HP
+	float m_lastTagUpdate;
+	uint8_t m_lastTagHp;
+	uint8_t m_lastTagObserver;
 
 	virtual void Spawn( void );
 
@@ -494,6 +502,12 @@ public:
 	int m_lastScore;
 	void UpdateScore();
 
+	void UpdateTag(CBasePlayer* dst=NULL);
+
+	int16_t m_lastTagPos[32][3];
+	float m_lastTagPosUpdate;
+	void UpdateTagPos();
+
 	uint16_t GetScoreboardStatus();
 	void UpdateTeamInfo(int color=-1, int msg_mode=MSG_ALL, edict_t* dst=NULL);
 
@@ -513,6 +527,7 @@ public:
 	int m_sevenkewpVersion; // version number for this mod's client
 	bool m_sentClientWarning; // has this client been warned about their client incompatability?
 	bool m_sentSevenKewpNotice; // has this client been told about the sevenkewp client?
+	bool m_clientCheckFinished;
 
 	string_t m_queryResults[6]; // one for each request in QueryClientType
 
@@ -627,6 +642,17 @@ public:
 	void BroadcastUserInfo();
 
 	void DebugThink();
+
+	void SetThirdPersonWeaponAnim(int sequence, float fps=1.0f);
+
+	// 0 = default velocity (800)
+	// -1 = jumping disabled
+	// 1+ = custom velocity
+	void SetJumpPower(int power);
+
+	void SyncWeaponBits();
+
+	bool HasSuit();
 
 	// for sven-style monster info
 	//void UpdateMonsterInfo();

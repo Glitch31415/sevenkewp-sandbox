@@ -58,8 +58,12 @@ class CItemBattery : public CItem
 
 		float healthcap = m_healthcap > 0 ? m_healthcap : maxArmor;
 
+<<<<<<< HEAD
 		if ((pPlayer->pev->armorvalue < 999) &&
 			(pPlayer->pev->weapons & (1 << WEAPON_SUIT)))
+=======
+		if ((pPlayer->pev->armorvalue < healthcap) && pPlayer->HasSuit())
+>>>>>>> 20e0e1816c70522a7608928dbc1b01e746d36ed6
 		{
 			int pct;
 			char szcharge[64];
