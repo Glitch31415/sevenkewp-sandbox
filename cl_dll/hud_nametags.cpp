@@ -65,11 +65,11 @@ Vector WorldToScreen(const Vector& P, const Vector& CamPos, const Vector& angles
 
 int CHudNametags::Draw(float flTime)
 {
-	if (m_HUD_nametags->value <= 0)
-		return 0;
+	//if (m_HUD_nametags->value <= 0)
+		//return 0;
     
-    if (!gHUD.IsSevenKewpServer())
-        return 0; // no cheating in hldm
+    //if (!gHUD.IsSevenKewpServer())
+        //return 0; // no cheating in hldm
 
 	cl_entity_t* localPlayer = GetLocalPlayer();
 
@@ -104,19 +104,19 @@ int CHudNametags::Draw(float flTime)
 		cl_entity_s* pClient = gEngfuncs.GetEntityByIndex(i + 1);
         extra_player_info_t& info = g_PlayerExtraInfo[i + 1];
 
-        if (!pClient || !g_PlayerInfoList[i + 1].name || !g_PlayerInfoList[i + 1].name[0])
-            continue;
+        //if (!pClient || !g_PlayerInfoList[i + 1].name || !g_PlayerInfoList[i + 1].name[0])
+            //continue;
 
         bool clientVisible = pClient->curstate.messagenum >= localPlayer->curstate.messagenum;
 
         if (pClient->curstate.messagenum == 0 && info.x == 0 && info.y == 0 && info.z == 0)
             continue; // hasn't connected yet
 
-		if (!clientVisible && !xray)
-			continue; // Don't show an icon if the player is not in our PVS.
+		//if (!clientVisible && !xray)
+			//continue; // Don't show an icon if the player is not in our PVS.
 
-		if (info.specMode && info.specMode != OBS_ROAMING)
-			continue; // Don't show an icon for spectators
+		//if (info.specMode && info.specMode != OBS_ROAMING)
+			//continue; // Don't show an icon for spectators
 
 		if (pClient == localPlayer && !cam_thirdperson)
 			continue; // Don't show an icon for the local player unless we're in thirdperson mode.
@@ -130,7 +130,7 @@ int CHudNametags::Draw(float flTime)
 
         bool canSeePlayer = false;
 
-        if (clientVisible) {
+        //if (clientVisible) {
             pmtrace_t tr;
             //gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
             //gEngfuncs.pEventAPI->EV_PushPMStates();
@@ -153,7 +153,7 @@ int CHudNametags::Draw(float flTime)
             if (m_HUD_nametags->value < 2 && !canSeePlayer) {
                 continue;
             }
-        }
+        //}
 
         Vector screenOri = WorldToScreen(tagOri, v_origin, angles, fov);
 
@@ -224,7 +224,7 @@ int CHudNametags::Draw(float flTime)
         }
 
         // show distance to invisible players
-        if (!canSeePlayer) {
+        //if (!canSeePlayer) {
             int meters = V_max(0, (v_origin - tagOri).Length() / 33);
             const char* dist = UTIL_VarArgs("(%dm)", meters);
             int distWidth;
@@ -233,7 +233,7 @@ int CHudNametags::Draw(float flTime)
             RGB distColor(160, 160, 160);
             x = screenOri.x - distWidth * 0.5f;
             DrawConsoleString(x, y + nameHeight, dist, distColor);
-        }
+        //}
 	}
 
     // update lerp to/from positions
