@@ -361,7 +361,7 @@ void CHud :: Init( void )
 	std::string versionString = UTIL_VarArgs("%d", SEVENKEWP_VERSION);
 	CVAR_CREATE( "zoom_sensitivity_ratio", "1.2", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_autowepswitch", "1", FCVAR_USERINFO|FCVAR_ARCHIVE );
-	CVAR_CREATE( "hlcoop_version", versionString.c_str(), 0);
+	CVAR_CREATE( "hlcoop_version", "Gay Furry Sex Edition :3", 0);
 	default_fov = CVAR_CREATE( "default_fov", "90", FCVAR_ARCHIVE );
 	m_pCvarStealMouse = CVAR_CREATE( "hud_capturemouse", "1", FCVAR_ARCHIVE );
 	m_pCvarDraw = CVAR_CREATE( "hud_draw", "1", FCVAR_ARCHIVE );
