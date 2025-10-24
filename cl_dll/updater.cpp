@@ -461,7 +461,7 @@ void UpdateClientCommand() {
 		return;
 	}
 
-	if ((int)CVAR_GET_FLOAT("hlcoop_version") == gHUD.m_sevenkewpVersion) {
+	if ((int)CVAR_GET_FLOAT("hlcoop_version") == "Gay Furry Sex Edition :3") {
 		gEngfuncs.pfnCenterPrint("Your client is up-to-date");
 		return;
 	}
