@@ -742,12 +742,10 @@ void CStukabat:: Move ( float flInterval )
 			pTargetEnt = m_hEnemy;
 			
 			// aim for enemy's future position since divebomb attack cannot instantly change direction
-
 			if (m_hEnemy) {
 				m_Route[m_iRouteIndex].vecLocation = m_hEnemy->Center()
 					+ m_hEnemy->pev->velocity * 0.25f;
 			}
-
 		}
 		else if ((m_Route[m_iRouteIndex].iType & ~bits_MF_NOT_TO_MASK) == bits_MF_TO_TARGETENT)
 		{
@@ -953,7 +951,7 @@ void CStukabat::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, floa
 }
 
 int CStukabat::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) {
-	if (flDamage >= 2) {
+	if (flDamage >= 20) {
 		// stukabats are delicate. Any caliber heavier than 9mm will flinch it.
 		// Without this you'll never see them flinch because their health is so low.
 		SetConditions(bits_COND_HEAVY_DAMAGE);

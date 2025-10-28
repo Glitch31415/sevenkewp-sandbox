@@ -21,9 +21,10 @@
 //
 
 
-#define RGB_YELLOWISH 0x00FFA000 //255,160,0
-#define RGB_REDISH 0x00FF1010 //255,160,0
-#define RGB_GREENISH 0x0000A000 //0,160,0
+#define RGB_YELLOWISH 0x0000FF00 //255,160,0
+#define RGB_REDISH 0x00FF0000 //255,160,0
+#define RGB_GREENISH 0x0000FF00 //0,160,0
+#define RGB_PINKISH 0x00FF00FF
 
 #ifndef _WIN32
 #define _cdecl 
@@ -693,7 +694,7 @@ public:
 	int GetNumWidth(int iNumber, int iFlags);
 
 	// for disabling features that could be used to cheat on vanilla servers
-	inline bool IsSevenKewpServer() { return m_sevenkewpVersion > 0; }
+	inline bool IsSevenKewpServer() { return true; }
 
 private:
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.

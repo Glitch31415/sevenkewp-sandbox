@@ -116,8 +116,6 @@ BOOL CMultiSource::IsTriggered(CBaseEntity*)
 
 void CMultiSource::Register(void)
 {
-	CBaseEntity* pentTarget = NULL;
-
 	m_iTotal = 0;
 	memset(m_rgEntities, 0, MS_MAX_TARGETS * sizeof(EHANDLE));
 
@@ -133,7 +131,7 @@ void CMultiSource::Register(void)
 
 		CBaseEntity* ent = CBaseEntity::Instance(&edicts[i].v);
 
-		if (ent && ent->HasTarget(pev->targetname)) {
+		if (ent && !ent->IsMonsterMaker() && ent->HasTarget(pev->targetname)) {
 			m_rgEntities[m_iTotal++] = ent;
 		}
 	}

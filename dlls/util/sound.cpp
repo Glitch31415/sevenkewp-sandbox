@@ -700,21 +700,21 @@ void PLAY_DISTANT_SOUND(edict_t* emitter, int soundType) {
 
 		// if listener is in the audible set and too close, don't play the sound.
 		// otherwise, the player may be close, but on the other side of a wall, so they should hear the sound
-		//if (baseEmitter->InPAS(ent)) {//} && (ent->v.origin - emitter->v.origin).Length() < minRange) {
-			//ontinue;
-		//}
+		if (baseEmitter->InPAS(ent) && (ent->v.origin - emitter->v.origin).Length() < minRange) {
+			continue;
+		}
 
 		pbits |= pbit;
 	}
 
 	if (pbits) {
 		// TODO: dynamic attenuation
-		float attn = 0.9f;
+		float attn = 0.1f;
 		
 		// randomize pitch per entity, so you get a better idea of how many players/npcs are shooting
 		int pitch = 95 + ((ENTINDEX(emitter) * 7) % 11);
 
-		StartSound((edict_t*)NULL, CHAN_STATIC, sample, volume*5, attn, SND_FL_GLOBAL, pitch, emitter->v.origin, pbits);
+		StartSound((edict_t*)NULL, CHAN_STATIC, sample, volume, attn, SND_FL_GLOBAL, pitch, emitter->v.origin, pbits);
 	}
 }
 

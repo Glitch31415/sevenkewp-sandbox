@@ -103,7 +103,23 @@ int CHudBattery::Draw(float flTime)
 	rc.top  += m_iHeight * ((float)(100-(V_min(100,m_iBat))) * 0.01);	// battery can go from 0 to 100 so * 0.01 goes from 0 to 1
 #endif
 
-	UnpackRGB(r,g,b, RGB_YELLOWISH);
+	int iHealth = m_iBat;
+
+	if (iHealth < 0)
+		iHealth = 0;
+	if (iHealth > m_iBatMax)
+		iHealth = m_iBatMax;
+	if (m_iBatMax == 0)
+		m_iBatMax = 100;
+
+	
+	g = (int)((float)iHealth * (float)((int)255 / (int)m_iBatMax));
+
+	if (iHealth == m_iBatMax)
+		g = 255;
+	//g = 255;
+	r = 255 - g;
+	b = 0;
 
 	if (!(gHUD.m_iWeaponBits & (1ULL<<(WEAPON_SUIT)) ))
 		return 1;
@@ -128,6 +144,8 @@ int CHudBattery::Draw(float flTime)
 	}
 	else
 		a = MIN_ALPHA;
+
+	a = 255; // max brightness
 
 	ScaleColors(r, g, b, a );
 	

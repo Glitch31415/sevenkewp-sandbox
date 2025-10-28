@@ -94,7 +94,7 @@ public:
 	virtual BOOL IsDeathmatch( void ) = 0;//is this a deathmatch game?
 	virtual BOOL IsTeamplay( void ) { return FALSE; };// is this deathmatch game being played with team rules?
 	virtual BOOL IsCoOp( void ) = 0;// is this a coop game?
-	virtual const char *GetGameDescription( void ) { return "GoldSrc COOP+DM"; }  // this is the game name that gets seen in the server browser
+	virtual const char *GetGameDescription( void ) { return "Half-Life Co-op"; }  // this is the game name that gets seen in the server browser
 
 // Survival Mode
 	virtual BOOL SurvivalModeEnabled( void ) { return FALSE; };

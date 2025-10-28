@@ -461,7 +461,7 @@ void UpdateClientCommand() {
 		return;
 	}
 
-	if ((int)CVAR_GET_FLOAT("hlcoop_version") != gHUD.m_sevenkewpVersion) { // lol
+	if ((int)CVAR_GET_FLOAT("hlcoop_version") == gHUD.m_sevenkewpVersion) {
 		gEngfuncs.pfnCenterPrint("Your client is up-to-date");
 		return;
 	}

@@ -347,7 +347,7 @@ void UTIL_ParametricRocket( entvars_t *pev, Vector vecOrigin, Vector vecAngles, 
 	// Trace out line to end pos
 	TraceResult tr;
 	UTIL_MakeVectors( vecAngles );
-	UTIL_TraceLine( pev->startpos, pev->startpos + gpGlobals->v_forward * 131072, ignore_monsters, owner, &tr);
+	UTIL_TraceLine( pev->startpos, pev->startpos + gpGlobals->v_forward * 8192, ignore_monsters, owner, &tr);
 	pev->endpos = tr.vecEndPos;
 
 	// Now compute how long it will take based on current velocity
@@ -2367,7 +2367,8 @@ void PrintEntindexStats(bool showCounts) {
 				continue;
 			}
 
-			if (ent->GetEntindexPriority() == ENTIDX_PRIORITY_NORMAL) {
+			//if (ent->GetEntindexPriority() == ENTIDX_PRIORITY_NORMAL) {
+			if (i < lowPrioMin) {
 				int* val = normalEnts.get(STRING(ent->pev->classname));
 				normalEnts.put(STRING(ent->pev->classname), val ? *val + 1 : 1);
 			}
@@ -2975,20 +2976,23 @@ void UTIL_ForceRetouch(edict_t* ent) {
 }
 
 const char* UTIL_GetReplacementSound(edict_t* ent, const char* sound) {
+	std::string lowerSound = toLowerCase(sound);
+	const char* lsound = lowerSound.c_str();
+
 	CBaseEntity* base = CBaseEntity::Instance(ent);
 
 	if (base && base->m_soundReplacementPath) {
 		StringMap& soundReplacements =
 			g_replacementFiles[STRING(base->m_soundReplacementPath)];
 
-		const char* replacement = soundReplacements.get(sound);
+		const char* replacement = soundReplacements.get(lsound);
 
 		if (replacement) {
 			return replacement;
 		}
 	}
 	
-	const char* globalReplacement = g_soundReplacements.get(sound);
+	const char* globalReplacement = g_soundReplacements.get(lsound);
 	if (globalReplacement) {
 		return globalReplacement;
 	}

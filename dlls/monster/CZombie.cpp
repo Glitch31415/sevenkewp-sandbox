@@ -167,7 +167,7 @@ int CZombie :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 		Vector vecDir = pev->origin - (pevInflictor->absmin + pevInflictor->absmax) * 0.5;
 		vecDir = vecDir.Normalize();
 		float flForce = DamageForce( flDamage );
-		//pev->velocity = pev->velocity + vecDir * flForce; // why tf was this here
+		pev->velocity = pev->velocity + vecDir * flForce;
 		//flDamage *= 0.3; // hl zombies had this bullet resistance for some reason
 	}
 

@@ -177,7 +177,7 @@ void CHWGrunt::Precache()
 	nextMinigunShoot = 0;
 	nextFindMinigunTime = 0;
 	shellEjectAttachment = 1;
-	m_flDistTooFar = 131072.0;
+	m_flDistTooFar = 1536;
 
 	BasePrecache();
 
@@ -207,7 +207,7 @@ void CHWGrunt::InitAiFlags() {
 	canCallMedic = false;
 	suppressOccludedTarget = true;
 	maxSuppressTime = 3.0f;
-	maxShootDist = 131072.0;
+	maxShootDist = 2048;
 }
 
 void CHWGrunt::PainSound(void)

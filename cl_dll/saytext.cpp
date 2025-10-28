@@ -32,7 +32,7 @@ extern float *GetClientColor( int clientIndex );
 
 extern cvar_t* hud_saytext_lines;
 
-#define MAX_LINES	20
+#define MAX_LINES	100
 #define MAX_CHARS_PER_LINE	256  /* it can be less than this, depending on char size */
 
 // allow 20 pixels on either side of the text

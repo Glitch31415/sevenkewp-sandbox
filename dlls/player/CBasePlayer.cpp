@@ -121,11 +121,11 @@ extern CGraph	WorldGraph;
 #define DOT_25DEGREE  0.9063077870367
 
 #define ARMOR_RATIO	 0.2	// Armor Takes 80% of the damage
-#define ARMOR_BONUS  1	// Each Point of Armor is work 1/x points of health
+#define ARMOR_BONUS  0.5	// Each Point of Armor is work 1/x points of health
 
 #define GEIGERDELAY 0.25
 #define SUITUPDATETIME	3.5
-#define AIRTIME	45		// lung full of air lasts this many seconds
+#define AIRTIME	12		// lung full of air lasts this many seconds
 #define SUITFIRSTUPDATETIME 0.1
 
 #define	PLAYER_SEARCH_RADIUS	(float)64 // +use distance
@@ -358,69 +358,41 @@ void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector 
 	if ( pev->takedamage )
 	{
 		m_LastHitGroup = ptr->iHitgroup;
-if (!(bitsDamageType & DMG_BLAST)) {
+
 		switch ( ptr->iHitgroup )
 		{
 		case HITGROUP_GENERIC:
 			break;
 		case HITGROUP_HEAD:
-			flDamage *= gSkillData.sk_player_head;
-			if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_player_head*pev->max_health))) {
-				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_head*pev->max_health))); // damage cap
-				if (flDamage < 1) {
-					flDamage = 1;
-				}
+			if (bitsDamageType & (DMG_BULLET | DMG_CLUB)) {
+				flDamage *= gSkillData.sk_player_head;
+				EMIT_SOUND_DYN(edict(), CHAN_BODY, "player/bhit_helmet-1.wav", 1.0f, ATTN_STATIC, 0, RANDOM_LONG(90, 110));
+				m_headshot = IsAlive(); // don't play effect while dying
+				m_headshotDir = Vector(vecDir.x, vecDir.y, 0).Normalize();
 			}
-			EMIT_SOUND_DYN(edict(), CHAN_BODY, "player/bhit_helmet-1.wav", 1.0f, ATTN_STATIC, 0, RANDOM_LONG(90, 110));
-			m_headshot = IsAlive(); // don't play effect while dying
-			m_headshotDir = Vector(vecDir.x, vecDir.y, 0).Normalize();
+			else {
+				// don't take headshot damage for things other than bullets and some melee attacks
+				flDamage *= gSkillData.sk_player_chest;
+			}
 			break;
 		case HITGROUP_CHEST:
 			flDamage *= gSkillData.sk_player_chest;
-			if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_player_chest*pev->max_health))) {
-				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_chest*pev->max_health))); // damage cap
-				if (flDamage < 1) {
-					flDamage = 1;
-				}
-			}
 			break;
 		case HITGROUP_STOMACH:
 			flDamage *= gSkillData.sk_player_stomach;
-			if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_player_stomach*pev->max_health))) {
-				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_stomach*pev->max_health))); // damage cap
-				if (flDamage < 1) {
-					flDamage = 1;
-				}
-			}
 			break;
 		case HITGROUP_LEFTARM:
 		case HITGROUP_RIGHTARM:
 			flDamage *= gSkillData.sk_player_arm;
-			if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_player_arm*pev->max_health))) {
-				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_arm*pev->max_health))); // damage cap
-				if (flDamage < 1) {
-					flDamage = 1;
-				}
-			}
 			break;
 		case HITGROUP_LEFTLEG:
 		case HITGROUP_RIGHTLEG:
 			flDamage *= gSkillData.sk_player_leg;
-			if (flDamage > pev->health - (pev->max_health - (gSkillData.sk_player_leg*pev->max_health))) {
-				flDamage = (pev->health - (pev->max_health - (gSkillData.sk_player_leg*pev->max_health))); // damage cap
-				if (flDamage < 1) {
-					flDamage = 1;
-				}
-			}
 			break;
 		default:
 			break;
 		}
-}
-		else {
-			// blast damage shouldn't hit a single point like bullets.
-			// consider it to always be a body/generic shot
-		}
+
 		if (bitsDamageType & DMG_BLOOD) {
 			SpawnBlood(ptr->vecEndPos, BloodColor(), flDamage);// a little surface blood.
 			TraceBleed( flDamage, vecDir, ptr, bitsDamageType );
@@ -1652,13 +1624,10 @@ void CBasePlayer::ReleaseControlledObjects() {
 WaterMove
 ============
 */
-
-
 void CBasePlayer::WaterMove()
 {
 	int air;
-	int bci;
-	bci = roundf(pev->air_finished - gpGlobals->time);
+
 	if (pev->movetype == MOVETYPE_NOCLIP)
 	{
 		pev->air_finished = gpGlobals->time + AIRTIME;
@@ -1672,30 +1641,19 @@ void CBasePlayer::WaterMove()
 	// waterlevel 1 - feet in water
 	// waterlevel 2 - waist in water
 	// waterlevel 3 - head in water
+
 	if (pev->waterlevel != 3) 
 	{
-		
 		// not underwater
 		
 		// play 'up for air' sound
-		if (pev->waterlevel == 2) {
-			if (pev->air_finished < gpGlobals->time)
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_wade1.wav", 1, ATTN_NORM);
-			else if (pev->air_finished < gpGlobals->time + 15)
-				EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_wade2.wav", 1, ATTN_NORM);
-		}
+		if (pev->air_finished < gpGlobals->time)
+			EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_wade1.wav", 1, ATTN_NORM);
+		else if (pev->air_finished < gpGlobals->time + 9)
+			EMIT_SOUND(ENT(pev), CHAN_VOICE, "player/pl_wade2.wav", 1, ATTN_NORM);
 
-		if (pev->pain_finished < gpGlobals->time) {
-			bci = bci + 3;
-			if (bci > AIRTIME) {
-				bci = AIRTIME;
-			}
-			pev->air_finished = gpGlobals->time + bci;
-			pev->pain_finished = gpGlobals->time + 1;
-			
-		}
-
-		pev->dmg = 0;
+		pev->air_finished = gpGlobals->time + AIRTIME + m_airTimeModifier;
+		pev->dmg = 2;
 
 		// if we took drowning damage, give it back slowly
 		if (m_idrowndmg > m_idrownrestored)
@@ -1719,39 +1677,28 @@ void CBasePlayer::WaterMove()
 		m_bitsDamageType &= ~DMG_DROWNRECOVER;
 		m_rgbTimeBasedDamage[itbd_DrownRecover] = 0;
 
-		if (pev->pain_finished < gpGlobals->time)
+		if (pev->air_finished < gpGlobals->time)		// drown!
 		{
-			//bci = bci - 1;
-			//if (bci <= 0) {
-				//bci = 0;
-				// start fucking drowning already
-			//}
-			//pev->air_finished = gpGlobals->time + bci;
-			if (pev->air_finished <= gpGlobals->time)		// drown!
+			if (pev->pain_finished < gpGlobals->time)
 			{
-				bci = 0;
 				// take drowning damage
-				pev->dmg += 0.1;
-				//if (pev->dmg > 5)
-					//pev->dmg = 5;
+				pev->dmg += 1;
+				if (pev->dmg > 5)
+					pev->dmg = 5;
 				TakeDamage(VARS(eoNullEntity), VARS(eoNullEntity), pev->dmg, DMG_DROWN);
-
+				pev->pain_finished = gpGlobals->time + 1;
 				
 				// track drowning damage, give it back when
 				// player finally takes a breath
 
 				m_idrowndmg += pev->dmg;
-			}
-			else
-			{
-				m_bitsDamageType &= ~DMG_DROWN;
-			}
-			pev->air_finished = gpGlobals->time + bci;
-			pev->pain_finished = gpGlobals->time + 1;
-		} 
+			} 
+		}
+		else
+		{
+			m_bitsDamageType &= ~DMG_DROWN;
+		}
 	}
-	//pev->air_finished = gpGlobals->time + bci;
-	//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("last, air_finished diff: %f\n", pev->air_finished-gpGlobals->time));
 
 	if (!pev->waterlevel)
 	{
@@ -1792,7 +1739,6 @@ void CBasePlayer::WaterMove()
 		SetBits(pev->flags, FL_INWATER);
 		pev->dmgtime = 0;
 	}
-	
 }
 
 // TRUE if the player is attached to a ladder
@@ -1884,7 +1830,6 @@ void CBasePlayer::PlayerDeathThink(void)
 
 	if (pev->deadflag == DEAD_DYING)
 	{
-		pev->sequence = 18;
 		//Once we finish animating, if we're in multiplayer just make a copy of our body right away.
 		if (m_fSequenceFinished && g_pGameRules->IsMultiplayer() && pev->movetype == MOVETYPE_NONE)
 		{
@@ -3030,8 +2975,6 @@ void CBasePlayer::PreThink(void)
 void CBasePlayer::CheckTimeBasedDamage() 
 {
 	int i;
-	//int pdd = 0;
-	//int ddr = 19;
 	BYTE bDuration = 0;
 
 	if (!(m_bitsDamageType & DMG_TIMEBASED))
@@ -3080,24 +3023,12 @@ void CBasePlayer::CheckTimeBasedDamage()
 				// after the player has been drowning and finally takes a breath
 				if (m_idrowndmg > m_idrownrestored)
 				{
-					//if (m_idrowndmg > pdd) {
-						// new drowning cycle?
-						//ddr = 19;
-					//}
-					//pdd = m_idrowndmg;
-					//ddr = ddr - 2;
-					//if (ddr < 1) {
-						//ddr = 1;
-					//}
-					//int idif = V_min(m_idrowndmg - m_idrownrestored, ddr);
-					//if (ddr == 1) {
-						//ddr = 19;
-					//}
+					int idif = V_min(m_idrowndmg - m_idrownrestored, 10);
 
-					TakeHealth(1, DMG_GENERIC);
-					m_idrownrestored += 1;
+					TakeHealth(idif, DMG_GENERIC);
+					m_idrownrestored += idif;
 				}
-				bDuration = 99;
+				bDuration = 4;	// get up to 5*10 = 50 points back
 				break;
 			case itbd_Acid:
 //				TakeDamage(pev, pev, ACID_DAMAGE, DMG_GENERIC);
@@ -3637,7 +3568,7 @@ void CBasePlayer::PostThink()
 				// (e.g. player sitting at the bottom of a deep tunnel with no way to avoid them)
 				ent->pev->health -= flFallDamage;
 				if (ent->pev->health <= 0) {
-					ent->Killed(pev, GIB_NEVER);
+					ent->Killed(pev, GIB_NORMAL);
 					ent->m_lastDamageType = DMG_FALL;
 					g_pGameRules->DeathNotice(ent, pev, pev);
 				}
@@ -3792,7 +3723,7 @@ void CBasePlayer::Spawn( void )
 	pev->max_health		= pev->health;
 	pev->flags		   &= (FL_PROXY | FL_FAKECLIENT);	// keep proxy flag sey by engine
 	pev->flags		   |= FL_CLIENT;
-	pev->air_finished	= gpGlobals->time + 45;
+	pev->air_finished	= gpGlobals->time + 12;
 	pev->dmg			= 2;				// initial water damage
 	pev->effects		= 0;
 	pev->deadflag		= DEAD_NO;
@@ -3939,184 +3870,10 @@ void CBasePlayer::Spawn( void )
 		m_wantToExitObserver = true;
 	}
 
-
 	ApplyEffects();
-		// don't play suit sounds for items given when spawning
+
+	// don't play suit sounds for items given when spawning
 	SetSuitUpdate(NULL, FALSE, 0);
-	std::string mns;
-mns = STRING(gpGlobals->mapname);
-		if (!(mns.find("hl_c") != std::string::npos)) {
-		//GiveNamedItem( "item_suit" );
-		//GiveNamedItem( "item_battery" );
-		GiveNamedItem( "weapon_crowbar" );
-		GiveNamedItem( "weapon_knife" );
-		GiveNamedItem( "weapon_9mmhandgun" );
-		GiveNamedItem( "ammo_9mmclip" );
-		GiveNamedItem( "weapon_shotgun" );
-		GiveNamedItem( "ammo_buckshot" );
-		GiveNamedItem( "weapon_9mmAR" );
-		GiveNamedItem( "ammo_9mmAR" );
-		GiveNamedItem( "ammo_ARgrenades" );
-		GiveNamedItem( "weapon_handgrenade" );
-		GiveNamedItem( "weapon_tripmine" );
-		GiveNamedItem( "weapon_357" );
-		GiveNamedItem( "ammo_357" );
-		GiveNamedItem( "weapon_crossbow" );
-		GiveNamedItem( "ammo_crossbow" );
-		GiveNamedItem( "weapon_egon" );
-		GiveNamedItem( "weapon_gauss" );
-		GiveNamedItem( "ammo_gaussclip" );
-		GiveNamedItem( "weapon_rpg" );
-		GiveNamedItem( "ammo_rpgclip" );
-		GiveNamedItem( "weapon_satchel" );
-		GiveNamedItem( "weapon_snark" );
-		GiveNamedItem( "weapon_hornetgun" );
-		GiveNamedItem( "weapon_grapple" );
-		GiveNamedItem( "weapon_pipewrench" );
-		GiveNamedItem( "weapon_displacer" );
-		GiveNamedItem( "weapon_shockrifle" );
-		GiveNamedItem( "weapon_sporelauncher" );
-		GiveNamedItem( "weapon_medkit" );
-
-		GiveNamedItem("ammo_crossbow");
-GiveNamedItem("ammo_egonclip");
-GiveNamedItem("ammo_gaussclip");
-GiveNamedItem("ammo_mp5clip");
-GiveNamedItem("ammo_9mmbox");
-GiveNamedItem("ammo_mp5grenades");
-GiveNamedItem("ammo_357");
-GiveNamedItem("ammo_rpgclip");
-GiveNamedItem("ammo_buckshot");
-GiveNamedItem("ammo_glockclip");
-GiveNamedItem("ammo_9mm");
-GiveNamedItem("ammo_9mmclip");
-GiveNamedItem("ammo_556");
-GiveNamedItem("ammo_762");
-GiveNamedItem("ammo_uziclip");
-GiveNamedItem("ammo_crossbow");
-GiveNamedItem("ammo_egonclip");
-GiveNamedItem("ammo_gaussclip");
-GiveNamedItem("ammo_mp5clip");
-GiveNamedItem("ammo_9mmbox");
-GiveNamedItem("ammo_mp5grenades");
-GiveNamedItem("ammo_357");
-GiveNamedItem("ammo_rpgclip");
-GiveNamedItem("ammo_buckshot");
-GiveNamedItem("ammo_glockclip");
-GiveNamedItem("ammo_9mm");
-GiveNamedItem("ammo_9mmclip");
-GiveNamedItem("ammo_556");
-GiveNamedItem("ammo_762");
-GiveNamedItem("ammo_uziclip");
-GiveNamedItem("ammo_crossbow");
-GiveNamedItem("ammo_egonclip");
-GiveNamedItem("ammo_gaussclip");
-GiveNamedItem("ammo_mp5clip");
-GiveNamedItem("ammo_9mmbox");
-GiveNamedItem("ammo_mp5grenades");
-GiveNamedItem("ammo_357");
-GiveNamedItem("ammo_rpgclip");
-GiveNamedItem("ammo_buckshot");
-GiveNamedItem("ammo_glockclip");
-GiveNamedItem("ammo_9mm");
-GiveNamedItem("ammo_9mmclip");
-GiveNamedItem("ammo_556");
-GiveNamedItem("ammo_762");
-GiveNamedItem("ammo_uziclip");
-GiveNamedItem("ammo_crossbow");
-GiveNamedItem("ammo_egonclip");
-GiveNamedItem("ammo_gaussclip");
-GiveNamedItem("ammo_mp5clip");
-GiveNamedItem("ammo_9mmbox");
-GiveNamedItem("ammo_mp5grenades");
-GiveNamedItem("ammo_357");
-GiveNamedItem("ammo_rpgclip");
-GiveNamedItem("ammo_buckshot");
-GiveNamedItem("ammo_glockclip");
-GiveNamedItem("ammo_9mm");
-GiveNamedItem("ammo_9mmclip");
-GiveNamedItem("ammo_556");
-GiveNamedItem("ammo_762");
-GiveNamedItem("ammo_uziclip");
-GiveNamedItem("ammo_crossbow");
-GiveNamedItem("ammo_egonclip");
-GiveNamedItem("ammo_gaussclip");
-GiveNamedItem("ammo_mp5clip");
-GiveNamedItem("ammo_9mmbox");
-GiveNamedItem("ammo_mp5grenades");
-GiveNamedItem("ammo_357");
-GiveNamedItem("ammo_rpgclip");
-GiveNamedItem("ammo_buckshot");
-GiveNamedItem("ammo_glockclip");
-GiveNamedItem("ammo_9mm");
-GiveNamedItem("ammo_9mmclip");
-GiveNamedItem("ammo_556");
-GiveNamedItem("ammo_762");
-GiveNamedItem("ammo_uziclip");
-GiveNamedItem("ammo_crossbow");
-GiveNamedItem("ammo_egonclip");
-GiveNamedItem("ammo_gaussclip");
-GiveNamedItem("ammo_mp5clip");
-GiveNamedItem("ammo_9mmbox");
-GiveNamedItem("ammo_mp5grenades");
-GiveNamedItem("ammo_357");
-GiveNamedItem("ammo_rpgclip");
-GiveNamedItem("ammo_buckshot");
-GiveNamedItem("ammo_glockclip");
-GiveNamedItem("ammo_9mm");
-GiveNamedItem("ammo_9mmclip");
-GiveNamedItem("ammo_556");
-GiveNamedItem("ammo_762");
-GiveNamedItem("ammo_uziclip");
-GiveNamedItem("ammo_crossbow");
-GiveNamedItem("ammo_egonclip");
-GiveNamedItem("ammo_gaussclip");
-GiveNamedItem("ammo_mp5clip");
-GiveNamedItem("ammo_9mmbox");
-GiveNamedItem("ammo_mp5grenades");
-GiveNamedItem("ammo_357");
-GiveNamedItem("ammo_rpgclip");
-GiveNamedItem("ammo_buckshot");
-GiveNamedItem("ammo_glockclip");
-GiveNamedItem("ammo_9mm");
-GiveNamedItem("ammo_9mmclip");
-GiveNamedItem("ammo_556");
-GiveNamedItem("ammo_762");
-GiveNamedItem("ammo_uziclip");
-GiveNamedItem("ammo_crossbow");
-GiveNamedItem("ammo_egonclip");
-GiveNamedItem("ammo_gaussclip");
-GiveNamedItem("ammo_mp5clip");
-GiveNamedItem("ammo_9mmbox");
-GiveNamedItem("ammo_mp5grenades");
-GiveNamedItem("ammo_357");
-GiveNamedItem("ammo_rpgclip");
-GiveNamedItem("ammo_buckshot");
-GiveNamedItem("ammo_glockclip");
-GiveNamedItem("ammo_9mm");
-GiveNamedItem("ammo_9mmclip");
-GiveNamedItem("ammo_556");
-GiveNamedItem("ammo_762");
-GiveNamedItem("ammo_uziclip");
-GiveNamedItem("ammo_crossbow");
-GiveNamedItem("ammo_egonclip");
-GiveNamedItem("ammo_gaussclip");
-GiveNamedItem("ammo_mp5clip");
-GiveNamedItem("ammo_9mmbox");
-GiveNamedItem("ammo_mp5grenades");
-GiveNamedItem("ammo_357");
-GiveNamedItem("ammo_rpgclip");
-GiveNamedItem("ammo_buckshot");
-GiveNamedItem("ammo_glockclip");
-GiveNamedItem("ammo_9mm");
-GiveNamedItem("ammo_9mmclip");
-GiveNamedItem("ammo_556");
-GiveNamedItem("ammo_762");
-GiveNamedItem("ammo_uziclip");
-		}
-
-
-
 
 	// for when mic audio breaks due to teleports or something else I don't understand yet
 	UTIL_ResetVoiceChannel(this);
@@ -4463,7 +4220,7 @@ CBaseEntity *FindEntityForward( CBaseEntity *pMe )
 	TraceResult tr;
 
 	UTIL_MakeVectors(pMe->pev->v_angle);
-	UTIL_TraceLine(pMe->pev->origin + pMe->pev->view_ofs,pMe->pev->origin + pMe->pev->view_ofs + gpGlobals->v_forward * 131072,dont_ignore_monsters, pMe->edict(), &tr );
+	UTIL_TraceLine(pMe->pev->origin + pMe->pev->view_ofs,pMe->pev->origin + pMe->pev->view_ofs + gpGlobals->v_forward * 8192,dont_ignore_monsters, pMe->edict(), &tr );
 	if ( tr.flFraction != 1.0 && !FNullEnt( tr.pHit) )
 	{
 		CBaseEntity *pHit = CBaseEntity::Instance( tr.pHit );
@@ -4494,7 +4251,6 @@ void CBasePlayer :: FlashlightTurnOn( void )
 		}
 		else {
 			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, SOUND_NIGHTVISION_ON, 1.0, ATTN_NORM, 0, PITCH_NORM);
-			SetBits(pev->effects, EF_NIGHTVISION);
 			UTIL_ScreenFade(this, m_nightvisionColor.ToVector(), 0.1f, 5.0f, 255, FFADE_MODULATE | FFADE_OUT);
 			
 			// give some time to fade in
@@ -4520,7 +4276,6 @@ void CBasePlayer :: FlashlightTurnOff( void )
 	}
 	else {
 		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, SOUND_NIGHTVISION_OFF, 1.0, ATTN_NORM, 0, PITCH_NORM);
-		ClearBits(pev->effects, EF_NIGHTVISION);
 		UTIL_ScreenFade(this, m_nightvisionColor.ToVector(), 0.1f, 0.15f, 255, FFADE_MODULATE | FFADE_IN);
 	}
 
@@ -4681,7 +4436,6 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "item_suit" );
 		GiveNamedItem( "item_battery" );
 		GiveNamedItem( "weapon_crowbar" );
-		GiveNamedItem( "weapon_knife" );
 		GiveNamedItem( "weapon_9mmhandgun" );
 		GiveNamedItem( "weapon_shotgun" );
 		GiveNamedItem( "ammo_buckshot" );
@@ -4708,7 +4462,9 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_shockrifle" );
 		GiveNamedItem( "weapon_sporelauncher" );
 		GiveNamedItem( "weapon_medkit" );
-		GiveNamedItem("item_longjump");
+		if (!m_fLongJump) {
+			GiveNamedItem("item_longjump");
+		}
 		if (IsSevenKewpClient()) {
 			GiveNamedItem("weapon_m249");
 			GiveNamedItem("weapon_sniperrifle");
@@ -7464,19 +7220,15 @@ const char* CBasePlayer::GetDeathNoticeWeapon() {
 
 void CBasePlayer::NightvisionUpdate() {
 
-	if (!m_flashlightEnabled || flashlight.value < 2 || g_engfuncs.pfnTime() - m_lastNightvisionUpdate < 1.0f) {
+	if (!m_flashlightEnabled || flashlight.value < 2 || g_engfuncs.pfnTime() - m_lastNightvisionUpdate < 0.05f) {
 		return;
 	}
 
 	m_lastNightvisionUpdate = g_engfuncs.pfnTime();
-	float copacity = 1.00;
-	if (pev->health <= 50) {
-		copacity = 1-((float)(100-pev->health)/100);
-	}
-	m_nightvisionColor = RGB((int)((100-pev->health)*2.55*copacity), (int)(255*copacity), 0);
-	const int radius = 255; // 255 makes more sense, but it's really laggy for all PCs
+
+	const int radius = 100; // 255 makes more sense, but it's really laggy for all PCs
 	const RGB color = RGB(128, 128, 128);
-	const int life = 12;
+	const int life = 2;
 	const int decay = 1;
 
 	if (UTIL_IsValidTempEntOrigin(pev->origin)) {

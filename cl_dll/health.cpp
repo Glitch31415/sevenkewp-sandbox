@@ -145,26 +145,20 @@ void CHudHealth::GetPainColor( int &r, int &g, int &b )
 {
 	int iHealth = m_iHealth;
 
-	if (iHealth > 25)
-		iHealth -= 25;
-	else if ( iHealth < 0 )
+	if (iHealth < 0)
 		iHealth = 0;
-#if 0
-	g = iHealth * 255 / 100;
+	if (iHealth > 100)
+		iHealth = 100;
+	
+	g = (int)((float)iHealth * (float)((int)255 / (int)100));
+
+	if (iHealth == 100)
+		g = 255;
+	
+	//g = 255;
 	r = 255 - g;
 	b = 0;
-#else
-	if (m_iHealth > 25)
-	{
-		UnpackRGB(r,g,b, RGB_YELLOWISH);
-	}
-	else
-	{
-		r = 250;
-		g = 0;
-		b = 0;
-	}
-#endif 
+
 }
 
 int CHudHealth::Draw(float flTime)
@@ -198,7 +192,7 @@ int CHudHealth::Draw(float flTime)
 		a = MIN_ALPHA;
 
 	// If health is getting low, make it bright red
-	if (m_iHealth <= 15)
+	//if (m_iHealth <= 15)
 		a = 255;
 		
 	GetPainColor( r, g, b );
@@ -225,7 +219,7 @@ int CHudHealth::Draw(float flTime)
 
 		int iHeight = gHUD.m_iFontHeight;
 		int iWidth = HealthWidth/10;
-		FillRGBA(x, y, iWidth, iHeight, 255, 160, 0, a);
+		FillRGBA(x, y, iWidth, iHeight, 0, 255, 0, a); // shame, hardcoding rgb values
 	}
 
 	DrawDamage(flTime);

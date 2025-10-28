@@ -584,8 +584,8 @@ void CPipewrench::BigSwing()
 		// doesn't make a bullet hole decal when making a big
 		// swing. If you want that decal, just uncomment the
 		// 2 lines below.
-		//SetThink( &CPipewrench::Smack );
-		//SetNextThink( UTIL_WeaponTimeBase() + 0.2 );
+		/*SetThink( &CPipewrench::Smack );
+		SetNextThink( UTIL_WeaponTimeBase() + 0.2 );*/
 #endif
 		m_flNextPrimaryAttack = GetNextAttackDelay(1.0);
 		m_flNextSecondaryAttack = GetNextAttackDelay(1.0);

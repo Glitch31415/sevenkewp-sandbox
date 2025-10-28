@@ -107,7 +107,7 @@ void te_debug_box(Vector mins, Vector maxs, uint8_t life, RGBA c, int msgType, e
 
 void te_debug_beam(Vector start, Vector end, uint8_t life, RGBA c, int msgType, edict_t* dest)
 {
-	UTIL_BeamPoints(start, end, MODEL_INDEX("sprites/laserbeam.spr"), 0, 0, life, 8, 0,
+	UTIL_BeamPoints(start, end, MODEL_INDEX("sprites/laserbeam.spr"), 0, 0, life, 16, 0,
 		c, 0, msgType, NULL, dest);
 }
 

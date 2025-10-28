@@ -372,11 +372,10 @@ void CShockTrooper::GibMonster()
 //=========================================================
 int CShockTrooper::ISoundMask()
 {
-	//return bits_SOUND_WORLD |
-		//bits_SOUND_COMBAT |
-		//bits_SOUND_PLAYER |
-		//bits_SOUND_DANGER;
-	return bits_ALL_SOUNDS;
+	return bits_SOUND_WORLD |
+		bits_SOUND_COMBAT |
+		bits_SOUND_PLAYER |
+		bits_SOUND_DANGER;
 }
 
 //=========================================================
@@ -587,7 +586,7 @@ BOOL CShockTrooper::CheckRangeAttack2(float flDot, float flDist)
 	// are any of my squad members near the intended grenade impact area?
 	if (InSquad())
 	{
-		if (SquadMemberInRange(vecTarget, 1024))
+		if (SquadMemberInRange(vecTarget, 256))
 		{
 			// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
@@ -595,7 +594,7 @@ BOOL CShockTrooper::CheckRangeAttack2(float flDot, float flDist)
 		}
 	}
 
-	if ((vecTarget - pev->origin).Length2D() <= 1024)
+	if ((vecTarget - pev->origin).Length2D() <= 256)
 	{
 		// crap, I don't want to blow myself up
 		m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
@@ -2147,7 +2146,7 @@ Schedule_t* CShockTrooper::GetSchedule()
 	}
 
 	// no special cases here, call the base class
-	return CBaseMonster::GetSchedule();
+	return CTalkSquadMonster::GetSchedule();
 }
 
 //=========================================================
@@ -2454,7 +2453,7 @@ void CDeadShockTrooper::Spawn()
 	pev->sequence = 0;
 	m_bloodColor = BLOOD_COLOR_GREEN;
 
-	pev->sequence = LookupSequence(m_szPoses[m_iPose]);
+	pev->sequence = LookupSequence(m_szPoses[clamp(m_iPose, 0, (int)ARRAY_SZ(m_szPoses) - 1)]);
 
 	if (pev->sequence == -1)
 	{

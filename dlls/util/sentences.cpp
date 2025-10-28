@@ -4,7 +4,6 @@
 #include "CBaseToggle.h"
 #include "wav.h"
 #include "eng_wrappers.h"
-#include <cstdint>
 
 CustomSentences g_customSentencesMod;
 CustomSentences g_customSentencesMap;
@@ -370,6 +369,7 @@ bool PlayCustomSentence(CBaseToggle* ent) {
 
 	if (playWord) {
 		const char* sound = playWord->file.str();
+		sound = UTIL_GetReplacementSound(ent->edict(), sound);
 		float vol = (playWord->volume / 100.0f) * ent->m_customSentVol;
 		float attn = ent->m_customSentAttn;
 		EMIT_SOUND_DYN(ent->edict(), CHAN_VOICE, sound, vol, attn, 0, playWord->pitch);

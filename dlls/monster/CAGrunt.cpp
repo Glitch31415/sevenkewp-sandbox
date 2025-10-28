@@ -125,13 +125,11 @@ int CAGrunt::IRelationship ( CBaseEntity *pTarget )
 //=========================================================
 int CAGrunt :: ISoundMask ( void )
 {
-	//return	bits_SOUND_WORLD	|
-			//bits_SOUND_COMBAT	|
-			//bits_SOUND_PLAYER	|
-			//bits_SOUND_DANGER;
-	return bits_ALL_SOUNDS;
+	return	bits_SOUND_WORLD	|
+			bits_SOUND_COMBAT	|
+			bits_SOUND_PLAYER	|
+			bits_SOUND_DANGER;
 }
-
 
 //=========================================================
 // TraceAttack
@@ -405,7 +403,7 @@ void CAGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				
 				UTIL_MakeVectors(pev->angles);
 
-				Vector vecSpread = VECTOR_CONE_1DEGREES*2;
+				Vector vecSpread = VECTOR_CONE_4DEGREES;
 				float x, y;
 				GetCircularGaussianSpread(x, y);
 				direction = direction + x * vecSpread.x * gpGlobals->v_right +

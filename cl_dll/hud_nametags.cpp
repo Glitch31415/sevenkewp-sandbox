@@ -104,19 +104,19 @@ int CHudNametags::Draw(float flTime)
 		cl_entity_s* pClient = gEngfuncs.GetEntityByIndex(i + 1);
         extra_player_info_t& info = g_PlayerExtraInfo[i + 1];
 
-        if (!pClient || !g_PlayerInfoList[i + 1].name || !g_PlayerInfoList[i + 1].name[0])
-            continue;
+        //if (!pClient || !g_PlayerInfoList[i + 1].name || !g_PlayerInfoList[i + 1].name[0])
+            //continue;
 
         bool clientVisible = pClient->curstate.messagenum >= localPlayer->curstate.messagenum;
 
         if (pClient->curstate.messagenum == 0 && info.x == 0 && info.y == 0 && info.z == 0)
             continue; // hasn't connected yet
 
-		if (!clientVisible && !xray)
-			continue; // Don't show an icon if the player is not in our PVS.
+		//if (!clientVisible && !xray)
+			//continue; // Don't show an icon if the player is not in our PVS.
 
-		if (info.specMode && info.specMode != OBS_ROAMING)
-			continue; // Don't show an icon for spectators
+		//if (info.specMode && info.specMode != OBS_ROAMING)
+			//continue; // Don't show an icon for spectators
 
 		if (pClient == localPlayer && !cam_thirdperson)
 			continue; // Don't show an icon for the local player unless we're in thirdperson mode.
@@ -130,7 +130,7 @@ int CHudNametags::Draw(float flTime)
 
         bool canSeePlayer = false;
 
-        if (clientVisible) {
+        //if (clientVisible) {
             pmtrace_t tr;
             //gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction(false, true);
             //gEngfuncs.pEventAPI->EV_PushPMStates();
@@ -153,7 +153,7 @@ int CHudNametags::Draw(float flTime)
             if (m_HUD_nametags->value < 2 && !canSeePlayer) {
                 continue;
             }
-        }
+        //}
 
         Vector screenOri = WorldToScreen(tagOri, v_origin, angles, fov);
 

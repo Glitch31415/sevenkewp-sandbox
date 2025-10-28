@@ -50,7 +50,6 @@ void CGrenade::Explode( Vector vecSrc, Vector vecAim )
 // UNDONE: temporary scorching for PreAlpha - find a less sleazy permenant solution.
 void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 {
-
 	pev->model = iStringNull;//invisible
 	pev->solid = SOLID_NOT;// intangible
 
@@ -75,7 +74,7 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 				pev->origin = tr.vecEndPos;
 		}
 	}
-	//pev->origin.z = pev->origin.z-1;
+
 	int iContents = UTIL_PointContents ( pev->origin );
 	
 	int spr = iContents != CONTENTS_WATER ? g_sModelIndexFireball : g_sModelIndexWExplosion;
@@ -215,9 +214,7 @@ void CGrenade::ExplodeTouch( CBaseEntity *pOther )
 
 	pev->enemy = pOther->edict();
 
-
 	vecSpot = pev->origin - pev->velocity.Normalize() * 32;
-
 	UTIL_TraceLine( vecSpot, vecSpot + pev->velocity.Normalize() * 64, ignore_monsters, ENT(pev), &tr );
 
 	Explode( &tr, DMG_BLAST );

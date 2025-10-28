@@ -245,8 +245,7 @@ int CBaseEntity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, flo
 	pev->health -= flDamage;
 	if (pev->health <= 0)
 	{
-		//Killed(pevAttacker, GIB_NORMAL);
-		Killed(pevAttacker, GIB_NEVER);
+		Killed(pevAttacker, GIB_NORMAL);
 
 		if (IsMonster()) {
 			g_pGameRules->DeathNotice((CBaseMonster*)this, pevAttacker, pevInflictor);
@@ -905,9 +904,8 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 		Vector vecEnd;
 
 		vecEnd = vecSrc + vecDir * flDistance;
-		bool ahs = false;
-		while (ahs == false) {
 		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
+
 		tracer = 0;
 		if (iTracerFreq != 0 && (tracerCount++ % iTracerFreq) == 0)
 		{
@@ -936,9 +934,8 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 			}
 		}
 		// do damage, paint decals
-		if (tr.flFraction != 1.0 && (CBaseEntity::Instance(tr.pHit)->pev->rendermode == kRenderNormal or CBaseEntity::Instance(tr.pHit)->IsBreakable()))
+		if (tr.flFraction != 1.0)
 		{
-			ahs = true;
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
 
 			if (iDamage)
@@ -989,18 +986,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 					break;
 				}
 			}
-			
 		}
-			vecSrc = tr.vecEndPos + (vecDir*0.01); // this is so inefficient lmao
-			if (vecSrc.Length() > 16384) {
-				ahs = true;
-			}
-			vecEnd = vecSrc + vecDir * flDistance;
-		}
-		
-
-
-
 		// make bullet trails
 		UTIL_BubbleTrail(vecSrc, tr.vecEndPos, (flDistance * tr.flFraction) / 64.0);
 	}
@@ -1025,7 +1011,7 @@ EHANDLE g_debugCycler;
 
 Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDirShooting,
 	Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage,
-	entvars_t* pevAttacker, int shared_rand, Vector* vecEndOut, bool sevenkewpEvent)
+	entvars_t* pevAttacker, int shared_rand, Vector* vecEndOut, BULLET_PREDICTION prediction)
 {
 	TraceResult tr;
 	Vector vecRight = gpGlobals->v_right;
@@ -1055,9 +1041,7 @@ Vector CBaseEntity::FireBulletsPlayer(ULONG cShots, Vector vecSrc, Vector vecDir
 		Vector vecEnd;
 
 		vecEnd = vecSrc + vecDir * flDistance;
-		bool ahs = false;
-		while (ahs == false) {
-UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
+		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
 
 		if (vecEndOut) {
 			*vecEndOut = tr.vecEndPos;
@@ -1069,9 +1053,8 @@ UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr
 		}
 
 		// do damage, paint decals
-		if (tr.flFraction != 1.0 && (CBaseEntity::Instance(tr.pHit)->pev->rendermode == kRenderNormal or CBaseEntity::Instance(tr.pHit)->IsBreakable()))
+		if (tr.flFraction != 1.0)
 		{
-			ahs = true;
 			CBaseEntity* pEntity = CBaseEntity::Instance(tr.pHit);
 			
 			// lag compensation debug code (shows a trace and monster state for misses)
@@ -1126,7 +1109,17 @@ UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr
 			}
 			*/
 
-			DecalGunshot(&tr, iBulletType, true, vecSrc, vecEnd, sevenkewpEvent ? edict() : NULL);
+			if (prediction != BULLETPRED_EVENT) {
+				bool attackerPredictsDecals = prediction == BULLETPRED_EVENTLESS;
+				DecalGunshot(&tr, iBulletType, true, vecSrc, vecEnd, attackerPredictsDecals ? edict() : NULL);
+			}
+			else {
+				// clients will simulate decals when they get the event message, but body impacts
+				// need to be confirmed and sent server-side
+				if (tr.pHit->v.flags & (FL_MONSTER | FL_CLIENT))
+					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType, tr.pHit);
+			}
+			
 
 			if (iDamage)
 			{
@@ -1136,20 +1129,20 @@ UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr
 			{
 			default:
 			case BULLET_PLAYER_9MM:
-				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_9mm_bullet)* UTIL_SharedRandomFloat( shared_rand, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
+				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_9mm_bullet), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_PLAYER_MP5:
-				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_9mmAR_bullet)* UTIL_SharedRandomFloat( shared_rand, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
+				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_9mmAR_bullet), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_PLAYER_BUCKSHOT:
 				// make distance based!
-				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_buckshot)* UTIL_SharedRandomFloat( shared_rand, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
+				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_buckshot), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_PLAYER_357:
-				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_357_bullet)* UTIL_SharedRandomFloat( shared_rand, 0.9, 1.1 ), vecDir, &tr, DMG_BULLET);
+				pEntity->TraceAttack(pevAttacker, GetDamage(gSkillData.sk_plr_357_bullet), vecDir, &tr, DMG_BULLET);
 				break;
 
 			case BULLET_NONE: // FIX 
@@ -1158,21 +1151,12 @@ UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr
 				// only decal glass
 				if (!FNullEnt(tr.pHit) && VARS(tr.pHit)->rendermode != 0)
 				{
-					
 					UTIL_DecalTrace(&tr, DECAL_GLASSBREAK1 + RANDOM_LONG(0, 2));
 				}
 
 				break;
 			}
 		}
-			vecSrc = tr.vecEndPos + (vecDir*0.01); // this is so inefficient lmao
-
-			if (vecSrc.Length() > 16384) {
-				ahs = true;
-			}
-			vecEnd = vecSrc + vecDir * flDistance;
-		}
-		
 		// make bullet trails
 		UTIL_BubbleTrail(vecSrc, tr.vecEndPos, (flDistance * tr.flFraction) / 64.0);
 	}
@@ -1615,21 +1599,28 @@ Vector CBaseEntity::GetLookDirection() {
 void CBaseEntity::GiveScorePoints(entvars_t* pevAttacker, float damageDealt) {
 	CBaseEntity* baseEnt = CBaseEntity::Instance(pevAttacker);
 	CBaseMonster* attackMon = baseEnt ? baseEnt->MyMonsterPointer() : NULL;
-	
+
+	if (pevAttacker == pev) {
+		return;
+	}
+
 	// give points proportional to how much damage will be dealt, ignoring overkill damage
 	if (attackMon && (pevAttacker->flags & FL_CLIENT) && pev->health > 0) {
-		const float MONSTER_POINTS_PER_HP = 0.01f; // how many points to give per hitpoint of damage dealt
-		// float damageAmt = damageDealt > 0 ? V_min(damageDealt, pev->health) : V_min(damageDealt, pev->max_health - pev->health);
-		// bool isFriendly = attackMon->IRelationship(this) == R_AL;
-		pevAttacker->frags += damageDealt * 1 * MONSTER_POINTS_PER_HP;
-		if (std::isnan(pevAttacker->frags) || pevAttacker->frags > 30000) {
-			pevAttacker->frags = 30000;
+		float damageAmt = damageDealt > 0 ? V_min(damageDealt, pev->health) : V_min(damageDealt, pev->max_health - pev->health);
+		float multiplier = attackMon->IsPlayer() ? ((CBasePlayer*)attackMon)->m_scoreMultiplier : 1.0f;
+		bool isFriendly = attackMon->IRelationship(this) == R_AL;
+
+		if (isFriendly) {
+			// always take full penalty for friendly fire
+			multiplier = 1.0f;
 		}
+
+		pevAttacker->frags += damageAmt * (isFriendly ? -1 : 1) * mp_damage_points.value * multiplier;
+
 		CBaseMonster* selfMon = MyMonsterPointer();
 		if (selfMon) {
-			selfMon->LogPlayerDamage(pevAttacker, damageDealt);
+			selfMon->LogPlayerDamage(pevAttacker, damageAmt);
 		}
-		
 	}
 }
 

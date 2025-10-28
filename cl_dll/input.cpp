@@ -21,8 +21,12 @@ extern "C"
 #include <string.h>
 #include <ctype.h>
 #include "Exports.h"
+#include "pm_shared.h"
 
 #include "vgui_TeamFortressViewport.h"
+
+#include "parsemsg.h"
+#include <stdio.h>
 
 
 extern int g_iAlive;
@@ -64,6 +68,15 @@ cvar_t	*cl_yawspeed;
 cvar_t	*cl_pitchspeed;
 cvar_t	*cl_anglespeedkey;
 cvar_t	*cl_vsmoothing;
+
+//cvar_t *cl_waah = gEngfuncs.pfnRegisterVariable ( "cl_waah", "0", FCVAR_ARCHIVE );
+
+
+//gEngfuncs.pfnRegisterVariable ( "cl_ctoggleprinttest", "0", FCVAR_ARCHIVE );
+
+
+//= CVAR_CREATE("cl_waah", "0", 0);
+
 /*
 ===============================================================================
 
@@ -120,6 +133,37 @@ typedef struct kblist_s
 } kblist_t;
 
 kblist_t *g_kbkeys = NULL;
+
+namespace autofuncs
+{
+static void HandleAutojump(usercmd_t *cmd)
+{
+	static bool s_bJumpWasDownLastFrame = false;
+
+	bool inWater = PM_GetWaterLevel() > 1;
+	bool isWalking = PM_GetMoveType() == MOVETYPE_WALK;
+	//bool shouldReleaseDuck = (!PM_GetOnGround() && !inWater && isWalking);
+
+	//if (CVAR_GET_STRING("cl_waah") == "1")
+	//{
+		bool shouldReleaseJump = (!PM_GetOnGround() && !inWater && isWalking);
+
+		/*
+		 * Spam pressing and releasing jump if we're stuck in a spot where jumping still results in
+		 * being onground in the end of the frame. Without this check, +jump would remain held and
+		 * when the player exits this spot they would have to release and press the jump button to
+		 * start jumping again. This also helps with exiting water or ladder right onto the ground.
+		 */
+		if (s_bJumpWasDownLastFrame && PM_GetOnGround() && !inWater && isWalking)
+			shouldReleaseJump = true;
+
+		if (shouldReleaseJump)
+			cmd->buttons &= ~IN_JUMP;
+	//}
+
+	s_bJumpWasDownLastFrame = ((cmd->buttons & IN_JUMP) != 0);
+}
+}
 
 bool IN_InvertMouse()
 {
@@ -479,13 +523,20 @@ void IN_JumpDown (void)
 
 }
 void IN_JumpUp (void) {KeyUp(&in_jump);}
+
 void IN_DuckDown(void)
 {
 	KeyDown(&in_duck);
 	gHUD.m_Spectator.HandleButtonsDown( IN_DUCK );
-
+	if ((int)CVAR_GET_FLOAT("cl_ctoggleprinttest") == 1) {
+		ConsolePrint("crouching\n");
+	}
 }
-void IN_DuckUp(void) {KeyUp(&in_duck);}
+void IN_DuckUp(void) { KeyUp(&in_duck); 
+if ((int)CVAR_GET_FLOAT("cl_ctoggleprinttest") == 1) {
+		ConsolePrint("not crouching\n");
+}
+}
 void IN_ReloadDown(void) {KeyDown(&in_reload);}
 void IN_ReloadUp(void) {KeyUp(&in_reload);}
 void IN_Alt1Down(void) {KeyDown(&in_alt1);}
@@ -738,6 +789,10 @@ void CL_DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int ac
 	//
 	cmd->buttons = CL_ButtonBits( 1 );
 
+
+	autofuncs::HandleAutojump(cmd); // maybe works?
+
+
 	// If they're in a modal dialog, ignore the attack button.
 	if(GetClientVoiceMgr()->IsInSquelchMode())
 		cmd->buttons &= ~IN_ATTACK;
@@ -983,6 +1038,7 @@ void InitInput (void)
 	gEngfuncs.pfnAddCommand ("-graph", IN_GraphUp);
 	gEngfuncs.pfnAddCommand ("+break",IN_BreakDown);
 	gEngfuncs.pfnAddCommand ("-break",IN_BreakUp);
+	CVAR_CREATE ( "cl_ctoggleprinttest", "0", 0 );
 
 	lookstrafe			= gEngfuncs.pfnRegisterVariable ( "lookstrafe", "0", FCVAR_ARCHIVE );
 	lookspring			= gEngfuncs.pfnRegisterVariable ( "lookspring", "0", FCVAR_ARCHIVE );

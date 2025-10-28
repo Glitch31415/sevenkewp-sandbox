@@ -114,7 +114,7 @@ void CMedkit::WeaponIdle()
 
 	if (m_reviveChargedTime) {
 		m_reviveChargedTime = 0;
-		m_flNextSecondaryAttack = GetNextAttackDelay(1.0f);
+		m_flNextSecondaryAttack = GetNextAttackDelay(0.5f);
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "items/medshotno1.wav", 1, ATTN_NORM);
 	}
 
@@ -163,12 +163,8 @@ void CMedkit::PrimaryAttack()
 
 	CBaseMonster* mon = tr.pHit ? CBaseEntity::Instance(tr.pHit)->MyMonsterPointer() : NULL;
 	int ammoLeft = m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType];
-	if (!mon) {
-		mon = m_pPlayer;
-	}
-	if (ammoLeft <= 0) {
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "items/medshotno1.wav", 1, ATTN_NORM);
-		m_flNextPrimaryAttack = GetNextAttackDelay(1.0f);
+
+	if (!mon || ammoLeft <= 0) {
 		return;
 	}
 
@@ -190,10 +186,6 @@ void CMedkit::PrimaryAttack()
 		m_pPlayer->m_iWeaponVolume = MEDKIT_VOLUME;
 
 		mon->TakeHealth(healAmount, DMG_MEDKITHEAL);
-		if ((IRelationship(m_pPlayer->Classify(), mon->Classify()) != R_AL) && (IRelationship(m_pPlayer->Classify(), mon->Classify()) != R_NO)) {
-			mon->SetClassify(CLASS_PLAYER_ALLY);
-			mon->m_IsPlayerAlly = TRUE;
-		}
 		mon->GiveScorePoints(m_pPlayer->pev, -healAmount);
 
 		CTalkSquadMonster* talkMon = mon->MyTalkSquadMonsterPointer();
@@ -210,11 +202,7 @@ void CMedkit::PrimaryAttack()
 		
 		EMIT_SOUND_DYN(m_pPlayer->edict(), CHAN_WEAPON, "items/medshot4.wav", 1, ATTN_NORM, 0, pitch);
 
-		m_flNextPrimaryAttack = GetNextAttackDelay(1.0f);
-	}
-	else {
-		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "items/medshotno1.wav", 1, ATTN_NORM);
-		m_flNextPrimaryAttack = GetNextAttackDelay(1.0f);
+		m_flNextPrimaryAttack = GetNextAttackDelay(0.5f);
 	}
 }
 
@@ -228,7 +216,7 @@ void CMedkit::SecondaryAttack()
 
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= gSkillData.sk_plr_medkit_revive_cost) {
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "items/medshotno1.wav", 1, ATTN_NORM);
-		m_flNextSecondaryAttack = GetNextAttackDelay(1.0f);
+		m_flNextSecondaryAttack = GetNextAttackDelay(0.5f);
 		m_reviveChargedTime = 0;
 		return;
 	}
@@ -268,7 +256,7 @@ void CMedkit::SecondaryAttack()
 
 	if (!bestTarget) {
 		EMIT_SOUND(m_pPlayer->edict(), CHAN_ITEM, "items/medshotno1.wav", 1, ATTN_NORM);
-		m_flNextSecondaryAttack = GetNextAttackDelay(1.0f);
+		m_flNextSecondaryAttack = GetNextAttackDelay(0.5f);
 		m_reviveChargedTime = 0;
 		return;
 	}
@@ -293,11 +281,8 @@ void CMedkit::SecondaryAttack()
 		m_flNextSecondaryAttack = GetNextAttackDelay(2.0f);
 
 		bestTarget->Revive();
-		bestTarget->pev->health = V_min(bestTarget->pev->max_health, 1);
-		if ((IRelationship(m_pPlayer->Classify(), bestTarget->Classify()) != R_AL) && (IRelationship(m_pPlayer->Classify(), bestTarget->Classify()) != R_NO)) {
-			bestTarget->SetClassify(CLASS_PLAYER_ALLY);
-			bestTarget->m_IsPlayerAlly = TRUE;
-		}
+		bestTarget->pev->health = V_min(bestTarget->pev->max_health, 50);
+
 		bestTarget->GiveScorePoints(m_pPlayer->pev, -bestTarget->pev->health);
 
 		CTalkSquadMonster* talkMon = bestTarget->MyTalkSquadMonsterPointer();

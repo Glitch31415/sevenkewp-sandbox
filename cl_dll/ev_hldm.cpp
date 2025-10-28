@@ -75,15 +75,18 @@ void EV_SnarkFire( struct event_args_s *args  );
 void EV_TrainPitchAdjust( struct event_args_s *args );
 }
 
-#define VECTOR_CONE_9MMAR Vector( 0.00057883, 0.00057883, 0.00057883 )
-#define VECTOR_CONE_357 Vector( 0.00123002083, 0.00123002083, 0.00123002083 )
-#define VECTOR_CONE_9MMPISTOL Vector( 0.0023153, 0.0023153, 0.0023153 )
-#define VECTOR_CONE_0125DEGREES  Vector( 0.00109, 0.00109, 0.00109 )
-#define VECTOR_CONE_025DEGREES  Vector( 0.00218, 0.00218, 0.00218 )
-#define VECTOR_CONE_05DEGREES   Vector( 0.00436, 0.00436, 0.00436 )
-#define VECTOR_CONE_1DEGREES	Vector( 0.0086825, 0.0086825, 0.0086825 )
-
-
+#define VECTOR_CONE_1DEGREES Vector( 0.00873, 0.00873, 0.00873 )
+#define VECTOR_CONE_2DEGREES Vector( 0.01745, 0.01745, 0.01745 )
+#define VECTOR_CONE_3DEGREES Vector( 0.02618, 0.02618, 0.02618 )
+#define VECTOR_CONE_4DEGREES Vector( 0.03490, 0.03490, 0.03490 )
+#define VECTOR_CONE_5DEGREES Vector( 0.04362, 0.04362, 0.04362 )
+#define VECTOR_CONE_6DEGREES Vector( 0.05234, 0.05234, 0.05234 )
+#define VECTOR_CONE_7DEGREES Vector( 0.06105, 0.06105, 0.06105 )	
+#define VECTOR_CONE_8DEGREES Vector( 0.06976, 0.06976, 0.06976 )
+#define VECTOR_CONE_9DEGREES Vector( 0.07846, 0.07846, 0.07846 )
+#define VECTOR_CONE_10DEGREES Vector( 0.08716, 0.08716, 0.08716 )
+#define VECTOR_CONE_15DEGREES Vector( 0.13053, 0.13053, 0.13053 )
+#define VECTOR_CONE_20DEGREES Vector( 0.17365, 0.17365, 0.17365 )
 
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the
@@ -505,7 +508,7 @@ void EV_FireGlock1( event_args_t *args )
 	
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_9MM, 0, 0, 0.00873, 0.00873 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 0, 0, args->fparam1, args->fparam2 );
 }
 
 void EV_FireGlock2( event_args_t *args )
@@ -550,7 +553,7 @@ void EV_FireGlock2( event_args_t *args )
 	
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_9MM, 0, &tracerCount[idx-1], 0.02618, 0.02618 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_9MM, 0, &tracerCount[idx-1], args->fparam1, args->fparam2 );
 	
 }
 //======================
@@ -607,11 +610,11 @@ void EV_FireShotGunDouble( event_args_t *args )
 
 	if ( gEngfuncs.GetMaxClients() > 1 )
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 18, vecSrc, vecAiming, 131072, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.01745, 0.01745 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 8, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.17365, 0.04362 );
 	}
 	else
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 18, vecSrc, vecAiming, 131072, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.01745, 0.01745 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.08716, 0.08716 );
 	}
 }
 
@@ -659,11 +662,11 @@ void EV_FireShotGunSingle( event_args_t *args )
 
 	if ( gEngfuncs.GetMaxClients() > 1 )
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 9, vecSrc, vecAiming, 131072, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.01745, 0.01745 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 4, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.08716, 0.04362 );
 	}
 	else
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 9, vecSrc, vecAiming, 131072, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.01745, 0.01745 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 6, vecSrc, vecAiming, 2048, BULLET_PLAYER_BUCKSHOT, 0, &tracerCount[idx-1], 0.08716, 0.08716 );
 	}
 }
 //======================
@@ -724,11 +727,11 @@ void EV_FireMP5( event_args_t *args )
 
 	if ( gEngfuncs.GetMaxClients() > 1 )
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_MP5, 2, &tracerCount[idx-1], 0.00109, 0.00109 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
 	}
 	else
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_MP5, 2, &tracerCount[idx-1], 0.00109, 0.00109 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
 	}
 }
 
@@ -810,7 +813,7 @@ void EV_FirePython( event_args_t *args )
 	
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 131072, BULLET_PLAYER_357, 0, 0, 0.00218, 0.00218 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_357, 0, 0, args->fparam1, args->fparam2 );
 }
 //======================
 //	    PHYTON END 
@@ -876,7 +879,9 @@ void EV_FireGauss( event_args_t *args )
 	pmtrace_t tr, beam_tr;
 	float flMaxFrac = 1.0;
 	int	nTotal = 0;
+	int fHasPunched = 0;
 	int fFirstBeam = 1;
+	int	nMaxHits = 10;
 	physent_t *pEntity;
 	int m_iBeam, m_iGlow, m_iBalls;
 	vec3_t up, right, forward;
@@ -900,7 +905,7 @@ void EV_FireGauss( event_args_t *args )
 	
 	AngleVectors( angles, forward, right, up );
 
-	VectorMA( vecSrc, 131072, forward, vecDest );
+	VectorMA( vecSrc, 8192, forward, vecDest );
 
 	if ( EV_IsLocal( idx ) )
 	{
@@ -914,8 +919,9 @@ void EV_FireGauss( event_args_t *args )
 
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/gauss2.wav", 0.5 + flDamage * (1.0 / 400.0), ATTN_NORM, 0, 85 + gEngfuncs.pfnRandomLong( 0, 0x1f ) );
 
-	while (flDamage > 1)
+	while (flDamage > 10 && nMaxHits > 0)
 	{
+		nMaxHits--;
 
 		gEngfuncs.pEventAPI->EV_SetUpPlayerPrediction( false, true );
 		
@@ -1028,10 +1034,15 @@ void EV_FireGauss( event_args_t *args )
 				gEngfuncs.pEfxAPI->R_TempSprite( tr.endpos, vec3_origin, 1.0, m_iGlow, kRenderGlow, kRenderFxNoDissipation, flDamage / 255.0, 6.0, FTENT_FADEOUT );
 
 				// limit it to one hole punch
+				if (fHasPunched)
+				{
+					break;
+				}
+				fHasPunched = 1;
 				
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
-				//if ( !m_fPrimaryFire )
-				//{
+				if ( !m_fPrimaryFire )
+				{
 					vec3_t start;
 
 					VectorMA( tr.endpos, 8.0, forward, start );
@@ -1096,7 +1107,25 @@ void EV_FireGauss( event_args_t *args )
 					}
 
 					gEngfuncs.pEventAPI->EV_PopPMStates();
-				//}
+				}
+				else
+				{
+					if ( m_fPrimaryFire )
+					{
+						// slug doesn't punch through ever with primary 
+						// fire, so leave a little glowy bit and make some balls
+						gEngfuncs.pEfxAPI->R_TempSprite( tr.endpos, vec3_origin, 0.2, m_iGlow, kRenderGlow, kRenderFxNoDissipation, 200.0 / 255.0, 0.3, FTENT_FADEOUT );
+			
+						{
+							vec3_t fwd;
+							VectorAdd( tr.endpos, tr.plane.normal, fwd );
+							gEngfuncs.pEfxAPI->R_Sprite_Trail( TE_SPRITETRAIL, tr.endpos, fwd, m_iBalls, 8, 0.6, gEngfuncs.pfnRandomFloat( 10, 20 ) / 100.0, 100,
+								255, 200 );
+						}
+					}
+
+					flDamage = 0;
+				}
 			}
 		}
 		else
@@ -1211,7 +1240,7 @@ void EV_FireCrossbow2( event_args_t *args )
 
 	EV_GetGunPosition( args, vecSrc, origin );
 
-	VectorMA( vecSrc, 131072, forward, vecEnd );
+	VectorMA( vecSrc, 8192, forward, vecEnd );
 
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_WEAPON, "weapons/xbow_fire1.wav", 1, ATTN_NORM, 0, 93 + gEngfuncs.pfnRandomLong(0,0xF) );
 	gEngfuncs.pEventAPI->EV_PlaySound( idx, origin, CHAN_ITEM, "weapons/xbow_reload1.wav", gEngfuncs.pfnRandomFloat(0.95, 1.0), ATTN_NORM, 0, 93 + gEngfuncs.pfnRandomLong(0,0xF) );

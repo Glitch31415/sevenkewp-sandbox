@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -228,11 +228,11 @@ void CAM_CamButtonRelease(void)
 void CAM_ToThirdPerson(void) { 
 	vec3_t viewangles;
 
-	if ( gEngfuncs.GetMaxClients() > 1 && !gHUD.IsSevenKewpServer())
-	{
+	//if ( gEngfuncs.GetMaxClients() > 1 && !gHUD.IsSevenKewpServer())
+	//{
 		// no thirdperson in multiplayer.
-		return;
-	}
+		//return;
+	//}
 
 	if (!cam_thirdperson) {
 		cam_thirdperson = 1;

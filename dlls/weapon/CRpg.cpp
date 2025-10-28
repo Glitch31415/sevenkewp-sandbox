@@ -764,7 +764,7 @@ void CRpg::UpdateSpot( void )
 		Vector vecAiming = gpGlobals->v_forward;
 
 		TraceResult tr;
-		UTIL_TraceLine ( vecSrc, vecSrc + vecAiming * 131072, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr );
+		UTIL_TraceLine ( vecSrc, vecSrc + vecAiming * 8192, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr );
 		
 		if (UTIL_PointContents(tr.vecEndPos) == CONTENTS_SKY) {
 			// back up until out of the sky, or else the client won't render the laser beam

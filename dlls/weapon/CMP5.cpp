@@ -132,65 +132,13 @@ void CMP5::PrimaryAttack()
 	if (!m_pPlayer)
 		return;
 
-	// JoshA: Sanitize this so it's not total garbage on level transition
-	// and we end up ear blasting the player!
-
-	float flDamage;
-
-	UTIL_MakeVectors( m_pPlayer->pev->v_angle + Vector(0, 0, 0) );
-	Vector vecAiming;
-	
-		vecAiming = gpGlobals->v_forward;
-	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
-	ULONG cShots = 1;
-	Vector vecSpread = VECTOR_CONE_9MMAR;
-	int shared_rand = m_pPlayer->random_seed;
-	float x, y, z;
-
-	for ( ULONG iShot = 1; iShot <= cShots; iShot++ )
-	{
-
-			//Use player's random seed.
-			// get circular gaussian spread
-			x = UTIL_SharedRandomFloat( shared_rand + iShot, -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 1 + iShot ) , -0.5, 0.5 );
-			y = UTIL_SharedRandomFloat( shared_rand + ( 2 + iShot ), -0.5, 0.5 ) + UTIL_SharedRandomFloat( shared_rand + ( 3 + iShot ), -0.5, 0.5 );
-			z = x * x + y * y;
-
-			
-	}
-    Vector spread = Vector ( x * vecSpread.x, y * vecSpread.y, 0.0 );
-	Vector vecDir = (vecAiming + spread).Normalize();
-	Vector vecDest = vecSrc + (vecDir * 8192);
-	
-	float dmg_mult = GetDamageModifier();
-
-		flDamage = gSkillData.sk_plr_9mmAR_bullet * dmg_mult * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 );
-
-
-	if (m_fInAttack != 3)
-	{
-		//ALERT ( at_console, "Time:%f Damage:%f\n", gpGlobals->time - m_pPlayer->m_flStartCharge, flDamage );
-
-		// player "shoot" animation
-		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
-	}
-
-	// time until aftershock 'static discharge' sound
-
-
-	edict_t		*pentIgnore;
-	TraceResult tr, beam_tr;
-	float flMaxFrac = 1.0;
-	int fFirstBeam = 1;
-
-	pentIgnore = m_pPlayer->edict();
 	// don't fire underwater
-	//if (m_pPlayer->pev->waterlevel == 3)
-	//{
-		//PlayEmptySound( );
-		//m_flNextPrimaryAttack = 0.15;
-		//return;
-	//}
+	if (m_pPlayer->pev->waterlevel == 3)
+	{
+		PlayEmptySound( );
+		m_flNextPrimaryAttack = 0.15;
+		return;
+	}
 
 	if (m_iClip <= 0)
 	{
@@ -210,240 +158,50 @@ void CMP5::PrimaryAttack()
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-	//Vector vecSrc	 = m_pPlayer->GetGunPosition( );
-	//Vector vecDir = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
-	  int flags;
+	Vector vecSrc	 = m_pPlayer->GetGunPosition( );
+	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
+	Vector vecDir;
+
+	lagcomp_begin(m_pPlayer);
+
+#ifdef CLIENT_DLL
+	bool isMultiPlayer = bIsMultiplayer();
+	bool isSevenKewp = false;
+#else
+	bool isMultiPlayer = g_pGameRules->IsMultiplayer();
+	bool isSevenKewp = false;
+#endif
+
+	if (isMultiPlayer)
+	{
+		if (isSevenKewp) {
+			// accuracy increase to give it an advantage over the uzi
+			// TODO: actually do this. Needs a client update.
+			vecDir = m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, VECTOR_CONE_4DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed, 0, BULLETPRED_EVENT);
+		}
+		else {
+			// optimized multiplayer. Widened to make it easier to hit a moving player
+			vecDir = m_pPlayer->FireBulletsPlayer(1, vecSrc, vecAiming, VECTOR_CONE_6DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed, 0, BULLETPRED_EVENT);
+		}
+	}
+	else
+	{
+		// single player spread
+		vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, VECTOR_CONE_3DEGREES, 8192, BULLET_PLAYER_MP5, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed, 0, BULLETPRED_EVENT);
+	}
+
+	lagcomp_end();
+
+  int flags;
 #if defined( CLIENT_WEAPONS )
 	flags = FEV_NOTHOST;
 #else
 	flags = 0;
 #endif
+
 	PLAYBACK_EVENT_FULL( flags, m_pPlayer->edict(), m_usMP5, 0.0, (float *)&g_vecZero, (float *)&g_vecZero, vecDir.x, vecDir.y, 0, 0, 0, 0 );
 
 	PLAY_DISTANT_SOUND(m_pPlayer->edict(), DISTANT_9MM);
-
-	lagcomp_begin(m_pPlayer);
-	m_pPlayer->pev->punchangle = Vector(-5, 0, 0);
-int loops = 0;
-while (flDamage > 1 && loops < 25)
-	{
-		loops = loops + 1;
-		bool sdm = true;
-		//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage begin: %f", flDamage));
-
-
-		// ALERT( at_console, "." );
-		UTIL_TraceLine(vecSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);
-
-		//if (tr.fAllSolid)
-			//break;
-
-		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
-		//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("edict: %s", pEntity->DisplayName()));
-
-		if (pEntity == NULL)
-			break;
-		
-		if ( fFirstBeam )
-		{
-			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
-			fFirstBeam = 0;
-			//te_debug_beam(vecSrc + (gpGlobals->v_up * -8) + (gpGlobals->v_forward * 36) + (gpGlobals->v_right * 4), tr.vecEndPos, 1, RGBA(255, 255, 255, flDamage), NULL, NULL);
-
-		}
-		else {
-			//te_debug_beam(vecSrc, tr.vecEndPos, 1, RGBA(255, 255, 255, flDamage), NULL, NULL);
-		}
-		float n = 0;
-		if (pEntity->pev->takedamage)
-		{
-			//UTIL_ClientPrintAll(print_chat, "hit monster");
-			if (pEntity->pev->health <= 0)
-				break;
-			ClearMultiDamage();
-
-			// if you hurt yourself clear the headshot bit
-
-			float prevmaxhealth = pEntity->pev->max_health;
-			float flpDamage = prevmaxhealth;
-			float angcheck = sin(UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0, M_PI_2));
-
-
-
-			switch ((&tr)->iHitgroup)
-			{
-			case 0:
-				//assume glass
-				pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-				ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-				flpDamage = prevmaxhealth * angcheck;
-				flDamage = flDamage - flpDamage;
-				break;
-			case 1:
-				//head
-				pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-				ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-				flpDamage = 0.6 * prevmaxhealth * angcheck;
-				flDamage = flDamage - flpDamage;
-				break;
-			case 2:
-				//chest
-				pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-				ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-				flpDamage = 1.125 * prevmaxhealth * angcheck;
-				flDamage = flDamage - flpDamage;
-				break;
-			case 3:
-				//stomach
-				pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-				ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-				flpDamage = 0.75 * prevmaxhealth * angcheck;
-				flDamage = flDamage - flpDamage;
-				break;
-			case 4:
-			case 5:
-				//left + right arm
-				pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-				ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-				flpDamage = 0.45 * prevmaxhealth * angcheck;
-				flDamage = flDamage - flpDamage;
-				break;
-			case 6:
-			case 7:
-				//left + right leg
-				pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-				ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-				flpDamage = 0.9 * prevmaxhealth * angcheck;
-				flDamage = flDamage - flpDamage;
-				break;
-			case 10:
-			case 11:
-				//armor, don't know what type, fuck
-				pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-				ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-				flpDamage = 70 * angcheck;
-				flDamage = flDamage - flpDamage;
-				break;
-			default:
-				pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-				ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-				flpDamage = 0.75 * prevmaxhealth * angcheck;
-				flDamage = flDamage - flpDamage;
-				//UTIL_ClientPrintAll(print_chat, "uh oh default");
-				break;
-			}
-
-			
-
-
-
-			//if (diffhealth < 0) {
-				//diffhealth = pEntity->pev->max_health;
-			//}
-			//if (diffhealth < pEntity->pev->max_health*0.75) {
-				//diffhealth = pEntity->pev->max_health*0.75;
-			//}
-
-			
-			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flcDamage: %f", flcDamage));
-			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flpDamage: %f", flpDamage));
-			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 1: %f", flDamage));
-			sdm = false;
-			vecSrc = tr.vecEndPos + vecDir;
-			pentIgnore = ENT( pEntity->pev );
-		}
-		else {
-		//if ( pEntity->ReflectGauss() )
-		//{
-			//pentIgnore = NULL;
-			//UTIL_ClientPrintAll(print_chat, "hit not monster");
-			n = -DotProduct(tr.vecPlaneNormal, vecDir);
-
-			if (n < 0.5) // 60 degrees
-			{
-				// ALERT( at_console, "reflect %f\n", n );
-				// reflect
-				Vector r;
-			
-				r = 2.0 * tr.vecPlaneNormal * n + vecDir;
-				flMaxFrac = flMaxFrac - tr.flFraction;
-				vecDir = r;
-				vecSrc = tr.vecEndPos + vecDir * 8;
-				vecDest = vecSrc + (vecDir * 8192);
-
-				// explode a bit
-				//m_pPlayer->RadiusDamage( tr.vecEndPos, pev, m_pPlayer->pev, flDamage * n, CLASS_NONE, DMG_BLAST );
-
-
-				
-				// lose energy
-				if (n == 0) n = 0.1;
-				flDamage = flDamage * (1 - n);
-				//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 2: %f", flDamage));
-			}
-		}
-
-
-				// limit it to one hole punch
-
-				// try punching through wall if secondary attack (primary is incapable of breaking through)
-				//if ( !m_fPrimaryFire )
-				//{
-					UTIL_TraceLine( tr.vecEndPos + vecDir * 8, vecDest, dont_ignore_monsters, pentIgnore, &beam_tr);
-					//if (!beam_tr.fAllSolid)
-					//{
-						// trace backwards to find exit point
-						UTIL_TraceLine( beam_tr.vecEndPos, tr.vecEndPos, dont_ignore_monsters, pentIgnore, &beam_tr);
-
-						n = (beam_tr.vecEndPos - tr.vecEndPos).Length( );
-
-						//if (n < flDamage)
-						//{
-							if (n == 0) n = 1;
-							if (sdm == true && pEntity->pev->rendermode == kRenderNormal) { // if not a damage-able entity and if not transparent
-									flDamage -= 7.5*n;
-
-							}
-							//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 3: %f", flDamage));
-
-							// ALERT( at_console, "punch %f\n", n );
-
-
-							// exit blast damage
-							//m_pPlayer->RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, CLASS_NONE, DMG_BLAST );
-
-							//::RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, damage_radius, CLASS_NONE, DMG_BLAST );
-
-
-
-
-							vecSrc = beam_tr.vecEndPos + vecDir;
-						//}
-					//}
-					//else
-					//{
-						 //ALERT( at_console, "blocked %f\n", n );
-						//flDamage = 0;
-					//}
-				//}
-				//else
-				//{
-					//ALERT( at_console, "blocked solid\n" );
-					
-					//flDamage = 0;
-				//}
-		//}
-		//else
-		//{
-			//vecSrc = tr.vecEndPos + vecDir;
-			//pentIgnore = ENT( pEntity->pev );
-		//}
-	}
-	
-	lagcomp_end();
-
-
-	
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition
@@ -466,12 +224,12 @@ void CMP5::SecondaryAttack( void )
 		return;
 
 	// don't fire underwater
-	//if (m_pPlayer->pev->waterlevel == 3)
-	//{
-		//PlayEmptySound( );
-		//m_flNextPrimaryAttack = 0.15;
-		//return;
-	//}
+	if (m_pPlayer->pev->waterlevel == 3)
+	{
+		PlayEmptySound( );
+		m_flNextPrimaryAttack = 0.15;
+		return;
+	}
 
 	if (m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType] == 0)
 	{
@@ -494,10 +252,9 @@ void CMP5::SecondaryAttack( void )
  	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 
 	// we don't add in player velocity anymore.
-	// yes we do
 	CGrenade::ShootContact( m_pPlayer->pev, 
 							m_pPlayer->pev->origin + m_pPlayer->pev->view_ofs + gpGlobals->v_forward * 16, 
-							(gpGlobals->v_forward * 800)+m_pPlayer->pev->velocity );
+							gpGlobals->v_forward * 800 );
 
 	int flags;
 #if defined( CLIENT_WEAPONS )

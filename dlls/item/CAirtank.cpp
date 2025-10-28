@@ -106,7 +106,7 @@ void CAirtank::TankTouch( CBaseEntity *pOther )
 	}
 		
 	// give player 12 more seconds of air
-	pOther->pev->air_finished = gpGlobals->time + 45;
+	pOther->pev->air_finished = gpGlobals->time + 12;
 
 	// suit recharge sound
 	EMIT_SOUND( ENT(pev), CHAN_VOICE, "doors/aliendoor3.wav", 1.0, ATTN_NORM );

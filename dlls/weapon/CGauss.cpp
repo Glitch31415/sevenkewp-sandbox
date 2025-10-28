@@ -62,10 +62,10 @@ float CGauss::GetFullChargeTime( void )
 	if ( g_pGameRules->IsMultiplayer() )
 #endif
 	{
-		return 5;
+		return 1.5;
 	}
 
-	return 5;
+	return 4;
 }
 
 #ifdef CLIENT_DLL
@@ -166,14 +166,14 @@ void CGauss::PrimaryAttack()
 		return;
 
 	// don't fire underwater
-	//if ( m_pPlayer->pev->waterlevel == 3 )
-	//{
-		//PlayEmptySound( );
-		//m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
-		//return;
-	//}
+	if ( m_pPlayer->pev->waterlevel == 3 )
+	{
+		PlayEmptySound( );
+		m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
+		return;
+	}
 
-	if ( m_pPlayer->m_rgAmmo[ m_iPrimaryAmmoType ] < 1 )
+	if ( m_pPlayer->m_rgAmmo[ m_iPrimaryAmmoType ] < 2 )
 	{
 		PlayEmptySound( );
 		m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
@@ -183,12 +183,12 @@ void CGauss::PrimaryAttack()
 	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 	m_fPrimaryFire = TRUE;
 
-	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= 1;
+	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= 2;
 
 	StartFire();
 	m_fInAttack = 0;
 	m_flTimeWeaponIdle = UTIL_WeaponTimeBase() + 1.0;
-	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.02	;
+	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.2;
 }
 
 void CGauss::SecondaryAttack()
@@ -202,22 +202,22 @@ void CGauss::SecondaryAttack()
 	m_pPlayer->m_flStartCharge = V_min(m_pPlayer->m_flStartCharge, gpGlobals->time);
 
 	// don't fire underwater
-	//if ( m_pPlayer->pev->waterlevel == 3 )
-	//{
-		//if ( m_fInAttack != 0 )
-		//{
-			//EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/electro4.wav", 1.0, ATTN_NORM, 0, 80 + RANDOM_LONG(0,0x3f));
-			//SendWeaponAnim( GAUSS_IDLE );
-			//m_fInAttack = 0;
-		//}
-		//else
-		//{
-			//PlayEmptySound( );
-		//}
+	if ( m_pPlayer->pev->waterlevel == 3 )
+	{
+		if ( m_fInAttack != 0 )
+		{
+			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/electro4.wav", 1.0, ATTN_NORM, 0, 80 + RANDOM_LONG(0,0x3f));
+			SendWeaponAnim( GAUSS_IDLE );
+			m_fInAttack = 0;
+		}
+		else
+		{
+			PlayEmptySound( );
+		}
 
-		//m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
-		//return;
-	//}
+		m_flNextSecondaryAttack = m_flNextPrimaryAttack = GetNextAttackDelay(0.5);
+		return;
+	}
 
 	if ( m_fInAttack == 0 )
 	{
@@ -266,7 +266,7 @@ void CGauss::SecondaryAttack()
 #endif
 			{
 				m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
-				m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase() + 0.3;
+				m_pPlayer->m_flNextAmmoBurn = UTIL_WeaponTimeBase() + 0.1;
 			}
 			else
 			{
@@ -355,13 +355,13 @@ void CGauss::StartFire( void )
 	m_pPlayer->m_flStartCharge = V_min(m_pPlayer->m_flStartCharge, gpGlobals->time);
 
 	float flDamage = 20;
-	float secondaryBaseDamage = 1000;
+	float secondaryBaseDamage = 200;
 	
 #ifndef CLIENT_DLL
 	secondaryBaseDamage = gSkillData.sk_plr_secondarygauss;
 #endif
 
-	UTIL_MakeVectors( m_pPlayer->pev->v_angle );
+	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 	Vector vecAiming = gpGlobals->v_forward;
 	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
 
@@ -371,11 +371,11 @@ void CGauss::StartFire( void )
 
 	if ( gpGlobals->time - m_pPlayer->m_flStartCharge > GetFullChargeTime() )
 	{
-		flDamage = secondaryBaseDamage * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 );
+		flDamage = secondaryBaseDamage;
 	}
 	else
 	{
-		flDamage = secondaryBaseDamage * UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0.9, 1.1 ) *
+		flDamage = secondaryBaseDamage *
 			(( gpGlobals->time - m_pPlayer->m_flStartCharge) / GetFullChargeTime() );
 	}
 
@@ -397,7 +397,7 @@ void CGauss::StartFire( void )
 
 		if ( !m_fPrimaryFire )
 		{
-			m_pPlayer->pev->velocity = m_pPlayer->pev->velocity - gpGlobals->v_forward * flDamage;
+			m_pPlayer->pev->velocity = m_pPlayer->pev->velocity - gpGlobals->v_forward * flDamage * 5;
 		}
 
 		if ( !g_pGameRules->IsMultiplayer() )
@@ -426,20 +426,22 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 
 	Vector vecSrc = vecOrigSrc;
-	Vector vecDest = vecSrc + (vecDir * 8192);
+	Vector vecDest = vecSrc + vecDir * 8192;
 	edict_t		*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
 	int	nTotal = 0;
+	int fHasPunched = 0;
 	int fFirstBeam = 1;
+	int	nMaxHits = 10;
 
 	pentIgnore = m_pPlayer->edict();
 
 #ifdef CLIENT_DLL
-	//if ( m_fPrimaryFire == false )
+	if ( m_fPrimaryFire == false )
 		 g_irunninggausspred = true;
 #endif
-
+	
 	// The main firing event is sent unreliably so it won't be delayed.
 	PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), m_usGaussFire, 0.0, (float *)&m_pPlayer->pev->origin, (float *)&m_pPlayer->pev->angles, flDamage, 0.0, 0, 0, m_fPrimaryFire ? 1 : 0, 0 );
 
@@ -459,23 +461,18 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 
 #ifndef CLIENT_DLL
 	lagcomp_begin(m_pPlayer);
-	m_pPlayer->pev->punchangle = Vector(-7.5, 0, 0);
-int loops = 0;
-while (flDamage > 1 && loops < 25)
-	{
-		loops = loops + 1;
-		bool sdm = true;
-		//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage begin: %f", flDamage));
 
+	while (flDamage > 10 && nMaxHits > 0)
+	{
+		nMaxHits--;
 
 		// ALERT( at_console, "." );
 		UTIL_TraceLine(vecSrc, vecDest, dont_ignore_monsters, pentIgnore, &tr);
 
-		//if (tr.fAllSolid)
-			//break;
+		if (tr.fAllSolid)
+			break;
 
 		CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
-		//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("edict: %s", pEntity->DisplayName()));
 
 		if (pEntity == NULL)
 			break;
@@ -485,120 +482,30 @@ while (flDamage > 1 && loops < 25)
 			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = 0;
 	
-
+			nTotal += 26;
 		}
-		float n = 0;
+		
 		if (pEntity->pev->takedamage)
 		{
-			//UTIL_ClientPrintAll(print_chat, "hit monster");
-			if (pEntity->pev->health <= 0)
-				break;
 			ClearMultiDamage();
 
 			// if you hurt yourself clear the headshot bit
+			if (m_pPlayer->pev == pEntity->pev)
+			{
+				tr.iHitgroup = 0;
+			}
 
-			float prevmaxhealth = pEntity->pev->max_health;
-			float flpDamage = prevmaxhealth;
-			float angcheck = sin(UTIL_SharedRandomFloat( m_pPlayer->random_seed, 0, M_PI_2));
-
-
-
-switch ((&tr)->iHitgroup)
-{
-case 0:
-	//assume glass
-	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
-	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = prevmaxhealth * angcheck;
-	flDamage = flDamage - flpDamage;
-	break;
-case 1:
-	//head
-	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
-	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 0.6 * prevmaxhealth * angcheck;
-	flDamage = flDamage - flpDamage;
-	break;
-case 2:
-	//chest
-	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
-	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 1.125 * prevmaxhealth * angcheck;
-	flDamage = flDamage - flpDamage;
-	break;
-case 3:
-	//stomach
-	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
-	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 0.75 * prevmaxhealth * angcheck;
-	flDamage = flDamage - flpDamage;
-	break;
-case 4:
-case 5:
-	//left + right arm
-	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
-	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 0.45 * prevmaxhealth * angcheck;
-	flDamage = flDamage - flpDamage;
-	break;
-case 6:
-case 7:
-	//left + right leg
-	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
-	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 0.9 * prevmaxhealth * angcheck;
-	flDamage = flDamage - flpDamage;
-	break;
-case 10:
-case 11:
-	//armor, don't know what type, fuck
-	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
-	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 70 * angcheck;
-	flDamage = flDamage - flpDamage;
-	break;
-default:
-	DecalGunshot(&tr, BULLET_PLAYER_357, true, vecSrc, tr.vecEndPos, NULL);
-	pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
-	ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
-	flpDamage = 0.75 * prevmaxhealth * angcheck;
-	flDamage = flDamage - flpDamage;
-	//UTIL_ClientPrintAll(print_chat, "uh oh default");
-	break;
-}
-
-			
-
-
-
-			//if (diffhealth < 0) {
-				//diffhealth = pEntity->pev->max_health;
-			//}
-			//if (diffhealth < pEntity->pev->max_health*0.75) {
-				//diffhealth = pEntity->pev->max_health*0.75;
-			//}
-
-			
-			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flcDamage: %f", flcDamage));
-			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flpDamage: %f", flpDamage));
-			//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 1: %f", flDamage));
-			sdm = false;
-			vecSrc = tr.vecEndPos + vecDir;
-			pentIgnore = ENT( pEntity->pev );
+			if (tr.pHit->v.flags & (FL_MONSTER | FL_CLIENT))
+				TEXTURETYPE_PlaySound(&tr, vecSrc, tr.vecEndPos, BULLET_PLAYER_357, tr.pHit);
+			pEntity->TraceAttack( m_pPlayer->pev, flDamage, vecDir, &tr, DMG_BULLET );
+			ApplyMultiDamage(m_pPlayer->pev, m_pPlayer->pev);
 		}
-		else {
-		//if ( pEntity->ReflectGauss() )
-		//{
-			//pentIgnore = NULL;
-			//UTIL_ClientPrintAll(print_chat, "hit not monster");
-			n = -DotProduct(tr.vecPlaneNormal, vecDir);
+
+		if ( pEntity->ReflectGauss() )
+		{
+			pentIgnore = NULL;
+
+			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
 
 			if (n < 0.5) // 60 degrees
 			{
@@ -610,75 +517,88 @@ default:
 				flMaxFrac = flMaxFrac - tr.flFraction;
 				vecDir = r;
 				vecSrc = tr.vecEndPos + vecDir * 8;
-				vecDest = vecSrc + (vecDir * 8192);
+				vecDest = vecSrc + vecDir * 8192;
 
 				// explode a bit
-				//m_pPlayer->RadiusDamage( tr.vecEndPos, pev, m_pPlayer->pev, flDamage * n, CLASS_NONE, DMG_BLAST );
+				m_pPlayer->RadiusDamage( tr.vecEndPos, pev, m_pPlayer->pev, flDamage * n, CLASS_NONE, DMG_BLAST );
 
-
+				nTotal += 34;
 				
 				// lose energy
 				if (n == 0) n = 0.1;
 				flDamage = flDamage * (1 - n);
-				//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 2: %f", flDamage));
 			}
-		}
-
+			else
+			{
+				nTotal += 13;
 
 				// limit it to one hole punch
+				if (fHasPunched)
+					break;
+				fHasPunched = 1;
 
 				// try punching through wall if secondary attack (primary is incapable of breaking through)
-				//if ( !m_fPrimaryFire )
-				//{
+				if ( !m_fPrimaryFire )
+				{
 					UTIL_TraceLine( tr.vecEndPos + vecDir * 8, vecDest, dont_ignore_monsters, pentIgnore, &beam_tr);
-					//if (!beam_tr.fAllSolid)
-					//{
+					if (!beam_tr.fAllSolid)
+					{
 						// trace backwards to find exit point
 						UTIL_TraceLine( beam_tr.vecEndPos, tr.vecEndPos, dont_ignore_monsters, pentIgnore, &beam_tr);
 
 						n = (beam_tr.vecEndPos - tr.vecEndPos).Length( );
 
-						//if (n < flDamage)
-						//{
+						if (n < flDamage)
+						{
 							if (n == 0) n = 1;
-							if (sdm == true && pEntity->pev->rendermode == kRenderNormal) { // if not a damage-able entity and if not transparent
-									flDamage -= 7.5*n;
-
-							}
-							//UTIL_ClientPrintAll(print_chat, UTIL_VarArgs("flDamage 3: %f", flDamage));
+							flDamage -= n;
 
 							// ALERT( at_console, "punch %f\n", n );
-
+							nTotal += 21;
 
 							// exit blast damage
 							//m_pPlayer->RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, CLASS_NONE, DMG_BLAST );
+							float damage_radius;
+							
 
-							//::RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, damage_radius, CLASS_NONE, DMG_BLAST );
+							if ( g_pGameRules->IsMultiplayer() )
+							{
+								damage_radius = flDamage * 1.75;  // Old code == 2.5
+							}
+							else
+							{
+								damage_radius = flDamage * 2.5;
+							}
 
+							::RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, damage_radius, CLASS_NONE, DMG_BLAST );
 
+							CSoundEnt::InsertSound ( bits_SOUND_COMBAT, pev->origin, NORMAL_EXPLOSION_VOLUME, 3.0 );
 
+							nTotal += 53;
 
 							vecSrc = beam_tr.vecEndPos + vecDir;
-						//}
-					//}
-					//else
-					//{
+						}
+					}
+					else
+					{
 						 //ALERT( at_console, "blocked %f\n", n );
-						//flDamage = 0;
-					//}
-				//}
-				//else
-				//{
+						flDamage = 0;
+					}
+				}
+				else
+				{
 					//ALERT( at_console, "blocked solid\n" );
 					
-					//flDamage = 0;
-				//}
-		//}
-		//else
-		//{
-			//vecSrc = tr.vecEndPos + vecDir;
-			//pentIgnore = ENT( pEntity->pev );
-		//}
+					flDamage = 0;
+				}
+
+			}
+		}
+		else
+		{
+			vecSrc = tr.vecEndPos + vecDir;
+			pentIgnore = ENT( pEntity->pev );
+		}
 	}
 	
 	lagcomp_end();

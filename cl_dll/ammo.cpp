@@ -62,6 +62,7 @@ client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes
 WeaponsResource gWR;
 
 int g_weaponselect = 0;
+const char* sevenkewpVersion = "test";
 
 void WeaponsResource :: LoadAllWeaponSprites( void )
 {
@@ -424,6 +425,8 @@ int CHudAmmo::VidInit(void)
 	giABHeight = 2 * nScale;
 
 	ResetCustomWeaponStates();
+
+	sevenkewpVersion = gEngfuncs.ServerInfo_ValueForKey("skv");
 
 	return 1;
 }
@@ -1303,6 +1306,8 @@ int CHudAmmo::Draw(float flTime)
 	int a, x, y, r, g, b;
 	int AmmoWidth;
 
+	DrawDynamicCrosshair();
+
 	if (!(gHUD.m_iWeaponBits & (1ULL<<(WEAPON_SUIT)) ))
 		return 1;
 
@@ -1322,8 +1327,6 @@ int CHudAmmo::Draw(float flTime)
 		return 0;
 
 	WEAPON *pw = m_pWeapon; // shorthand
-
-	DrawDynamicCrosshair();
 
 	// SPR_Draw Ammo
 	if ((pw->iAmmoType < 0) && (pw->iAmmo2Type < 0))
@@ -1475,7 +1478,7 @@ void DrawCrossHair(float accuracyX, float accuracyY, int len, int thick, int bor
 	if (gapX == minGap && gapY == minGap) {
 		//len *= 0.75f;
 	}
-	a = 200;
+	a = 255;
 	
 
 	if (border > 0) {
@@ -1497,7 +1500,7 @@ void DrawCrossHair(float accuracyX, float accuracyY, int len, int thick, int bor
 		gEngfuncs.pfnFillRGBABlend(centerX - bhthick, centerY - bhthick, bthick, bthick, r, g, b, a);
 	}
 
-	UnpackRGB(r, g, b, RGB_YELLOWISH);
+	UnpackRGB(r, g, b, RGB_PINKISH);
 
 	// horizontal
 	gEngfuncs.pfnFillRGBABlend(centerX - (gapX + len), centerY - hthick, len, thick, r, g, b, a);
@@ -1513,17 +1516,39 @@ void DrawCrossHair(float accuracyX, float accuracyY, int len, int thick, int bor
 }
 
 void CHudAmmo::DrawDynamicCrosshair() {
-	if (!m_pWeapon || m_hud_crosshair_mode->value <= 0 || !gHUD.IsSevenKewpServer())
+	if (m_hud_crosshair_mode->value <= 0)
 		return;
 
-	WEAPON* pw = m_pWeapon; // shorthand
+	int len = clamp(m_hud_crosshair_length->value, 1, 1000);
+	int width = clamp(m_hud_crosshair_width->value, 1, 1000);
+	int border = clamp(m_hud_crosshair_border->value, 0, 1000);
 
-	if (!pw->hCrosshair && m_hud_crosshair_mode->value != 2) {
+
+	
+	if (sevenkewpVersion[0] && atoi(sevenkewpVersion) > 0) {
+		if (m_hud_crosshair_width->value == -1) {
+		// auto size
+		width = 2;
+		if (ScreenHeight <= 768) {
+			width = 1;
+		}
+	}
+
+	if (!m_pWeapon) {
+		//if (m_hud_crosshair_mode->value >= 2) {
+			DrawCrossHair(0, 0, len, width, border);
+		//}
 		return;
 	}
 
-	if (pw->hZoomedCrosshair && IsWeaponZoomed() && (pw->iFlagsEx & WEP_FLAG_USE_ZOOM_CROSSHAIR))
-		return;
+	WEAPON* pw = m_pWeapon; // shorthand
+
+	//if (!pw->hCrosshair && m_hud_crosshair_mode->value != 2) {
+		//return;
+	//}
+
+	//if (pw->hZoomedCrosshair && IsWeaponZoomed() && (pw->iFlagsEx & WEP_FLAG_USE_ZOOM_CROSSHAIR))
+		//return;
 
 	if (g_crosshair_active) {
 		static wrect_t nullrc;
@@ -1587,19 +1612,12 @@ void CHudAmmo::DrawDynamicCrosshair() {
 		accuracyY2 += punch;
 	}
 
-	int len = clamp(m_hud_crosshair_length->value, 1, 1000);
-	int width = clamp(m_hud_crosshair_width->value, 1, 1000);
-	int border = clamp(m_hud_crosshair_border->value, 0, 1000);
-
-	if (m_hud_crosshair_width->value == -1) {
-		// auto size
-		width = 2;
-		if (ScreenHeight <= 768) {
-			width = 1;
-		}
-	}
-
 	DrawCrossHair(accuracyX, accuracyY, len, width, border);
+	}
+	else {
+		DrawCrossHair(1, 1, len, width, border);
+	}
+	
 }
 
 

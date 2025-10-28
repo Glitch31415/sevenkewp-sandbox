@@ -1712,7 +1712,7 @@ public:
 		// Draw the vertical line
 		int HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
 		x += HealthWidth / 2;
-		FillRGBA(x, iYPos + 5, HealthWidth / 10, gHUD.m_iFontHeight, 255, 160, 0, a);
+		FillRGBA(x, iYPos + 5, HealthWidth / 10, gHUD.m_iFontHeight, 0, 255, 0, a); // shame, hardcoding rgb values
 	}
 };
 

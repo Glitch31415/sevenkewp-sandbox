@@ -5,7 +5,7 @@
 #include "CItem.h"
 #include "gamerules.h"
 
-#define MAX_NORMAL_BATTERY	999
+#define MAX_NORMAL_BATTERY	100
 
 class CItemBattery : public CItem
 {
@@ -53,12 +53,11 @@ class CItemBattery : public CItem
 			return FALSE;
 		}
 
-		float maxArmor = mp_startarmor.value > 100 ? mp_startarmor.value : 100; // what the fuck is this, you just defined MAX_NORMAL_BATTERY at the top of this file
-		maxArmor = MAX_NORMAL_BATTERY;
+		float maxArmor = mp_startarmor.value > 100 ? mp_startarmor.value : 100;
 
 		float healthcap = m_healthcap > 0 ? m_healthcap : maxArmor;
 
-		if ((pPlayer->pev->armorvalue < 999) && pPlayer->HasSuit())
+		if ((pPlayer->pev->armorvalue < healthcap) && pPlayer->HasSuit())
 		{
 			int pct;
 			char szcharge[64];

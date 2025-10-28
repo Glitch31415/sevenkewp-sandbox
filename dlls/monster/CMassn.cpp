@@ -96,7 +96,7 @@ class CDeadMassn : public CBaseDead
 public:
 	void Spawn(void);
 	int	Classify(void) { return	CBaseMonster::Classify(CLASS_HUMAN_MILITARY); }
-	int GetPoseSequence() { return LookupSequence(m_szPoses[m_iPose]); }
+	int GetPoseSequence() { return LookupSequence(m_szPoses[clamp(m_iPose, 0, (int)ARRAY_SZ(m_szPoses) - 1)]); }
 
 	static const char* m_szPoses[3];
 };
@@ -171,9 +171,9 @@ void CMassn :: Precache()
 	{
 		m_weaponModel = MAssassinWeapon::SniperRifle;
 		m_cClipSize = MASSN_SNIPER_CLIP_SIZE;
-		m_flDistTooFar = 131072.0;
+		m_flDistTooFar = 4096.0;
 		m_flDistLook = 4096.0;
-		maxShootDist = 131072.0;
+		maxShootDist = 4096;
 	}
 	else
 	{

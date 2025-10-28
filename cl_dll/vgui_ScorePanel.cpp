@@ -314,7 +314,7 @@ void ScorePanel::Update()
 
 	m_CurrentMapLabel.setText(mapname);
 
-	if (gHUD.IsSevenKewpServer()) {
+	//if (gHUD.IsSevenKewpServer()) {
 		m_NextMapLabel.setText("Next map: %s", gViewPort->m_szNextMap);
 
 		if (gViewPort->m_timeLeft >= 0) {
@@ -328,11 +328,11 @@ void ScorePanel::Update()
 		else {
 			m_TimeleftLabel.setText("Time left: Infinite");
 		}
-	}
-	else {
-		m_NextMapLabel.setText("");
-		m_TimeleftLabel.setText("");
-	}
+	//}
+	//else {
+		//m_NextMapLabel.setText("");
+		//m_TimeleftLabel.setText("");
+	//}
 
 	m_iRows = 0;
 	gViewPort->GetAllPlayersInfo();
@@ -856,8 +856,8 @@ void ScorePanel::FillGrid()
 					GetClientVoiceMgr()->UpdateSpeakerImage(pLabel, m_iSortedRows[row]);
 					break;
 				case COLUMN_CLASS: {
-					if (!gHUD.IsSevenKewpServer())
-						break;
+					//if (!gHUD.IsSevenKewpServer())
+						//break;
 
 					int status = pl_extra_info->playerclass;
 					if (status == 5) {

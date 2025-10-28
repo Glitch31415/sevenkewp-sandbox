@@ -63,8 +63,6 @@ enum
 #define HASS_FOLLOW_SOUND "buttons/blip2.wav"
 #define HASS_UNFOLLOW_SOUND "buttons/blip1.wav"
 
-
-
 class CHAssassin : public CBaseMonster
 {
 public:
@@ -168,11 +166,10 @@ void CHAssassin::CantFollowSound() {
 //=========================================================
 int CHAssassin :: ISoundMask ( void) 
 {
-	//return	bits_SOUND_WORLD	|
-			//bits_SOUND_COMBAT	|
-			//bits_SOUND_DANGER	|
-			//bits_SOUND_PLAYER;
-	return bits_ALL_SOUNDS;
+	return	bits_SOUND_WORLD	|
+			bits_SOUND_COMBAT	|
+			bits_SOUND_DANGER	|
+			bits_SOUND_PLAYER;
 }
 
 
@@ -241,7 +238,7 @@ void CHAssassin :: Shoot ( void )
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass ( pev->origin + gpGlobals->v_up * 32 + gpGlobals->v_forward * 12, vecShellVelocity, pev->angles.y, m_iShell, TE_BOUNCE_SHELL); 
-	FireBullets(1, vecShootOrigin, vecShootDir, Vector( 0.00436, 0.00436, 0.00436 ), 131072, BULLET_MONSTER_9MM ); // shoot +-8 degrees
+	FireBullets(1, vecShootOrigin, vecShootDir, Vector( m_flDiviation, m_flDiviation, m_flDiviation ), 2048, BULLET_MONSTER_9MM ); // shoot +-8 degrees
 
 	switch(RANDOM_LONG(0,1))
 	{
@@ -687,9 +684,8 @@ BOOL CHAssassin :: CheckMeleeAttack1 ( float flDot, float flDist )
 //=========================================================
 BOOL CHAssassin :: CheckRangeAttack1 ( float flDot, float flDist )
 {
-	if ( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist > 64 /* && flDot >= 0.5 */ /* && NoFriendlyFire() */ )
+	if ( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist > 64 && flDist <= 2048 /* && flDot >= 0.5 */ /* && NoFriendlyFire() */ )
 	{
-		distfactor = flDist / 2000;
 		TraceResult	tr;
 
 		Vector vecSrc = GetGunPosition();
@@ -710,7 +706,6 @@ BOOL CHAssassin :: CheckRangeAttack1 ( float flDot, float flDist )
 //=========================================================
 BOOL CHAssassin :: CheckRangeAttack2 ( float flDot, float flDist )
 {
-	distfactor = flDist / 2000;
 	m_fThrowGrenade = FALSE;
 	if ( !FBitSet ( m_hEnemy->pev->flags, FL_ONGROUND ) )
 	{
@@ -722,7 +717,7 @@ BOOL CHAssassin :: CheckRangeAttack2 ( float flDot, float flDist )
 	if ( m_iFrustration <= 2)
 		return FALSE;
 
-	if ( m_flNextGrenadeCheck < gpGlobals->time && !HasConditions( bits_COND_ENEMY_OCCLUDED ) /* && flDot >= 0.5 */ /* && NoFriendlyFire() */ )
+	if ( m_flNextGrenadeCheck < gpGlobals->time && !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= 512 /* && flDot >= 0.5 */ /* && NoFriendlyFire() */ )
 	{
 		Vector vecToss = VecCheckThrow( pev, GetGunPosition( ), m_hEnemy->Center(), flDist, 0.5 ); // use dist as speed to get there in 1 second
 
@@ -804,12 +799,6 @@ void CHAssassin :: StartTask ( Task_t *pTask )
 		break;
 	case TASK_ASSASSIN_FALL_TO_GROUND:
 		break;
-	case TASK_WAIT_FACE_ENEMY:
-	{
-		// need to override this to get the dynamic aiming time to work
-		m_flWaitFinished = gpGlobals->time + reactiontim;
-		break;
-	}
 	default:
 		CBaseMonster :: StartTask ( pTask );
 		break;
@@ -1044,12 +1033,6 @@ Schedule_t* CHAssassin :: GetScheduleOfType ( int Type )
 		return slAssassinJumpAttack;
 	case SCHED_ASSASSIN_JUMP_LAND:
 		return slAssassinJumpLand;
-	case SCHED_RANGE_ATTACK1:
-		reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
-		return &slRangeAttack1[0];
-	case SCHED_RANGE_ATTACK2:
-		reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
-		return &slRangeAttack2[0];
 	}
 
 	return CBaseMonster :: GetScheduleOfType( Type );

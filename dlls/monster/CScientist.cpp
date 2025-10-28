@@ -778,11 +778,10 @@ int CScientist :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 //=========================================================
 int CScientist :: ISoundMask ( void )
 {
-	//return	bits_SOUND_WORLD	|
-			//bits_SOUND_COMBAT	|
-			//bits_SOUND_DANGER	|
-			//bits_SOUND_PLAYER;
-	return bits_ALL_SOUNDS;
+	return	bits_SOUND_WORLD	|
+			bits_SOUND_COMBAT	|
+			bits_SOUND_DANGER	|
+			bits_SOUND_PLAYER;
 }
 	
 //=========================================================
@@ -999,7 +998,7 @@ Schedule_t *CScientist :: GetSchedule ( void )
 		break;
 	}
 	
-	return CBaseMonster::GetSchedule();
+	return CTalkSquadMonster::GetSchedule();
 }
 
 const char* CScientist::GetTaskName(int taskIdx) {
@@ -1172,7 +1171,7 @@ void CDeadScientist :: Spawn( )
 	else
 		pev->skin = m_skinBase;
 
-	pev->sequence = LookupSequence( m_szPoses[m_iPose] );
+	pev->sequence = LookupSequence( m_szPoses[clamp(m_iPose, 0, (int)ARRAY_SZ(m_szPoses)-1)]);
 	if (pev->sequence == -1)
 	{
 		ALERT ( at_console, "Dead scientist with bad pose\n" );

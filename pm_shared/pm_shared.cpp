@@ -273,8 +273,27 @@ static int gcTextures = 0;
 static char grgszTextureName[CTEXTURESMAX][CBTEXTURENAMEMAX];	
 static char grgchTextureType[CTEXTURESMAX];
 
+static int s_iOnGround;
+static int s_iWaterlevel;
+static int s_iMoveType;
+
 int g_onladder = 0;
 int g_footstepVariety = 2;
+
+int PM_GetOnGround()
+{
+	return s_iOnGround;
+}
+
+int PM_GetWaterLevel()
+{
+	return s_iWaterlevel;
+}
+
+int PM_GetMoveType()
+{
+	return s_iMoveType;
+}
 
 void PM_SwapTextures( int i, int j )
 {
@@ -897,14 +916,6 @@ int PM_FlyMove (void)
 
 		// See if we can make it from origin to end point.
 		trace = pmove->PM_PlayerTrace (pmove->origin, end, PM_NORMAL, -1 );
-
-		if (trace.fraction == 0.0)
-		{
-			// Move end point to a thousandth fraction of the unit vector away from the wall and try to move again
-			for (i = 0; i < 3; i++)
-				end[i] += trace.plane.normal[i] * 0.001;
-			trace = pmove->PM_PlayerTrace(pmove->origin, end, PM_NORMAL, -1);
-		}
 
 		allFraction += trace.fraction;
 		// If we started in a solid object, or we were in solid space
@@ -1613,6 +1624,10 @@ qboolean PM_CheckWater ()
 			VectorMA (pmove->basevelocity, 50.0*pmove->waterlevel, current_table[CONTENTS_CURRENT_0 - truecont], pmove->basevelocity);
 		}
 	}
+
+#ifdef CLIENT_DLL
+	s_iWaterlevel = pmove->waterlevel;
+#endif
 
 	return pmove->waterlevel > 1;
 }
@@ -2863,6 +2878,10 @@ void PM_CheckFalling( void )
 	{		
 		pmove->flFallVelocity = 0;
 	}
+
+#ifdef CLIENT_DLL
+	s_iOnGround = pmove->onground != -1; // Set flag for bunnyhop, to jump when touch the ground
+#endif
 }
 
 /*
@@ -3153,6 +3172,9 @@ void PM_PlayerMove ( qboolean server )
 		if ( pLadder )
 		{
 			g_onladder = 1;
+#ifdef CLIENT_DLL
+			s_iOnGround = 1; // allow to jump off
+#endif
 		}
 	}
 
@@ -3481,6 +3503,9 @@ void PM_Move ( struct playermove_s *ppmove, int server )
 	{
 		//pmove->friction = 1.0f;
 	}
+#ifdef CLIENT_DLL
+	s_iMoveType = pmove->movetype;
+#endif
 }
 
 int PM_GetVisEntInfo( int ent )

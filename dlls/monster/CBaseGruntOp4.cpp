@@ -306,7 +306,7 @@ void CBaseGruntOp4::InitAiFlags(void) {
 	waitForEnemyFire = true;
 	runFromHeavyDamage = true;
 	canCallMedic = true;
-	maxShootDist = 131072.0;
+	maxShootDist = 2048;
 }
 
 void CBaseGruntOp4::PlaySentenceSound(int sentenceType) {
@@ -321,14 +321,13 @@ int	CBaseGruntOp4::Classify(void)
 
 int CBaseGruntOp4::ISoundMask(void)
 {
-	//return	bits_SOUND_WORLD |
-		//bits_SOUND_COMBAT |
-		//bits_SOUND_PLAYER |
-		//bits_SOUND_DANGER |
-		//bits_SOUND_CARCASS |
-		//bits_SOUND_MEAT |
-		//bits_SOUND_GARBAGE;
-	return bits_ALL_SOUNDS;
+	return	bits_SOUND_WORLD |
+		bits_SOUND_COMBAT |
+		bits_SOUND_PLAYER |
+		bits_SOUND_DANGER |
+		bits_SOUND_CARCASS |
+		bits_SOUND_MEAT |
+		bits_SOUND_GARBAGE;
 }
 
 BOOL CBaseGruntOp4::NoFriendlyFire(void) {

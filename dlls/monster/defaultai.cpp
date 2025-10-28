@@ -128,8 +128,6 @@ Schedule_t	slIdleWalk[] =
 		bits_COND_PROVOKED,
 
 		bits_SOUND_COMBAT		|// sound flags
-		bits_SOUND_PLAYER		|
-		bits_SOUND_DANGER		|
 
 		bits_SOUND_MEAT			|// scents
 		bits_SOUND_CARCASS		|
@@ -1143,7 +1141,6 @@ Schedule_t	slRoam[] =
 		bits_SOUND_COMBAT |// sound flags
 		bits_SOUND_WORLD |
 		bits_SOUND_DANGER |
-		bits_SOUND_PLAYER |
 
 		bits_SOUND_MEAT |// scents
 		bits_SOUND_CARCASS |
