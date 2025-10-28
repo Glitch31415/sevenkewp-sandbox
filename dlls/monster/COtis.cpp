@@ -115,6 +115,7 @@ public:
 
 	BOOL	m_fGunDrawn;
 	float	m_painTime;
+	float   m_timefinishcheck;
 	float	m_checkAttackTime;
 	BOOL	m_lastAttackCheck;
 
@@ -523,7 +524,8 @@ void COtis :: SetYawSpeed ( void )
 //=========================================================
 BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 {
-	if ( flDist <= 1024 && flDot >= 0.5 )
+	distfactor = flDist / 2000;
+	if ( flDot >= 0.5 )
 	{
 		if ( gpGlobals->time > m_checkAttackTime )
 		{
@@ -536,12 +538,15 @@ BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 				shootTarget = pEnemy->Center();
 			}
 
-			UTIL_TraceLine( shootOrigin, shootTarget, dont_ignore_monsters, ENT(pev), &tr );
+			UTIL_TraceLine( shootOrigin, shootTarget, dont_ignore_monsters, ignore_glass, ENT(pev), &tr );
 			m_checkAttackTime = gpGlobals->time + 1;
-			if ( tr.flFraction == 1.0 || (tr.pHit != NULL && CBaseEntity::Instance(tr.pHit) == pEnemy) )
+			if ( tr.flFraction == 1.0 || (tr.pHit != NULL && CBaseEntity::Instance(tr.pHit) == pEnemy) or CBaseEntity::Instance(tr.pHit)->pev->rendermode != kRenderNormal ) {
 				m_lastAttackCheck = TRUE;
-			else
+				m_timefinishcheck = gpGlobals->time;
+			}
+			else {
 				m_lastAttackCheck = FALSE;
+			}
 			m_checkAttackTime = gpGlobals->time + 1.5;
 		}
 		return m_lastAttackCheck;
@@ -556,6 +561,8 @@ BOOL COtis :: CheckRangeAttack1 ( float flDot, float flDist )
 //=========================================================
 void COtis :: OtisFirePistol ( void )
 {
+	reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+	if (gpGlobals->time >= (m_timefinishcheck+reactiontim)) {
 	Vector vecShootOrigin;
 
 	UTIL_MakeVectors(pev->angles);
@@ -566,7 +573,7 @@ void COtis :: OtisFirePistol ( void )
 	SetBlending( 0, angDir.x );
 	pev->effects = EF_MUZZLEFLASH;
 
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 1024, gSkillData.sk_otis_bullet );
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_05DEGREES, 131072, gSkillData.sk_otis_bullet );
 	
 	int pitchShift = RANDOM_LONG( 0, 20 );
 	
@@ -581,6 +588,7 @@ void COtis :: OtisFirePistol ( void )
 
 	// UNDONE: Reload?
 	m_cAmmoLoaded--;// take away a bullet!
+	}
 }
 		
 //=========================================================
@@ -1014,6 +1022,12 @@ Schedule_t* COtis :: GetScheduleOfType ( int Type )
 		}
 		else
 			return psched;	
+	case SCHED_RANGE_ATTACK1:
+		reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+		return &slRangeAttack1[0];
+	case SCHED_RANGE_ATTACK2:
+		reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
+		return &slRangeAttack2[0];
 	}
 
 	return CTalkSquadMonster::GetScheduleOfType( Type );

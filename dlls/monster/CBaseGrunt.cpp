@@ -19,6 +19,8 @@
 int g_fGruntQuestion;
 const float safe_rpg_explosion_distance = 300;
 
+
+
 TYPEDESCRIPTION	CBaseGrunt::m_SaveData[] = 
 {
 	DEFINE_FIELD( CBaseGrunt, m_flNextGrenadeCheck, FIELD_TIME ),
@@ -252,6 +254,7 @@ BOOL CBaseGrunt :: CheckMeleeAttack1 ( float flDot, float flDist )
 //=========================================================
 BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 {
+	distfactor = flDist / 2000;
 	if (!HasEquipment(ANY_RANGED_WEAPON)) {
 		return FALSE;
 	}
@@ -260,27 +263,27 @@ BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 		return FALSE;
 	}
 
-	if ( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= maxShootDist && flDot >= 0.5 && NoFriendlyFire() )
+	if ( flDist <= maxShootDist && flDot >= 0.5 && NoFriendlyFire() )
 	{
 		TraceResult	tr;
 
 		if ( !m_hEnemy->IsPlayer() && flDist <= 64 )
 		{
 			// kick nonclients, but don't shoot at them.
-			return FALSE;
+			//return FALSE;
 		}
 
 		Vector vecSrc = GetGunPosition();
 
 		// verify that a bullet fired from the gun will hit the enemy before the world.
-		UTIL_TraceLine( vecSrc, m_hEnemy->BodyTarget(vecSrc), ignore_monsters, ignore_glass, ENT(pev), &tr);
+		UTIL_TraceLine( vecSrc, m_hEnemy->BodyTarget(vecSrc), dont_ignore_monsters, ignore_glass, ENT(pev), &tr);
 
-		if ( tr.flFraction == 1.0 || tr.pHit == m_hEnemy.GetEdict() )
-		{
-			return TRUE;
-		}
-		
 		m_lastAttackCheck = tr.flFraction == 1.0 ? true : tr.pHit && GET_PRIVATE(tr.pHit) == m_hEnemy;
+
+		if ( tr.flFraction == 1.0 || tr.pHit == m_hEnemy.GetEdict() or CBaseEntity::Instance(tr.pHit)->pev->rendermode != kRenderNormal)
+		{
+			m_lastAttackCheck = true;
+		}
 
 		return m_lastAttackCheck;
 	}
@@ -293,6 +296,7 @@ BOOL CBaseGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 //=========================================================
 BOOL CBaseGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 {
+	distfactor = flDist / 2000;
 	if (!HasEquipment(MEQUIP_HAND_GRENADE | MEQUIP_GRENADE_LAUNCHER))
 	{
 		return FALSE;
@@ -325,21 +329,8 @@ BOOL CBaseGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 	if (HasEquipment(MEQUIP_HAND_GRENADE))
 	{
 		// find feet
-		if (RANDOM_LONG(0,1))
-		{
-			// magically know where they are
-			if (m_hEnemy->IsBSPModel()) {
-				vecTarget = m_hEnemy->GetTargetOrigin();
-			}
-			else {
-				vecTarget = Vector(m_hEnemy->pev->origin.x, m_hEnemy->pev->origin.y, m_hEnemy->pev->absmin.z);
-			}
-		}
-		else
-		{
-			// toss it to where you last saw them
+					// toss it to where you last saw them
 			vecTarget = m_vecEnemyLKP;
-		}
 		// vecTarget = m_vecEnemyLKP + (m_hEnemy->BodyTarget( pev->origin ) - m_hEnemy->pev->origin);
 		// estimate position
 		// vecTarget = vecTarget + m_hEnemy->pev->velocity * 2;
@@ -363,7 +354,7 @@ BOOL CBaseGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 	// are any of my squad members near the intended grenade impact area?
 	if ( InSquad() )
 	{
-		if (SquadMemberInRange( vecTarget, 256 ))
+		if (SquadMemberInRange( vecTarget, 1024 ))
 		{
 			// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
@@ -371,7 +362,7 @@ BOOL CBaseGrunt :: CheckRangeAttack2 ( float flDot, float flDist )
 		}
 	}
 	
-	if ( ( vecTarget - pev->origin ).Length2D() <= 256 )
+	if ( ( vecTarget - pev->origin ).Length2D() <= 1024 )
 	{
 		// crap, I don't want to blow myself up
 		m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
@@ -632,7 +623,7 @@ void CBaseGrunt::Shoot(bool firstRound)
 
 	Vector vecShootDir = ShootAtEnemy(vecShootOrigin);
 
-	if (HasEquipment(MEQUIP_MP5)) {
+	if (HasEquipment(MEQUIP_MP5) && gpGlobals->time - m_flLastShot > 0.075) {
 		ShootMp5(vecShootOrigin, vecShootDir);
 		if (firstRound) {
 			// the first round of the three round burst plays the sound and puts a sound in the world sound list.
@@ -691,7 +682,7 @@ void CBaseGrunt::ShootMp5(Vector& vecShootOrigin, Vector& vecShootDir)
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40, 90) + gpGlobals->v_up * RANDOM_FLOAT(75, 200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass(vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 2048, BULLET_MONSTER_MP5); // shoot +-5 degrees;
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 131072, BULLET_MONSTER_MP5); // shoot +-5 degrees;
 	PLAY_DISTANT_SOUND(edict(), DISTANT_9MM);
 }
 
@@ -702,7 +693,7 @@ void CBaseGrunt::ShootUzis(Vector& vecShootOrigin, Vector& vecShootDir) {
 	Vector	rightShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40, 90)*-1 + gpGlobals->v_up * RANDOM_FLOAT(75, 200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass(vecShootOrigin - vecShootDir * 24, leftShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
 	EjectBrass(vecShootOrigin - vecShootDir * 24, rightShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
-	FireBullets(2, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 2048, BULLET_MONSTER_MP5); // shoot +-5 degrees;
+	FireBullets(2, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES*5, 131072, BULLET_MONSTER_MP5); // shoot +-5 degrees;
 	
 	EMIT_SOUND(ENT(pev), CHAN_STATIC, RANDOM_SOUND_ARRAY(pUziSounds), 1, ATTN_NORM);
 	PLAY_DISTANT_SOUND(edict(), DISTANT_9MM);
@@ -725,14 +716,14 @@ void CBaseGrunt::ShootMinigun(Vector& vecShootOrigin, Vector& vecShootDir) {
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40, 90) + gpGlobals->v_up * RANDOM_FLOAT(75, 200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass(vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iBrassShell, TE_BOUNCE_SHELL);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 2048, BULLET_PLAYER_556, 2);
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES*2, 131072, BULLET_PLAYER_556, 2);
 	EMIT_SOUND(ENT(pev), channel, sound, 1, ATTN_NORM);
 	PLAY_DISTANT_SOUND(edict(), DISTANT_9MM);
 }
 
 void CBaseGrunt::ShootSniper(Vector& vecShootOrigin, Vector& vecShootDir) {
 	//TODO: why is this 556? is 762 too damaging?
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 8192, BULLET_MONSTER_762);
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_025DEGREES, 131072, BULLET_MONSTER_762);
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/sniper_fire.wav", 1, 0.2);
 }
 
@@ -742,7 +733,7 @@ void CBaseGrunt ::ShootShotgun(Vector& vecShootOrigin, Vector& vecShootDir)
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass ( vecShootOrigin - vecShootDir * 24, vecShellVelocity, pev->angles.y, m_iShotgunShell, TE_BOUNCE_SHOTSHELL); 
-	FireBullets(gSkillData.sk_hgrunt_pellets, vecShootOrigin, vecShootDir, VECTOR_CONE_15DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0 ); // shoot +-7.5 degrees
+	FireBullets(gSkillData.sk_hgrunt_pellets, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 131072, BULLET_PLAYER_BUCKSHOT, 0 ); // shoot +-7.5 degrees
 
 	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/sbarrel1.wav", 1, ATTN_NORM);
 	PLAY_DISTANT_SOUND(edict(), DISTANT_556);
@@ -769,7 +760,7 @@ void CBaseGrunt::ShootSaw(Vector& vecShootOrigin, Vector& vecShootDir)
 	}
 	}
 
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 8192, BULLET_PLAYER_556, 2); // shoot +-5 degrees
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES*2, 131072, BULLET_PLAYER_556, 2); // shoot +-5 degrees
 
 	EMIT_SOUND_DYN(edict(), CHAN_WEAPON, "weapons/saw_fire1.wav", VOL_NORM, ATTN_NORM, 0, RANDOM_LONG(0, 15) + 94);
 	PLAY_DISTANT_SOUND(edict(), DISTANT_556);
@@ -777,7 +768,7 @@ void CBaseGrunt::ShootSaw(Vector& vecShootOrigin, Vector& vecShootDir)
 
 void CBaseGrunt::ShootGlock(Vector& vecShootOrigin, Vector& vecShootDir) {
 	UTIL_MakeVectors(pev->angles);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 1024, BULLET_MONSTER_9MM); // shoot +-5 degrees
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 131072, BULLET_MONSTER_9MM); // shoot +-5 degrees
 
 	const auto random = RANDOM_LONG(0, 20);
 	EMIT_SOUND_DYN(edict(), CHAN_WEAPON, "weapons/pl_gun3.wav", VOL_NORM, ATTN_NORM, 0, (random <= 10 ? random - 5 : 0) + 100);
@@ -786,7 +777,7 @@ void CBaseGrunt::ShootGlock(Vector& vecShootOrigin, Vector& vecShootDir) {
 
 void CBaseGrunt::ShootDeagle(Vector& vecShootOrigin, Vector& vecShootDir) {
 	UTIL_MakeVectors(pev->angles);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 1024, BULLET_PLAYER_357); // shoot +-5 degrees
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_05DEGREES, 131072, BULLET_PLAYER_357); // shoot +-5 degrees
 
 	const auto random = RANDOM_LONG(0, 20);
 	EMIT_SOUND_DYN(edict(), CHAN_WEAPON, "weapons/desert_eagle_fire.wav", VOL_NORM, ATTN_NORM, 0, (random <= 10 ? random - 5 : 0) + 100);
@@ -795,7 +786,7 @@ void CBaseGrunt::ShootDeagle(Vector& vecShootOrigin, Vector& vecShootDir) {
 
 void CBaseGrunt::Shoot357(Vector& vecShootOrigin, Vector& vecShootDir) {
 	UTIL_MakeVectors(pev->angles);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 1024, BULLET_PLAYER_357); // shoot +-5 degrees
+	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_05DEGREES, 131072, BULLET_PLAYER_357); // shoot +-5 degrees
 
 	const char* sound = RANDOM_LONG(0, 1) == 0 ? "weapons/357_shot1.wav" : "weapons/357_shot2.wav";
 	const auto random = RANDOM_LONG(0, 20);
@@ -1146,9 +1137,7 @@ void CBaseGrunt::InitAiFlags() {
 	canCallMedic = false;
 	suppressOccludedTarget = false;
 	maxSuppressTime = 3.0f;
-
-	if (!maxShootDist)
-		maxShootDist = 2048;
+	maxShootDist = 131072.0;
 }
 
 void CBaseGrunt::BasePrecache() {
@@ -1269,6 +1258,12 @@ void CBaseGrunt :: StartTask ( Task_t *pTask )
 			m_IdealActivity = ACT_GLIDE;
 		}
 		break;
+	case TASK_WAIT_FACE_ENEMY:
+	{
+		// need to override this to get the dynamic aiming time to work
+		m_flWaitFinished = gpGlobals->time + reactiontim;
+		break;
+	}
 	case TASK_GRUNT_MINIGUN_SPINUP:
 		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "hassault/hw_spinup.wav", 1.0, ATTN_NORM, 0, 90);
 		
@@ -1302,6 +1297,18 @@ void CBaseGrunt :: RunTask ( Task_t *pTask )
 			if ( FacingIdeal() )
 			{
 				m_iTaskStatus = TASKSTATUS_COMPLETE;
+			}
+			break;
+		}
+	case TASK_WAIT_FACE_ENEMY:
+		{
+			// need to override this to get the dynamic aiming time to work
+			MakeIdealYaw ( m_vecEnemyLKP );
+			ChangeYaw( pev->yaw_speed ); 
+
+			if ( gpGlobals->time >= m_flWaitFinished )
+			{
+				TaskComplete();
 			}
 			break;
 		}
@@ -1794,21 +1801,28 @@ Schedule_t	slGruntSweep[] =
 // primary range attack. Overriden because base class stops attacking when the enemy is occluded.
 // grunt's grenade toss requires the enemy be occluded.
 //=========================================================
+
 Task_t	tlGruntRangeAttack1A[] =
 {
+
+
 	{ TASK_STOP_MOVING,			(float)0		},
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,		(float)ACT_CROUCH },
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
-	{ TASK_FACE_ENEMY,			(float)0		},
-	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_RANGE_ATTACK1,		(float)0		},
-	{ TASK_FACE_ENEMY,			(float)0		},
-	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_RANGE_ATTACK1,		(float)0		},
-	{ TASK_FACE_ENEMY,			(float)0		},
-	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_RANGE_ATTACK1,		(float)0		},
+	//{ TASK_FACE_ENEMY,			(float)0		},
+	//{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
+	//{ TASK_WAIT_FACE_ENEMY,                0      },
+	//{ TASK_RANGE_ATTACK1,		(float)0		},
+	//{ TASK_FACE_ENEMY,			(float)0		},
+	//{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
+	//{ TASK_WAIT_FACE_ENEMY,                0      },
+	//{ TASK_RANGE_ATTACK1,		(float)0		},
+	//{ TASK_FACE_ENEMY,			(float)0		},
+	//{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
+	//{ TASK_WAIT_FACE_ENEMY,                0      },
+	//{ TASK_RANGE_ATTACK1,		(float)0		},
 };
 
 Schedule_t	slGruntRangeAttack1A[] =
@@ -1836,16 +1850,16 @@ Task_t	tlGruntRangeAttack1B[] =
 	{ TASK_STOP_MOVING,				(float)0		},
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,(float)ACT_IDLE_ANGRY  },
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
-	{ TASK_FACE_ENEMY,			(float)0		},
-	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_RANGE_ATTACK1,		(float)0		},
-	{ TASK_FACE_ENEMY,			(float)0		},
-	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_RANGE_ATTACK1,		(float)0		},
-	{ TASK_FACE_ENEMY,			(float)0		},
-	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_RANGE_ATTACK1,		(float)0		},
+	//{ TASK_FACE_ENEMY,			(float)0		},
+	//{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
+	//{ TASK_WAIT_FACE_ENEMY,                0      },
+	//{ TASK_RANGE_ATTACK1,		(float)0		},
+	//{ TASK_FACE_ENEMY,			(float)0		},
+	//{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
+	//{ TASK_WAIT_FACE_ENEMY,                0      },
+	//{ TASK_RANGE_ATTACK1,		(float)0		},
 };
 
 Schedule_t	slGruntRangeAttack1B[] =
@@ -1872,16 +1886,16 @@ Task_t	tlGruntRangeAttack1C[] =
 	{ TASK_STOP_MOVING,			(float)0		},
 	{ TASK_FACE_ENEMY,			(float)0		},
 	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
+	{ TASK_WAIT_FACE_ENEMY,                0      },
 	{ TASK_RANGE_ATTACK1,		(float)0		},
-	{ TASK_FACE_ENEMY,			(float)0		},
-	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_RANGE_ATTACK1,		(float)0		},
-	{ TASK_FACE_ENEMY,			(float)0		},
-	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_RANGE_ATTACK1,		(float)0		},
-	{ TASK_FACE_ENEMY,			(float)0		},
-	{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
-	{ TASK_RANGE_ATTACK1,		(float)0		},
+	//{ TASK_FACE_ENEMY,			(float)0		},
+	//{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
+	//{ TASK_WAIT_FACE_ENEMY,                0      },
+	//{ TASK_RANGE_ATTACK1,		(float)0		},
+	//{ TASK_FACE_ENEMY,			(float)0		},
+	//{ TASK_GRUNT_CHECK_FIRE,	(float)0		},
+	//{ TASK_WAIT_FACE_ENEMY,                0      },
+	//{ TASK_RANGE_ATTACK1,		(float)0		},
 };
 
 Schedule_t	slGruntRangeAttack1C[] =
@@ -2687,6 +2701,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		break;
 	case SCHED_RANGE_ATTACK1:
 		{
+			reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
 			// randomly stand or crouch
 			if (RANDOM_LONG(0,9) == 0)
 				m_fStanding = RANDOM_LONG(0,1);
@@ -2700,6 +2715,7 @@ Schedule_t* CBaseGrunt :: GetScheduleOfType ( int Type )
 		}
 	case SCHED_RANGE_ATTACK2:
 		{
+			reactiontim = RANDOM_FLOAT((distfactor*0.75), (distfactor*1.25));
 			return &slGruntRangeAttack2[ 0 ];
 		}
 	case SCHED_COMBAT_FACE:

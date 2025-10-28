@@ -382,7 +382,7 @@ public:
 		virtual int ISoundMask( void );
 		virtual CSound* PBestSound ( void );
 		virtual CSound* PBestScent ( void );
-		virtual float HearingSensitivity( void ) { return 1.0; };
+		virtual float HearingSensitivity( void ) { return 10.0; };
 
 		BOOL BarnacleVictimCaught ( void );
 		virtual void BarnacleVictimBitten( entvars_t *pevBarnacle );

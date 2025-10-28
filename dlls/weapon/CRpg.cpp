@@ -139,7 +139,7 @@ void CLaserSpot::MonsterAimThink() {
 	}
 
 	TraceResult tr;
-	UTIL_TraceLine(attachOrigin, attachOrigin + vecShootDir * 8192, dont_ignore_monsters, edict(), &tr);
+	UTIL_TraceLine(attachOrigin, attachOrigin + vecShootDir * 131072, dont_ignore_monsters, edict(), &tr);
 
 	UTIL_SetOrigin(pev, tr.vecEndPos);
 
@@ -389,7 +389,7 @@ void CRpgRocket :: FollowThink( void  )
 		float flDistance = (pev->origin - m_pLauncher->pev->origin).Length();
 
 		// if we've travelled more than max distance the player can send a spot, stop tracking the original launcher (allow it to reload)		
-		if (flDistance > 8192.0f || gpGlobals->time - m_flIgniteTime > 6.0f)
+		if (flDistance > 131072.0f || gpGlobals->time - m_flIgniteTime > 6.0f)
 		{
 			//ALERT( at_console, "RPG too far (%f)!\n", flDistance );
 			m_pLauncher->m_cActiveRockets--;
@@ -764,7 +764,7 @@ void CRpg::UpdateSpot( void )
 		Vector vecAiming = gpGlobals->v_forward;
 
 		TraceResult tr;
-		UTIL_TraceLine ( vecSrc, vecSrc + vecAiming * 8192, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr );
+		UTIL_TraceLine ( vecSrc, vecSrc + vecAiming * 131072, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr );
 		
 		if (UTIL_PointContents(tr.vecEndPos) == CONTENTS_SKY) {
 			// back up until out of the sky, or else the client won't render the laser beam

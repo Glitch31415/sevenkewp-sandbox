@@ -702,7 +702,7 @@ void CNihilanth :: NextActivity( )
 
 		CBaseEntity *pEnt = NULL;
 		CBaseEntity *pRecharger = NULL;
-		float flDist = 8192;
+		float flDist = 131072;
 
 		snprintf(szName, 128, "%s%d", m_szRechargerTarget, m_iLevel );
 

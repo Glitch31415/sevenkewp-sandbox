@@ -951,7 +951,7 @@ void CStukabat::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, floa
 }
 
 int CStukabat::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType) {
-	if (flDamage >= 20) {
+	if (flDamage >= 2) {
 		// stukabats are delicate. Any caliber heavier than 9mm will flinch it.
 		// Without this you'll never see them flinch because their health is so low.
 		SetConditions(bits_COND_HEAVY_DAMAGE);

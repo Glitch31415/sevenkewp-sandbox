@@ -87,6 +87,12 @@ void EV_TrainPitchAdjust( struct event_args_s *args );
 #define VECTOR_CONE_10DEGREES Vector( 0.08716, 0.08716, 0.08716 )
 #define VECTOR_CONE_15DEGREES Vector( 0.13053, 0.13053, 0.13053 )
 #define VECTOR_CONE_20DEGREES Vector( 0.17365, 0.17365, 0.17365 )
+#define VECTOR_CONE_9MMAR Vector( 0.00057883, 0.00057883, 0.00057883 )
+#define VECTOR_CONE_357 Vector( 0.00123002083, 0.00123002083, 0.00123002083 )
+#define VECTOR_CONE_9MMPISTOL Vector( 0.0023153, 0.0023153, 0.0023153 )
+#define VECTOR_CONE_0125DEGREES  Vector( 0.00109, 0.00109, 0.00109 )
+#define VECTOR_CONE_025DEGREES  Vector( 0.00218, 0.00218, 0.00218 )
+#define VECTOR_CONE_05DEGREES   Vector( 0.00436, 0.00436, 0.00436 )
 
 
 // play a strike sound based on the texture that was hit by the attack traceline.  VecSrc/VecEnd are the

@@ -209,7 +209,7 @@ bool CEnvWeather::GetRainPosition(Vector pos, Vector& bottom, Vector& top, bool 
 
 			start = bottom;
 			end = top;
-			end.z = bottom.z + 8192;
+			end.z = bottom.z + 131072;
 
 			if (i == 0) {
 				end.x += r;
@@ -973,7 +973,7 @@ int CEnvWeather::WaterSplashes(CBasePlayer* plr) {
 		pos = skyPos;
 
 		// find the floor position
-		TRACE_LINE(pos, pos - Vector(0, 0, 8192), ignore_monsters, NULL, &tr);
+		TRACE_LINE(pos, pos - Vector(0, 0, 131072), ignore_monsters, NULL, &tr);
 		Vector bottom = tr.vecEndPos;
 		edict_t* floorEnt = tr.pHit;
 		Vector floorNormal = tr.vecPlaneNormal;

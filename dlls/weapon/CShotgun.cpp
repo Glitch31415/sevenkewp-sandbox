@@ -135,12 +135,12 @@ void CShotgun::PrimaryAttack()
 		return;
 
 	// don't fire underwater
-	if (m_pPlayer->pev->waterlevel == 3)
-	{
-		PlayEmptySound( );
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
-		return;
-	}
+	//if (m_pPlayer->pev->waterlevel == 3)
+	//{
+		//PlayEmptySound( );
+		//m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
+		//return;
+	//}
 
 	if (m_iClip <= 0)
 	{
@@ -169,7 +169,7 @@ void CShotgun::PrimaryAttack()
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
 	Vector vecDir;
-
+	m_pPlayer->pev->punchangle = Vector(-7.5, 0, 0);
 	lagcomp_begin(m_pPlayer);
 
 #ifdef CLIENT_DLL
@@ -178,12 +178,12 @@ void CShotgun::PrimaryAttack()
 	if ( g_pGameRules->IsMultiplayer() )
 #endif
 	{
-		vecDir = m_pPlayer->FireBulletsPlayer( 4, vecSrc, vecAiming, VECTOR_CONE_DM_SHOTGUN, 2048, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed, 0, BULLETPRED_EVENT);
+		vecDir = m_pPlayer->FireBulletsPlayer( 9, vecSrc, vecAiming, VECTOR_CONE_1DEGREES*1.5, 131072, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed, 0, BULLETPRED_EVENT);
 	}
 	else
 	{
 		// regular old, untouched spread. 
-		vecDir = m_pPlayer->FireBulletsPlayer( 6, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed, 0, BULLETPRED_EVENT);
+		vecDir = m_pPlayer->FireBulletsPlayer( 9, vecSrc, vecAiming, VECTOR_CONE_1DEGREES*1.5, 131072, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed, 0, BULLETPRED_EVENT);
 	}
 
 	lagcomp_end();
@@ -218,12 +218,12 @@ void CShotgun::SecondaryAttack( void )
 		return;
 
 	// don't fire underwater
-	if (m_pPlayer->pev->waterlevel == 3)
-	{
-		PlayEmptySound( );
-		m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
-		return;
-	}
+	//if (m_pPlayer->pev->waterlevel == 3)
+	//{
+		//PlayEmptySound( );
+		//m_flNextPrimaryAttack = GetNextAttackDelay(0.15);
+		//return;
+	//}
 
 	if (m_iClip <= 1)
 	{
@@ -254,7 +254,7 @@ void CShotgun::SecondaryAttack( void )
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
 	Vector vecDir;
-	
+	m_pPlayer->pev->punchangle = Vector(-15, 0, 0);
 	lagcomp_begin(m_pPlayer);
 
 #ifdef CLIENT_DLL
@@ -264,12 +264,12 @@ void CShotgun::SecondaryAttack( void )
 #endif
 	{
 		// tuned for deathmatch
-		vecDir = m_pPlayer->FireBulletsPlayer( 8, vecSrc, vecAiming, VECTOR_CONE_DM_DOUBLESHOTGUN, 2048, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed, 0, BULLETPRED_EVENT);
+		vecDir = m_pPlayer->FireBulletsPlayer( 18, vecSrc, vecAiming, VECTOR_CONE_1DEGREES*3, 131072, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed, 0, BULLETPRED_EVENT);
 	}
 	else
 	{
 		// untouched default single player
-		vecDir = m_pPlayer->FireBulletsPlayer( 12, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 2048, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed, 0, BULLETPRED_EVENT);
+		vecDir = m_pPlayer->FireBulletsPlayer( 18, vecSrc, vecAiming, VECTOR_CONE_1DEGREES*3, 131072, BULLET_PLAYER_BUCKSHOT, 0, 0, m_pPlayer->pev, m_pPlayer->random_seed, 0, BULLETPRED_EVENT);
 	}
 
 	lagcomp_end();

@@ -171,9 +171,9 @@ void CMassn :: Precache()
 	{
 		m_weaponModel = MAssassinWeapon::SniperRifle;
 		m_cClipSize = MASSN_SNIPER_CLIP_SIZE;
-		m_flDistTooFar = 4096.0;
-		m_flDistLook = 4096.0;
-		maxShootDist = 4096;
+		m_flDistTooFar = 131072.0;
+		m_flDistLook = 131072.0;
+		maxShootDist = 131072.0;
 	}
 	else
 	{

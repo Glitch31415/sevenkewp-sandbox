@@ -149,6 +149,14 @@ void CHGrunt::Spawn() {
 void CHGrunt::Precache()
 {
 	// get voice pitch
+	if (RANDOM_LONG(0, 99) < 50) {
+		pev->weapons |= HGRUNT_SHOTGUN;
+	}
+	else {
+		if (FBitSet(pev->weapons, HGRUNT_SHOTGUN)) {
+			pev->weapons - HGRUNT_SHOTGUN;
+		}
+	}
 	if (RANDOM_LONG(0, 1))
 		m_voicePitch = 109 + RANDOM_LONG(0, 7);
 	else
@@ -163,11 +171,13 @@ void CHGrunt::Precache()
 	}
 
 	// set base equipment flags
-	if (FBitSet(pev->weapons, HGRUNT_9MMAR)) {
-		m_iEquipment |= MEQUIP_MP5;
-	}
 	if (FBitSet(pev->weapons, HGRUNT_SHOTGUN)) {
 		m_iEquipment |= MEQUIP_SHOTGUN;
+	}
+	else {
+		if (FBitSet(pev->weapons, HGRUNT_9MMAR)) {
+			m_iEquipment |= MEQUIP_MP5;
+		}
 	}
 	if (FBitSet(pev->weapons, HGRUNT_HANDGRENADE)) {
 		m_iEquipment |= MEQUIP_HAND_GRENADE;

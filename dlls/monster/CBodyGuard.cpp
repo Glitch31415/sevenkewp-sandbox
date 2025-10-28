@@ -347,9 +347,9 @@ void CBodyGuard::Precache()
 	case 6:
 		m_iEquipment |= MEQUIP_SNIPER;
 		m_cClipSize = SNIPER_CLIP_SIZE;
-		m_flDistTooFar = 4096.0;
-		m_flDistLook = 4096.0;
-		maxShootDist = 4096.0;
+		m_flDistTooFar = 131072.0;
+		m_flDistLook = 131072.0;
+		maxShootDist = 131072.0;
 		break;
 	case 7:
 		m_iEquipment |= MEQUIP_MINIGUN;
@@ -404,7 +404,7 @@ void CBodyGuard::InitAiFlags() {
 	waitForEnemyFire = false;
 	runFromHeavyDamage = false;
 	canCallMedic = false;
-	maxShootDist = 2048;
+	maxShootDist = 131072;
 }
 
 DEFINE_CUSTOM_SCHEDULES(CBodyGuard)

@@ -1225,7 +1225,7 @@ void CWeaponCustom::PlayEvent_Bullets(WepEvt& evt, CBasePlayer* m_pPlayer, bool 
 	Vector vecEnd;
 
 	lagcomp_begin(m_pPlayer);
-	Vector vecDir = m_pPlayer->FireBulletsPlayer(evt.bullets.count, vecSrc, vecAiming, spread, 8192,
+	Vector vecDir = m_pPlayer->FireBulletsPlayer(evt.bullets.count, vecSrc, vecAiming, spread, 131072,
 		BULLET_PLAYER_9MM, evt.bullets.tracerFreq, evt.bullets.damage, m_pPlayer->pev,
 		m_pPlayer->random_seed, &vecEnd, BULLETPRED_EVENTLESS);
 	lagcomp_end();
@@ -1871,7 +1871,7 @@ void CWeaponCustom::UpdateLaser() {
 	Vector vecAiming = gpGlobals->v_forward;
 
 	TraceResult tr;
-	UTIL_TraceLine(vecSrc, vecSrc + vecAiming * 8192, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
+	UTIL_TraceLine(vecSrc, vecSrc + vecAiming * 131072, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr);
 
 	if (UTIL_PointContents(tr.vecEndPos) == CONTENTS_SKY) {
 		// back up until out of the sky, or else the client won't render the laser beam

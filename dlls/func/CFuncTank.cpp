@@ -434,7 +434,7 @@ CBaseEntity* CFuncTank::FindTarget(Vector forward)
 	CBaseEntity* bestTarget = NULL;
 	float bestDot = -1.0f;
 
-	const int iDistance = m_maxRange ? m_maxRange : 8192;
+	const int iDistance = m_maxRange ? m_maxRange : 131072;
 	Vector delta = Vector(iDistance, iDistance, iDistance);
 	CBaseEntity* pList[512];
 	CBaseEntity* pSightEnt = NULL;// the current visible entity that we're dealing with
