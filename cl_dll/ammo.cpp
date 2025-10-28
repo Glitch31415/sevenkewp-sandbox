@@ -62,7 +62,7 @@ client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes
 WeaponsResource gWR;
 
 int g_weaponselect = 0;
-const char* sevenkewpVersion = "test";
+//const char* sevenkewpVersion = "test";
 
 void WeaponsResource :: LoadAllWeaponSprites( void )
 {
@@ -426,7 +426,7 @@ int CHudAmmo::VidInit(void)
 
 	ResetCustomWeaponStates();
 
-	sevenkewpVersion = gEngfuncs.ServerInfo_ValueForKey("skv");
+	//sevenkewpVersion = gEngfuncs.ServerInfo_ValueForKey("skv");
 
 	return 1;
 }
@@ -1525,7 +1525,7 @@ void CHudAmmo::DrawDynamicCrosshair() {
 
 
 	
-	if (sevenkewpVersion[0] && atoi(sevenkewpVersion) > 0) {
+	//if (sevenkewpVersion[0] && atoi(sevenkewpVersion) > 0) {
 		if (m_hud_crosshair_width->value == -1) {
 		// auto size
 		width = 2;
@@ -1613,10 +1613,10 @@ void CHudAmmo::DrawDynamicCrosshair() {
 	}
 
 	DrawCrossHair(accuracyX, accuracyY, len, width, border);
-	}
-	else {
-		DrawCrossHair(1, 1, len, width, border);
-	}
+	//}
+	//else {
+		//DrawCrossHair(1, 1, len, width, border);
+	//}
 	
 }
 
